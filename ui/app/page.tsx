@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { TariffList } from "../components/TariffList";
+
 interface HealthPayload {
   status: string;
   service: string;
@@ -23,26 +25,24 @@ export default function Home() {
 
   return (
     <main className="landing">
-      <h1>OpenWatt UI</h1>
-      <p>Spec-driven comparator for residential electricity tariffs in France.</p>
-      <section>
-        <h2>API health</h2>
-        {health && (
-          <code>
-            {health.status} @ {health.timestamp_utc}
-          </code>
-        )}
-        {error && <p className="error">{error}</p>}
-        {!health && !error && <p>Checking...</p>}
-      </section>
-      <section>
-        <h2>Next steps</h2>
-        <ul>
-          <li>Implement tariff list view consuming `/v1/tariffs`.</li>
-          <li>Render freshness badges using `docs/ui/badges.md`.</li>
-          <li>Wire filters (supplier, option, puissance) to query params.</li>
-        </ul>
-      </section>
+      <header className="hero">
+        <div>
+          <p className="hero__eyebrow">Spec-Kit • Open Data</p>
+          <h1>OpenWatt UI</h1>
+          <p>Comparateur des tarifs électricité FR — statuts fresh / verifying / stale / broken alignés sur la spec.</p>
+        </div>
+        <div className="health">
+          <h3>API health</h3>
+          {health && (
+            <code>
+              {health.status} @ {health.timestamp_utc}
+            </code>
+          )}
+          {error && <p className="error">{error}</p>}
+          {!health && !error && <p>Checking...</p>}
+        </div>
+      </header>
+      <TariffList />
     </main>
   );
 }

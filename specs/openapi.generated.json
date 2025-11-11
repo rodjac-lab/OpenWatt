@@ -1,0 +1,631 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "OpenWatt API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health probe",
+        "description": "Basic uptime signal for monitoring.",
+        "operationId": "health_probe_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Health Probe Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tariffs": {
+      "get": {
+        "tags": [
+          "tariffs"
+        ],
+        "summary": "Derniers tarifs frais",
+        "description": "Expose `/v1/tariffs` tel que decrit dans `specs/api.md`.",
+        "operationId": "get_latest_tariffs_v1_tariffs_get",
+        "parameters": [
+          {
+            "name": "option",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TariffOption"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filtrer par option tarifaire",
+              "title": "Option"
+            },
+            "description": "Filtrer par option tarifaire"
+          },
+          {
+            "name": "puissance",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 36,
+                  "minimum": 3
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Limiter a une puissance specifique (kVA)",
+              "title": "Puissance"
+            },
+            "description": "Limiter a une puissance specifique (kVA)"
+          },
+          {
+            "name": "include_stale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Inclure les observations marquees stale/broken pour audit",
+              "default": false,
+              "title": "Include Stale"
+            },
+            "description": "Inclure les observations marquees stale/broken pour audit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TariffCollection"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tariffs/history": {
+      "get": {
+        "tags": [
+          "tariffs"
+        ],
+        "summary": "Historique insert-only",
+        "operationId": "get_tariff_history_v1_tariffs_history_get",
+        "parameters": [
+          {
+            "name": "supplier",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filtrer par fournisseur",
+              "title": "Supplier"
+            },
+            "description": "Filtrer par fournisseur"
+          },
+          {
+            "name": "option",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TariffOption"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Option"
+            }
+          },
+          {
+            "name": "puissance",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 36,
+                  "minimum": 3
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Puissance"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Inclure les observations a partir de cette date",
+              "title": "Since"
+            },
+            "description": "Inclure les observations a partir de cette date"
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Inclure les observations jusqu'a cette date",
+              "title": "Until"
+            },
+            "description": "Inclure les observations jusqu'a cette date"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TariffHistoryResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/guards/trve-diff": {
+      "get": {
+        "tags": [
+          "guards"
+        ],
+        "summary": "Ecart vs TRVE",
+        "description": "Return last validation snapshot between observed tariffs and TRVE reference.",
+        "operationId": "get_trve_diff_v1_guards_trve_diff_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrveDiffResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "FreshnessStatus": {
+        "type": "string",
+        "enum": [
+          "fresh",
+          "verifying",
+          "stale",
+          "broken"
+        ],
+        "title": "FreshnessStatus"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "TariffCollection": {
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TariffObservation"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "TariffCollection"
+      },
+      "TariffHistoryFilters": {
+        "properties": {
+          "supplier": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier"
+          },
+          "option": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TariffOption"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "puissance_kva": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "enum": [
+                  3,
+                  6,
+                  9,
+                  12,
+                  15,
+                  18,
+                  24,
+                  30,
+                  36
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Puissance Kva"
+          },
+          "since": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Since"
+          },
+          "until": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Until"
+          }
+        },
+        "type": "object",
+        "title": "TariffHistoryFilters"
+      },
+      "TariffHistoryResponse": {
+        "properties": {
+          "filters": {
+            "$ref": "#/components/schemas/TariffHistoryFilters"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TariffObservation"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "filters",
+          "items"
+        ],
+        "title": "TariffHistoryResponse"
+      },
+      "TariffObservation": {
+        "properties": {
+          "supplier": {
+            "type": "string",
+            "title": "Supplier",
+            "description": "Supplier name as published in the spec"
+          },
+          "option": {
+            "$ref": "#/components/schemas/TariffOption"
+          },
+          "puissance_kva": {
+            "type": "integer",
+            "enum": [
+              3,
+              6,
+              9,
+              12,
+              15,
+              18,
+              24,
+              30,
+              36
+            ],
+            "title": "Puissance Kva"
+          },
+          "price_kwh_ttc": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Kwh Ttc"
+          },
+          "price_kwh_hp_ttc": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Kwh Hp Ttc"
+          },
+          "price_kwh_hc_ttc": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Kwh Hc Ttc"
+          },
+          "abo_month_ttc": {
+            "type": "number",
+            "title": "Abo Month Ttc"
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Observed At"
+          },
+          "parser_version": {
+            "type": "string",
+            "title": "Parser Version"
+          },
+          "source_url": {
+            "type": "string",
+            "title": "Source Url"
+          },
+          "source_checksum": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64,
+            "title": "Source Checksum"
+          },
+          "data_status": {
+            "$ref": "#/components/schemas/FreshnessStatus",
+            "description": "fresh/verifying/stale/broken per constitution"
+          },
+          "last_verified": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Verified"
+          }
+        },
+        "type": "object",
+        "required": [
+          "supplier",
+          "option",
+          "puissance_kva",
+          "abo_month_ttc",
+          "observed_at",
+          "parser_version",
+          "source_url",
+          "source_checksum",
+          "data_status"
+        ],
+        "title": "TariffObservation"
+      },
+      "TariffOption": {
+        "type": "string",
+        "enum": [
+          "BASE",
+          "HPHC",
+          "TEMPO"
+        ],
+        "title": "TariffOption"
+      },
+      "TrveDiffEntry": {
+        "properties": {
+          "supplier": {
+            "type": "string",
+            "title": "Supplier"
+          },
+          "option": {
+            "$ref": "#/components/schemas/TariffOption"
+          },
+          "puissance_kva": {
+            "type": "integer",
+            "enum": [
+              3,
+              6,
+              9,
+              12,
+              15,
+              18,
+              24,
+              30,
+              36
+            ],
+            "title": "Puissance Kva"
+          },
+          "delta_eur_per_mwh": {
+            "type": "number",
+            "title": "Delta Eur Per Mwh"
+          },
+          "compared_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Compared At"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "ok|alert per TRVE guard"
+          }
+        },
+        "type": "object",
+        "required": [
+          "supplier",
+          "option",
+          "puissance_kva",
+          "delta_eur_per_mwh",
+          "compared_at",
+          "status"
+        ],
+        "title": "TrveDiffEntry"
+      },
+      "TrveDiffResponse": {
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TrveDiffEntry"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated_at",
+          "items"
+        ],
+        "title": "TrveDiffResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

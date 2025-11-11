@@ -14,13 +14,87 @@ main.landing {
   gap: 1.5rem;
 }
 
+.hero,
 section {
   background: white;
-  border-radius: 8px;
-  padding: 1rem;
+  border-radius: 12px;
+  padding: 1.5rem;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.hero__eyebrow {
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6366f1;
+  margin-bottom: 0.25rem;
+}
+
+.health {
+  min-width: 180px;
 }
 
 .error {
   color: #dc2626;
+}
+
+.tariff-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.tariff-header select {
+  margin-left: 0.5rem;
+  padding: 0.4rem;
+}
+
+.tariff-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.tariff-table th,
+.tariff-table td {
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.75rem 0.5rem;
+  text-align: left;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.badge--green {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.badge--amber {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge--grey {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.badge--red {
+  background: #fee2e2;
+  color: #b91c1c;
 }
