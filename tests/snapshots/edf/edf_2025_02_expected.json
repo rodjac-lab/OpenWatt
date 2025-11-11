@@ -1,28 +1,28 @@
 [
   {
     "supplier": "EDF",
-    "option": "BASE",
-    "puissance_kva": 6,
-    "price_kwh_ttc": 0.251,
-    "price_kwh_hp_ttc": null,
-    "price_kwh_hc_ttc": null,
-    "abo_month_ttc": 12.5,
-    "observed_at": "2025-02-12T08:00:00Z",
     "parser_version": "edf_v1",
     "source_url": "https://edf.fr/tarifs",
-    "source_checksum": "f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0"
+    "source_checksum": "e5263d008a996139674e41c61714c60344f56cdd82dc385d0905c7be7cb0deee",
+    "observed_at": "2025-02-12T08:00:00Z",
+    "option": "BASE",
+    "puissance_kva": 6,
+    "abo_month_ttc": 12.5,
+    "price_kwh_ttc": 0.251,
+    "price_kwh_hp_ttc": null,
+    "price_kwh_hc_ttc": null
   },
   {
     "supplier": "EDF",
-    "option": "HPHC",
-    "puissance_kva": 9,
-    "price_kwh_ttc": null,
-    "price_kwh_hp_ttc": 0.269,
-    "price_kwh_hc_ttc": 0.19,
-    "abo_month_ttc": 15.2,
-    "observed_at": "2025-02-12T08:00:00Z",
     "parser_version": "edf_v1",
     "source_url": "https://edf.fr/tarifs",
-    "source_checksum": "0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f"
+    "source_checksum": "e5263d008a996139674e41c61714c60344f56cdd82dc385d0905c7be7cb0deee",
+    "observed_at": "2025-02-12T08:00:00Z",
+    "option": "HPHC",
+    "puissance_kva": 9,
+    "abo_month_ttc": 15.2,
+    "price_kwh_ttc": null,
+    "price_kwh_hp_ttc": 0.269,
+    "price_kwh_hc_ttc": 0.19
   }
 ]
