@@ -1,0 +1,14 @@
+supplier: Engie
+parser_version: engie_v1
+source:
+  url: https://particuliers.engie.fr/tarifs
+  format: html
+selectors:
+  rows: "section#tariffs article"
+  fields:
+    option: "@data-option"
+    puissance_kva: "@data-puissance"
+    abo_month_ttc: "@data-abonnement"
+    price_kwh_ttc: "@data-kwht"
+    price_kwh_hp_ttc: "@data-kwhhp"
+    price_kwh_hc_ttc: "@data-kwhhc"

@@ -1,0 +1,28 @@
+[
+  {
+    "supplier": "Engie",
+    "parser_version": "engie_v1",
+    "source_url": "https://particuliers.engie.fr/tarifs",
+    "source_checksum": "f5a7b8047937b62d6049abf879b0ce9fe38f7d11445119a7c29a89aeedc075b1",
+    "observed_at": "2025-02-12T08:00:00Z",
+    "option": "HPHC",
+    "puissance_kva": 6,
+    "abo_month_ttc": 13.8,
+    "price_kwh_ttc": null,
+    "price_kwh_hp_ttc": 0.278,
+    "price_kwh_hc_ttc": 0.189
+  },
+  {
+    "supplier": "Engie",
+    "parser_version": "engie_v1",
+    "source_url": "https://particuliers.engie.fr/tarifs",
+    "source_checksum": "f5a7b8047937b62d6049abf879b0ce9fe38f7d11445119a7c29a89aeedc075b1",
+    "observed_at": "2025-02-12T08:00:00Z",
+    "option": "BASE",
+    "puissance_kva": 9,
+    "abo_month_ttc": 16.4,
+    "price_kwh_ttc": 0.259,
+    "price_kwh_hp_ttc": null,
+    "price_kwh_hc_ttc": null
+  }
+]
