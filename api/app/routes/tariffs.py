@@ -33,7 +33,7 @@ async def get_latest_tariffs(
     ),
 ) -> TariffCollection:
     """Expose `/v1/tariffs` tel que decrit dans `specs/api.md`."""
-    return tariff_service.fetch_latest_tariffs(option=option, puissance=puissance, include_stale=include_stale)
+    return await tariff_service.fetch_latest_tariffs(option=option, puissance=puissance, include_stale=include_stale)
 
 
 @router.get(
@@ -55,4 +55,4 @@ async def get_tariff_history(
         since=since,
         until=until,
     )
-    return tariff_service.fetch_history(filters)
+    return await tariff_service.fetch_history(filters)

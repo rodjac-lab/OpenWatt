@@ -1,25 +1,10 @@
 from __future__ import annotations
 
 from datetime import date, datetime, timezone
-from enum import Enum
-from typing import Literal
 
 from pydantic import BaseModel, Field, HttpUrl
 
-Puissance = Literal[3, 6, 9, 12, 15, 18, 24, 30, 36]
-
-
-class TariffOption(str, Enum):
-    BASE = "BASE"
-    HPHC = "HPHC"
-    TEMPO = "TEMPO"
-
-
-class FreshnessStatus(str, Enum):
-    FRESH = "fresh"
-    VERIFYING = "verifying"
-    STALE = "stale"
-    BROKEN = "broken"
+from api.app.models.enums import FreshnessStatus, Puissance, TariffOption
 
 
 class TariffObservation(BaseModel):

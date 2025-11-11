@@ -14,6 +14,11 @@ class Settings(BaseSettings):
         env="OPENWATT_DATABASE_URL",
     )
     slack_webhook_url: str | None = Field(default=None, env="OPENWATT_SLACK_WEBHOOK")
+    enable_db: bool = Field(
+        default=False,
+        env="OPENWATT_ENABLE_DB",
+        description="Set to true to use the PostgreSQL persistence layer instead of the in-memory seed.",
+    )
 
     model_config = {
         "env_file": ".env",

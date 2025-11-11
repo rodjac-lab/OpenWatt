@@ -1,19 +1,27 @@
-"""In-memory placeholder services satisfying Spec-Kit contract."""
+"""Services fetching tariff data while keeping Spec-Kit semantics."""
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 from typing import Iterable
 
+from sqlalchemy.exc import SQLAlchemyError
+
+from api.app.core.config import settings
+from api.app.db.repositories.tariffs import TariffRepository
+from api.app.db.session import get_session
+from api.app.models.enums import FreshnessStatus, TariffOption
 from api.app.models.tariffs import (
-    FreshnessStatus,
     TariffCollection,
     TariffHistoryFilters,
     TariffHistoryResponse,
     TariffObservation,
-    TariffOption,
     TrveDiffEntry,
     TrveDiffResponse,
 )
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def _seed_observations() -> list[TariffObservation]:
@@ -129,18 +137,41 @@ def _filter_observations(
     return [obs for obs in observations if is_visible(obs)]
 
 
-def fetch_latest_tariffs(
+async def fetch_latest_tariffs(
     *, option: TariffOption | None = None, puissance: int | None = None, include_stale: bool = False
 ) -> TariffCollection:
-    observations = _seed_observations()
-    filtered = _filter_observations(observations, option=option, puissance=puissance, include_stale=include_stale)
-    return TariffCollection(items=filtered)
+    observations: list[TariffObservation] | None = None
+    if settings.enable_db:
+        try:
+            async with get_session() as session:
+                repo = TariffRepository(session)
+                observations = await repo.fetch_latest(option=option, puissance=puissance, include_stale=include_stale)
+        except SQLAlchemyError as exc:
+            logger.warning("DB fetch_latest_tariffs failed, falling back to seed data: %s", exc)
+            observations = None
+    if not observations:
+        observations = _filter_observations(
+            _seed_observations(),
+            option=option,
+            puissance=puissance,
+            include_stale=include_stale,
+        )
+    return TariffCollection(items=observations)
 
 
-def fetch_history(filters: TariffHistoryFilters) -> TariffHistoryResponse:
-    observations = _seed_observations()
-    items = [obs for obs in observations if _matches_filters(obs, filters)]
-    return TariffHistoryResponse(filters=filters, items=items)
+async def fetch_history(filters: TariffHistoryFilters) -> TariffHistoryResponse:
+    observations: list[TariffObservation] | None = None
+    if settings.enable_db:
+        try:
+            async with get_session() as session:
+                repo = TariffRepository(session)
+                observations = await repo.fetch_history(filters.model_dump(exclude_none=True))
+        except SQLAlchemyError as exc:
+            logger.warning("DB fetch_history failed, falling back to seed data: %s", exc)
+            observations = None
+    if observations is None:
+        observations = [obs for obs in _seed_observations() if _matches_filters(obs, filters)]
+    return TariffHistoryResponse(filters=filters, items=observations)
 
 
 def _matches_filters(obs: TariffObservation, filters: TariffHistoryFilters) -> bool:

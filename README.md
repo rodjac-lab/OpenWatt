@@ -19,6 +19,12 @@ Open Data electricity tariffs comparator for France — transparent, reproducibl
 3. Run the FastAPI app, which currently serves `/health` and `/v1/*` routes:
     uvicorn api.app.main:app --reload
 
+### Database setup
+1. Start PostgreSQL (or point to a managed instance) and run `psql -f db/ddl.sql` to apply the canonical schema (insert-only tables + views/triggers).
+2. Export `OPENWATT_DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/openwatt`.
+3. Enable the persistence layer by setting `OPENWATT_ENABLE_DB=1` when launching `uvicorn`.
+4. Alembic is included for future migrations (`alembic init migrations` once the schema evolves).
+
 ## API endpoints (alpha)
 - GET /health — liveness probe for CI/CD monitors.
 - GET /v1/tariffs — latest observations filtered by option, puissance, include_stale (`data_status = fresh|verifying|stale|broken`).
