@@ -1,0 +1,43 @@
+---
+id: openwatt.ui
+version: 0.1.0
+status: draft
+last_updated: 2025-11-11
+---
+
+# UI Stack & Contrats (OpenWatt)
+
+## Stack
+- Framework: Next.js (App Router)
+- Style: Tailwind CSS + shadcn/ui (Radix)
+- Thème: next-themes (dark mode: class)
+- Data: TanStack Query (+ Zod côté client)
+- Table: TanStack Table (+ virtualisation si >200 lignes)
+- Charts: Recharts
+- Forms: React Hook Form + Zod
+
+## Pages (MVP)
+- `/` (Comparateur)
+  - Filtres: `puissance_kva`, `option`, `conso_kwh`, `%hc (si HPHC)`
+  - Résultats: tri par `annual_cost` (TTC), badges `fresh/suspect/stale`, `delta_vs_trve_pct`
+- `/provider/[slug]` (Détail fournisseur)
+  - Graphique historique (price/abo) + liste d’observations
+- `/methodology`, `/api` (doc)
+
+## Contrats front (API)
+- GET `/v1/tariffs?option=&puissance=&include_stale=`
+  - Réponse: liste `Tariff` (voir `specs/openapi.yaml#components/schemas/Tariff`)
+  - Le front calcule `annual_cost`:
+    - BASE: `conso_kwh * price_kwh_ttc + 12 * abo_month_ttc`
+    - HPHC: `conso_hp * price_hp + conso_hc * price_hc + 12 * abo`
+- GET `/v1/tariffs/history?...` pour `/provider/[slug]`
+
+## États & badges
+- `fresh` (≤7j), `suspect` (≤48h), `stale` (>14j, masqué par défaut), `broken` (exclu)
+- Deltas: afficher `±x% vs TRVE`
+
+## Acceptation UI (MVP)
+- Filtres réactifs (aucun reload)
+- Table triable par coût annuel
+- Dark mode toggle persistant
+- Chargement: skeletons, erreurs: toasts
