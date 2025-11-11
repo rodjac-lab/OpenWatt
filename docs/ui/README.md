@@ -7,6 +7,6 @@
 4. Bind the generated client to the FastAPI endpoints listed in the README (start with `/v1/tariffs` and `/v1/tariffs/history`).
 
 Next steps for the UI squad:
-- Scaffold a Next.js app under `ui/` targeting `/compare` with supplier/option filters.
+- Use the pre-scaffolded Next.js app under `ui/` (run `npm install && npm run dev`).
 - Consume the `Tariff` type defined in `docs/ui/types.ts` until the generated types are wired in CI.
 - Surface freshness badges exactly as specified (no other wording) to stay aligned with the Spec-Kit.
