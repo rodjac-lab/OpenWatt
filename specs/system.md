@@ -13,7 +13,7 @@ A[Scrapers HTML/PDF] --> B[Normalizer]
 B --> C[(Postgres insert-only)]
 C --> D[API FastAPI /v1]
 D --> E[UI Comparateur]
-C --> F[TRVE Guard Diff (QA)]
+C --> F["TRVE Guard Diff (QA)"]
 ```
 
 # 🔌 Flux de données
