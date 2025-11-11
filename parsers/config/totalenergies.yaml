@@ -1,0 +1,12 @@
+supplier: TotalEnergies
+parser_version: totale_v1
+source:
+  url: https://www.totalenergies.fr/offres-electricite
+  format: html
+selectors:
+  rows: "section.tariffs article"
+  fields:
+    option: "@data-option"
+    puissance_kva: "@data-puissance"
+    abo_month_ttc: "@data-abonnement"
+    price_kwh_ttc: "@data-kwht"

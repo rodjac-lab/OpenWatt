@@ -8,6 +8,7 @@ Current coverage:
 |----------|----------------|-------|
 | EDF | `edf_v1` | Snapshot parser built from anonymised HTML (see `tests/snapshots/edf`). |
 | Engie | `engie_v1` | Same YAML-driven parser with HPHC attributes (`tests/snapshots/engie`). |
+| TotalEnergies | `totale_v1` | Tempo/Base placeholder from `tests/snapshots/total`. |
 
 Add one Markdown file per supplier (e.g. `docs/parsers/edf.md`) describing:
 - URLs to monitor and expected update cadence.

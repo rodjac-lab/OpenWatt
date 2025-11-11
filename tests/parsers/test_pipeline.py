@@ -13,6 +13,7 @@ SNAPSHOT_ROOT = Path(__file__).parent.parent / "snapshots"
 CASES = [
     ("edf", "edf/edf_2025_02.html", "edf/edf_2025_02_expected.json"),
     ("engie", "engie/engie_2025_02.html", "engie/engie_2025_02_expected.json"),
+    ("totalenergies", "total/total_2025_02.html", "total/total_2025_02_expected.json"),
 ]
 
 

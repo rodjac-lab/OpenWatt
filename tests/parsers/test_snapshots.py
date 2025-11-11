@@ -12,6 +12,7 @@ SNAPSHOT_DIR = Path(__file__).parent.parent / "snapshots"
 SNAPSHOT_CASES = [
     ("edf", "edf_2025_02.html", "edf_2025_02_expected.json"),
     ("engie", "engie_2025_02.html", "engie_2025_02_expected.json"),
+    ("total", "total_2025_02.html", "total_2025_02_expected.json"),
 ]
 
 
