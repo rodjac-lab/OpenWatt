@@ -15,7 +15,17 @@ jobs:
       - run: pip install -r requirements.txt || true
       - name: Run ingest (placeholder)
         run: |
-          echo '{"date": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'", "supplier":"EDF","hash":"dummy","status":"ok"}' > logs.json
+          echo '{"date": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'", "supplier":"EDF","hash":"dummy","data_status":"verifying"}' > logs.json
+      - name: Flag verifying payloads
+        run: |
+          python - <<'PY'
+import json
+from pathlib import Path
+
+payload = json.loads(Path("logs.json").read_text())
+if payload.get("data_status") == "verifying":
+    print("::warning::Observation en cours de verification (data_status=verifying)")
+PY
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
