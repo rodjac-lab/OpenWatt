@@ -5,17 +5,43 @@ on:
   workflow_dispatch:
 
 jobs:
-  scrape:
+  nightly-suite:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: openwatt
+          POSTGRES_USER: openwatt
+          POSTGRES_PASSWORD: openwatt
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U openwatt -d openwatt"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      OPENWATT_DATABASE_URL: postgresql+asyncpg://openwatt:openwatt@localhost:5432/openwatt
+      OPENWATT_ENABLE_DB: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install -r requirements.txt || true
-      - name: Run ingest (placeholder)
+      - name: Install system deps
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Install Python deps
+        run: pip install -r requirements.txt
+      - name: Apply DDL
+        run: python scripts/apply_ddl.py --database-url ${{ env.OPENWATT_DATABASE_URL }}
+      - name: Seed reference data
+        run: python -m api.app.db.seed
+      - name: Run pytest (DB + parser snapshots)
+        run: pytest
+      - name: Smoke ingest snapshot regeneration
         run: |
-          echo '{"date": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'", "supplier":"EDF","hash":"dummy","data_status":"verifying"}' > logs.json
+          python -m ingest.pipeline edf tests/snapshots/edf/edf_2025_02.html --observed-at 2025-02-12T08:00:00Z > logs.json
       - name: Flag verifying payloads
         run: |
           python - <<'PY'
@@ -26,8 +52,8 @@ payload = json.loads(Path("logs.json").read_text())
 if payload.get("data_status") == "verifying":
     print("::warning::Observation en cours de verification (data_status=verifying)")
 PY
-      - name: Upload artifact
+      - name: Upload ingest artifact
         uses: actions/upload-artifact@v4
         with:
-          name: logs
+          name: ingest-logs
           path: logs.json
