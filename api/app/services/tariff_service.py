@@ -1,0 +1,180 @@
+"""In-memory placeholder services satisfying Spec-Kit contract."""
+from __future__ import annotations
+
+from datetime import datetime, timedelta, timezone
+from typing import Iterable
+
+from api.app.models.tariffs import (
+    FreshnessStatus,
+    TariffCollection,
+    TariffHistoryFilters,
+    TariffHistoryResponse,
+    TariffObservation,
+    TariffOption,
+    TrveDiffEntry,
+    TrveDiffResponse,
+)
+
+
+def _seed_observations() -> list[TariffObservation]:
+    """Simulate DB rows then compute data_status according to the constitution."""
+    now = datetime.now(timezone.utc)
+    base_ts = now.replace(microsecond=0)
+    seeds = [
+        {
+            "supplier": "EDF",
+            "option": TariffOption.BASE,
+            "puissance_kva": 6,
+            "price_kwh_ttc": 0.251,
+            "price_kwh_hp_ttc": None,
+            "price_kwh_hc_ttc": None,
+            "abo_month_ttc": 12.5,
+            "observed_at": base_ts - timedelta(days=1),
+            "parser_version": "edf_v1",
+            "source_url": "https://edf.fr/tarifs",
+            "source_checksum": "f" * 64,
+            "last_verified": base_ts - timedelta(hours=6),
+        },
+        {
+            "supplier": "Engie",
+            "option": TariffOption.HPHC,
+            "puissance_kva": 9,
+            "price_kwh_ttc": None,
+            "price_kwh_hp_ttc": 0.269,
+            "price_kwh_hc_ttc": 0.19,
+            "abo_month_ttc": 15.2,
+            "observed_at": base_ts - timedelta(hours=8),
+            "parser_version": "engie_v1",
+            "source_url": "https://particuliers.engie.fr/tarifs",
+            "source_checksum": "e" * 64,
+            "validation_pending": True,
+        },
+        {
+            "supplier": "Mint",
+            "option": TariffOption.BASE,
+            "puissance_kva": 12,
+            "price_kwh_ttc": 0.241,
+            "price_kwh_hp_ttc": None,
+            "price_kwh_hc_ttc": None,
+            "abo_month_ttc": 14.0,
+            "observed_at": base_ts - timedelta(days=20),
+            "parser_version": "mint_v1",
+            "source_url": "https://mint-energie.com/tarifs",
+            "source_checksum": "d" * 64,
+            "last_verified": base_ts - timedelta(days=10),
+        },
+        {
+            "supplier": "TotalEnergies",
+            "option": TariffOption.BASE,
+            "puissance_kva": 3,
+            "price_kwh_ttc": None,
+            "price_kwh_hp_ttc": None,
+            "price_kwh_hc_ttc": None,
+            "abo_month_ttc": 11.2,
+            "observed_at": base_ts - timedelta(days=2),
+            "parser_version": "total_v1",
+            "source_url": "https://www.totalenergies.fr/offres-electricite",
+            "source_checksum": "c" * 64,
+            "parse_error": True,
+        },
+    ]
+    return [_build_observation(seed, now) for seed in seeds]
+
+
+def _build_observation(seed: dict, now: datetime) -> TariffObservation:
+    return TariffObservation(
+        supplier=seed["supplier"],
+        option=seed["option"],
+        puissance_kva=seed["puissance_kva"],
+        price_kwh_ttc=seed.get("price_kwh_ttc"),
+        price_kwh_hp_ttc=seed.get("price_kwh_hp_ttc"),
+        price_kwh_hc_ttc=seed.get("price_kwh_hc_ttc"),
+        abo_month_ttc=seed["abo_month_ttc"],
+        observed_at=seed["observed_at"],
+        parser_version=seed["parser_version"],
+        source_url=seed["source_url"],
+        source_checksum=seed["source_checksum"],
+        last_verified=seed.get("last_verified"),
+        data_status=_determine_data_status(seed, now),
+    )
+
+
+def _determine_data_status(seed: dict, now: datetime) -> FreshnessStatus:
+    if seed.get("parse_error"):
+        return FreshnessStatus.BROKEN
+    if seed.get("validation_pending"):
+        return FreshnessStatus.VERIFYING
+    age = now - seed["observed_at"]
+    if age > timedelta(days=14):
+        return FreshnessStatus.STALE
+    return FreshnessStatus.FRESH
+
+
+def _filter_observations(
+    observations: Iterable[TariffObservation],
+    *,
+    option: TariffOption | None,
+    puissance: int | None,
+    include_stale: bool,
+) -> list[TariffObservation]:
+    def is_visible(obs: TariffObservation) -> bool:
+        if option and obs.option != option:
+            return False
+        if puissance and obs.puissance_kva != puissance:
+            return False
+        if not include_stale and obs.data_status in {FreshnessStatus.STALE, FreshnessStatus.BROKEN}:
+            return False
+        return True
+
+    return [obs for obs in observations if is_visible(obs)]
+
+
+def fetch_latest_tariffs(
+    *, option: TariffOption | None = None, puissance: int | None = None, include_stale: bool = False
+) -> TariffCollection:
+    observations = _seed_observations()
+    filtered = _filter_observations(observations, option=option, puissance=puissance, include_stale=include_stale)
+    return TariffCollection(items=filtered)
+
+
+def fetch_history(filters: TariffHistoryFilters) -> TariffHistoryResponse:
+    observations = _seed_observations()
+    items = [obs for obs in observations if _matches_filters(obs, filters)]
+    return TariffHistoryResponse(filters=filters, items=items)
+
+
+def _matches_filters(obs: TariffObservation, filters: TariffHistoryFilters) -> bool:
+    if filters.supplier and obs.supplier.lower() != filters.supplier.lower():
+        return False
+    if filters.option and obs.option != filters.option:
+        return False
+    if filters.puissance_kva and obs.puissance_kva != filters.puissance_kva:
+        return False
+    if filters.since and obs.observed_at.date() < filters.since:
+        return False
+    if filters.until and obs.observed_at.date() > filters.until:
+        return False
+    return True
+
+
+def compute_trve_diff() -> TrveDiffResponse:
+    now = datetime.now(timezone.utc)
+    items = [
+        TrveDiffEntry(
+            supplier="EDF",
+            option=TariffOption.BASE,
+            puissance_kva=6,
+            delta_eur_per_mwh=1.2,
+            compared_at=now,
+            status="ok",
+        ),
+        TrveDiffEntry(
+            supplier="Engie",
+            option=TariffOption.HPHC,
+            puissance_kva=9,
+            delta_eur_per_mwh=15.4,
+            compared_at=now,
+            status="alert" if 15.4 > 10 else "ok",
+        ),
+    ]
+    return TrveDiffResponse(generated_at=now, items=items)
