@@ -1,4 +1,4 @@
-openapi: 3.0.3
+﻿openapi: 3.0.3
 info:
   title: OpenWatt API
   description: Minimal placeholder OpenAPI definition for future endpoints.
@@ -6,4 +6,59 @@ info:
 servers:
   - url: https://api.openwatt.example
 paths: {}
-components: {}
+components:
+  schemas:
+    Tariff:
+      type: object
+      description: Observation insert-only exposee via /v1/tariffs.
+      properties:
+        supplier:
+          type: string
+        option:
+          type: string
+          enum: [BASE, HPHC, TEMPO]
+        puissance_kva:
+          type: integer
+          enum: [3, 6, 9, 12, 15, 18, 24, 30, 36]
+        abo_month_ttc:
+          type: number
+        price_kwh_ttc:
+          type: number
+          nullable: true
+        price_kwh_hp_ttc:
+          type: number
+          nullable: true
+        price_kwh_hc_ttc:
+          type: number
+          nullable: true
+        observed_at:
+          type: string
+          format: date-time
+        parser_version:
+          type: string
+        source_url:
+          type: string
+          format: uri
+        source_checksum:
+          type: string
+          minLength: 64
+          maxLength: 64
+        data_status:
+          type: string
+          description: |
+            Enum des etats affiches dans l'UI.
+            - fresh: observation <= 7 jours et aucune alerte
+            - verifying: changement detecte, validation en cours (<= 48 h)
+            - stale: observation > 14 jours
+            - broken: parsing en echec ou donnees invalides
+          enum: [fresh, verifying, stale, broken]
+      required:
+        - supplier
+        - option
+        - puissance_kva
+        - abo_month_ttc
+        - observed_at
+        - parser_version
+        - source_url
+        - source_checksum
+        - data_status

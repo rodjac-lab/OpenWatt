@@ -32,7 +32,7 @@ OpenWatt s’inscrit dans une démarche de **transparence énergétique** et de 
 # ⚙️ Charte technique (non négociable)
 1. **Référence officielle : TRVE**
    - Importés depuis data.gouv.fr (CRE) comme garde-fou.
-   - Écart > ±50 % = alerte `suspect`.
+   - Écart > ±50 % = alerte `erifying`.
    - TRVE n’est jamais “scrapé”, mais importé et versionné séparément.
 2. **Configuration déclarative (YAML)**
    - Chaque fournisseur possède un fichier YAML définissant :
@@ -46,7 +46,10 @@ OpenWatt s’inscrit dans une démarche de **transparence énergétique** et de 
    - Si hash change → re-parse sandbox.
    - Si échec 3× → masquer fournisseur dans l’API.
 4. **Fraîcheur des données**
-   - `fresh` ≤ 7 j, `suspect` ≤ 48 h, `stale` > 14 j, `broken` = échec.
+   - `fresh` : dernière observation ≤ 7 jours, aucune alerte active.
+   - `verifying` : changement détecté ou validation en attente (≤ 48 h max).
+   - `stale` : dernière observation > 14 jours.
+   - `broken` : échec de parsing ou données invalides.
    - Chaque tarif expose `observed_at`, `parser_version`, `source_checksum`.
 5. **Historisation complète**
    - Jamais d’UPDATE : chaque scrape = nouvelle ligne en DB.
@@ -121,4 +124,3 @@ OpenWatt s’inscrit dans une démarche de **transparence énergétique** et de 
 - Offrir une API publique open-source et un tableau de bord temps réel.  
 - Publier les historiques consolidés en open data.  
 - Devenir la référence indépendante sur la transparence énergétique.
-

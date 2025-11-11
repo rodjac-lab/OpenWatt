@@ -71,6 +71,15 @@
       "type": "string",
       "minLength": 64,
       "maxLength": 64
+    },
+    "data_status": {
+      "type": "string",
+      "enum": [
+        "fresh",
+        "verifying",
+        "stale",
+        "broken"
+      ]
     }
   }
 }

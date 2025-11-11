@@ -26,4 +26,5 @@ Feature: Derniers tarifs
     When j'appelle GET /v1/tariffs
     Then seules les observations fresh sont retournées
     And le champ last_verified est présent
+    And les observations en validation exposent data_status = verifying
 ```
