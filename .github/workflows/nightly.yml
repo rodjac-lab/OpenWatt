@@ -40,20 +40,25 @@ jobs:
       - name: Run pytest (DB + parser snapshots)
         run: pytest
       - name: Smoke ingest snapshot regeneration
-        run: |
-          python -m ingest.pipeline edf tests/snapshots/edf/edf_2025_02.html --observed-at 2025-02-12T08:00:00Z > logs.json
+        run: >
+          python -m ingest.pipeline edf
+          --html tests/snapshots/edf/edf_2025_02.html
+          --observed-at 2025-02-12T08:00:00Z
+          --persist
+          --output artifacts/ci_edf.json
       - name: Flag verifying payloads
         run: |
           python - <<'PY'
 import json
 from pathlib import Path
 
-payload = json.loads(Path("logs.json").read_text())
-if payload.get("data_status") == "verifying":
+payload = json.loads(Path("artifacts/ci_edf.json").read_text())
+statuses = {item.get("data_status") for item in payload}
+if "verifying" in statuses:
     print("::warning::Observation en cours de verification (data_status=verifying)")
 PY
       - name: Upload ingest artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ingest-logs
-          path: logs.json
+          name: ingest-output
+          path: artifacts/ci_edf.json
