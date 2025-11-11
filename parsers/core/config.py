@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field, HttpUrl
 
 class SourceConfig(BaseModel):
     url: HttpUrl
-    format: Literal["html"] = "html"
+    format: Literal["html", "pdf"] = "html"
 
 
 class SelectorConfig(BaseModel):

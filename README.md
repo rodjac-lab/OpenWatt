@@ -1,4 +1,4 @@
-# OpenWatt ?
+# OpenWatt
 
 Open Data electricity tariffs comparator for France — transparent, reproducible, historical.
 
@@ -29,10 +29,13 @@ Open Data electricity tariffs comparator for France — transparent, reproducible,
 
 ## Ingestion & parsers
 - Supplier scrapers are declared in `parsers/config/<supplier>.yaml` (selectors, URLs, parser version).
-- Run the YAML-driven parser against an HTML artifact:
-    python -m ingest.pipeline edf tests/snapshots/edf/edf_2025_02.html --observed-at 2025-02-12T08:00:00Z
+- Run the YAML-driven parser against an existing artifact:
+    python -m ingest.pipeline edf --html tests/snapshots/edf/edf_2025_02.html --observed-at 2025-02-12T08:00:00Z
+- Or download the latest source defined in YAML:
+    python -m ingest.pipeline edf --fetch
+  The raw file lands in `artifacts/raw/` and the parsed JSON in `artifacts/parsed/`.
 - Snapshot outputs live in `tests/snapshots/<supplier>/` and are validated by `pytest` to keep the Spec-Kit contract green.
-- Current coverage: EDF (`edf_v1`) and Engie (`engie_v1`). Add new suppliers by cloning the YAML + snapshot pattern.
+- Current coverage: EDF (`edf_v1`), Engie (`engie_v1`), TotalEnergies (`totale_v1`). Add new suppliers by cloning the YAML + snapshot pattern (HTML or text-based PDF).
 
 ## UI hand-off
 - Generate an OpenAPI payload for frontend tooling:
@@ -49,7 +52,7 @@ Open Data electricity tariffs comparator for France — transparent, reproducible,
 - GET /v1/guards/trve-diff — compares last observations against TRVE reference to flag ok/alert.
 
 ## Tests
-1. Snapshot fixtures live in `tests/snapshots/` (e.g. `edf/edf_2025_02.*`, `engie/engie_2025_02.*`).
+1. Snapshot fixtures live in `tests/snapshots/` (EDF, Engie, TotalEnergies).
 2. Run the suite locally:
     pytest
 3. CI should block on failing snapshots or API regressions per Spec-Kit charter.

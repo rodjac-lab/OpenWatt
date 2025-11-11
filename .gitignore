@@ -4,6 +4,13 @@ __pycache__/
 .env
 .env.*
 !.env.example
+artifacts/
+ui/node_modules/
+ui/.next/
+.pytest_cache/
+.env
+.env.*
+!.env.example
 ui/node_modules/
 ui/.next/
 
