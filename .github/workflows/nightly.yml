@@ -1,4 +1,4 @@
-name: nightly-scrape
+name: nightly
 on:
   schedule:
     - cron: "15 3 * * *"

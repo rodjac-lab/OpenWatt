@@ -1,0 +1,9 @@
+openapi: 3.0.3
+info:
+  title: OpenWatt API
+  description: Minimal placeholder OpenAPI definition for future endpoints.
+  version: 0.1.0
+servers:
+  - url: https://api.openwatt.example
+paths: {}
+components: {}
