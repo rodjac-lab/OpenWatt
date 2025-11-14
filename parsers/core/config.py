@@ -23,6 +23,7 @@ class PdfSliceConfig(BaseModel):
     columns: dict[str, int]
     notes: Optional[str] = None
     use_clean_rows: Optional[bool] = None
+    puissance_values: Optional[list[int]] = None
 
 
 class PdfTableConfig(BaseModel):

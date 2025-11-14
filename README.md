@@ -23,8 +23,10 @@ Open Data electricity tariffs comparator for France — transparent, reproducibl
 ### Database setup
 1. Copy `.env.example` to `.env` and adjust credentials if needed.
 2. Start PostgreSQL locally: `docker compose up -d db` (or point to an existing instance).
-3. Apply the canonical schema: `python scripts/apply_ddl.py` (wraps `psql -f db/ddl.sql`).
-4. Export `OPENWATT_DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/openwatt` and set `OPENWATT_ENABLE_DB=1` before launching uvicorn.
+3. Apply the canonical schema:
+   - Postgres: `python scripts/apply_ddl.py` (wraps `psql -f db/ddl.sql`).
+   - Any SQLAlchemy-compatible URL (incl. SQLite for local dev): `python scripts/bootstrap_db.py --database-url sqlite+aiosqlite:///artifacts/dev.sqlite`.
+4. Export `OPENWATT_DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/openwatt` (or the SQLite URL above) and set `OPENWATT_ENABLE_DB=1` before launching uvicorn.
 5. Alembic is ready for future migrations (`alembic init migrations`).
 
 ## Ingestion & parsers

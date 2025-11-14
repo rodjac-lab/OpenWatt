@@ -101,6 +101,8 @@ def build_record_from_row(
     puissance = parse_int_value(row[slice_spec.puissance_column])
     if puissance is None:
         return None
+    if slice_spec.puissance_values and puissance not in slice_spec.puissance_values:
+        return None
 
     observed_iso = observed_at.isoformat().replace("+00:00", "Z")
     payload: dict[str, Any] = {

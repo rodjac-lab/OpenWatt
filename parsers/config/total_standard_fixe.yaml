@@ -11,11 +11,13 @@ pdf:
       slices:
         - option: BASE
           puissance_column: 0
+          puissance_values: [3, 6, 9, 12, 15, 18, 24, 30, 36]
           columns:
             abo_month_ttc: 2
             price_kwh_ttc: 4
         - option: HPHC
           puissance_column: 0
+          puissance_values: [6, 9, 12, 15, 18, 24, 30, 36]
           columns:
             abo_month_ttc: 2
             price_kwh_hp_ttc: 4

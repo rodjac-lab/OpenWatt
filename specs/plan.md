@@ -21,3 +21,7 @@ last_updated: 2025-11-11
 # 📌 Hypothèses
 - Sources publiques HTML/PDF
 - Aucune dépendance LLM/OCR au MVP
+## Backlog / To-do
+- Ajouter un outil CLI d'inspection des PDF (afficher colonnes/lignes extraites selon `parsers/config/*.yaml`) pour valider visuellement les tables avant régénération des snapshots.
+- Importer les grilles TRVE dans `trve_reference` et brancher `/v1/guards/trve-diff` sur ces données (au lieu du stub actuel).
+
