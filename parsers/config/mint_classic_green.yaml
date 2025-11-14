@@ -1,0 +1,26 @@
+supplier: MintEnergie
+parser_version: mint_classic_green_v1
+source:
+  url: https://doc.mint-energie.com/MintEnergie/MINT_ENERGIE_Fiche_Tarifs_23012_CLASSIC_GREEN.pdf
+  format: pdf
+pdf:
+  tables:
+    - page: 0
+      table_index: 0
+      skip_rows: 2
+      slices:
+        - option: BASE
+          puissance_column: 0
+          columns:
+            abo_month_ttc: 6
+            price_kwh_ttc: 12
+    - page: 0
+      table_index: 1
+      skip_rows: 3
+      slices:
+        - option: HPHC
+          puissance_column: 1
+          columns:
+            abo_month_ttc: 7
+            price_kwh_hp_ttc: 11
+            price_kwh_hc_ttc: 15

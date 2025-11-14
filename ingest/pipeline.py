@@ -1,21 +1,37 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from hashlib import sha256
 from pathlib import Path
 from typing import Any
 
 from ingest.fetch import fetch_supplier_artifact
 from ingest.persist import TariffPersister
 from parsers.core import parser as yaml_parser
-from parsers.core.config import load_supplier_config
+from parsers.core.config import SupplierConfig, load_supplier_config
 
 DEFAULT_PARSED_DIR = Path("artifacts/parsed")
 
 
-def run_ingest(supplier: str, html_input: Path, observed_at: datetime | None = None) -> list[dict[str, Any]]:
+def compute_checksum(path: Path) -> str:
+    data = path.read_bytes()
+    return sha256(data).hexdigest()
+
+
+def run_ingest(
+    config: SupplierConfig,
+    artifact_path: Path,
+    *,
+    observed_at: datetime,
+    source_checksum: str,
+) -> list[dict[str, Any]]:
     """Parse a supplier artifact into tariff payloads."""
-    timestamp = observed_at or datetime.now(timezone.utc)
-    return yaml_parser.parse_file(supplier, html_input, observed_at=timestamp)
+    return yaml_parser.parse_file(
+        config,
+        artifact_path,
+        observed_at=observed_at,
+        source_checksum=source_checksum,
+    )
 
 
 if __name__ == "__main__":
@@ -60,8 +76,14 @@ if __name__ == "__main__":
         artifact_path = Path(args.html)
         if not artifact_path.exists():
             parser.error(f"Artifact not found: {artifact_path}")
+        checksum = compute_checksum(artifact_path)
 
-    rows = run_ingest(args.supplier, artifact_path, observed_at=observed)
+    rows = run_ingest(
+        config,
+        artifact_path,
+        observed_at=observed,
+        source_checksum=checksum,
+    )
 
     if args.output:
         output_path = Path(args.output)

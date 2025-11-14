@@ -1,13 +1,14 @@
-# Engie parser runbook (engie_v1)
+# Engie parser runbook (`engie_pdf_v1`)
 
-- **URLs**: https://particuliers.engie.fr/tarifs (HTML snippet similar to EDF tables).
-- **Selectors**: see `parsers/config/engie.yaml` (rows = `section#tariffs article`, values in `data-*`).
-- **Cadence**: Engie publishes updates roughly monthly; nightly digest monitors checksums and goes `verifying` until TRVE diff clears.
-- **Known quirks**:
-  - BASE option exposes `data-kwht`; HPHC exposes both `data-kwhhp` and `data-kwhhc`.
-  - Some power tiers disappear temporarily; parser should handle missing rows gracefully.
-- **Recovery steps**:
-  1. Save offending HTML/PDF into `tests/snapshots/engie/`.
-  2. Adjust YAML selectors if attributes changed.
-  3. Regenerate JSON expectations via `python -m ingest.pipeline engie tests/snapshots/engie/<file>.html --observed-at <ISO>`.
-  4. Run `pytest tests/parsers -k engie` to confirm schema + parser output before merging.
+- **PDF source**: https://particuliers.engie.fr/content/dam/pdf/fiches-descriptives/fiche-descriptive-elec-reference-3-ans.pdf (offre Elec Reference).
+- **Extraction**: `parsers/config/engie.yaml` reference les tables PDF (page 3) pour l'option Base et HP/HC. Les colonnes TTC sont converties via `parse_float()`.
+- **Cadence**: Engie ajuste les prix lors des evolutions TRV (~mensuel). La job nightly telecharge le PDF, calcule un hash et persiste uniquement les nouvelles observations.
+- **Pieges** :
+  - Certaines lignes comportent `-` pour les puissances non disponibles -> le parser saute ces entrees.
+  - Surveiller les intitules de colonnes si Engie change la maquette.
+- **Recovery steps** :
+  1. Deposer la nouvelle fiche Engie dans `tests/snapshots/engie/`.
+  2. Ajuster `pdf.tables` si les colonnes evoluent.
+  3. Regenerer le JSON attendu :  
+     `python -m ingest.pipeline engie --html tests/snapshots/engie/<file>.pdf --observed-at <ISO> --output tests/snapshots/engie/engie_<date>_expected.json`
+  4. Lancer `pytest -k engie`.

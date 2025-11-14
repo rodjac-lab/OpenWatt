@@ -1,14 +1,15 @@
 # Parser runbooks
 
-Each supplier must ship a YAML file under `parsers/config/` plus a short runbook in this directory. The YAML keeps the scraping logic declarative (selectors, URLs, validation rules) while the runbook explains edge cases, history of breakages, and manual recovery steps.
+Each supplier must ship a YAML file under `parsers/config/` plus a short runbook in this folder. The YAML keeps the scraping logic declarative (selectors, URLs, validation rules) while the runbook explains edge cases, history of breakages, and manual recovery steps.
 
 Current coverage:
 
 | Supplier | Parser version | Notes |
 |----------|----------------|-------|
-| EDF | `edf_v1` | Snapshot parser built from anonymised HTML (see `tests/snapshots/edf`). |
-| Engie | `engie_v1` | Same YAML-driven parser with HPHC attributes (`tests/snapshots/engie`). |
-| TotalEnergies | `totale_v1` | Tempo/Base placeholder from `tests/snapshots/total`. |
+| EDF | `edf_pdf_v1` | Grille Tarif Bleu (PDF) -> `tests/snapshots/edf/edf_tarif_bleu.pdf`. |
+| Engie | `engie_pdf_v1` | Fiche Elec Reference 3 ans (PDF) -> `tests/snapshots/engie/`. |
+| TotalEnergies | `total_heures_eco_v1` / `total_standard_fixe_v1` | Deux grilles (Heures Eco & Standard Fixe) sous `tests/snapshots/total/`. |
+| Mint Energie | `mint_indexe_trv_v1`, `mint_classic_green_v1`, `mint_smart_green_v1` | Trois fiches PDF (Online & Green, Classic, Smart) dans `tests/snapshots/mint/`. |
 
 Add one Markdown file per supplier (e.g. `docs/parsers/edf.md`) describing:
 - URLs to monitor and expected update cadence.

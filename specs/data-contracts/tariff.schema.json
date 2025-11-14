@@ -23,17 +23,9 @@
       ]
     },
     "puissance_kva": {
-      "enum": [
-        3,
-        6,
-        9,
-        12,
-        15,
-        18,
-        24,
-        30,
-        36
-      ]
+      "type": "integer",
+      "minimum": 3,
+      "maximum": 36
     },
     "price_kwh_ttc": {
       "type": [

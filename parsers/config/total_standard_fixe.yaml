@@ -1,23 +1,19 @@
-supplier: Engie
-parser_version: engie_pdf_v1
+supplier: TotalEnergies
+parser_version: total_standard_fixe_v1
 source:
-  url: https://particuliers.engie.fr/content/dam/pdf/fiches-descriptives/fiche-descriptive-elec-reference-3-ans.pdf
+  url: https://www.totalenergies.fr/fileadmin/Digital/Groupe/PDF/Documents_contractuels/Particuliers/Tarifs_TotalEnergies/fr/grille-tarifaire-standard-fixe-particuliers.pdf
   format: pdf
 pdf:
   tables:
-    - page: 3
+    - page: 0
       table_index: 0
-      skip_rows: 3
+      skip_rows: 4
       slices:
         - option: BASE
           puissance_column: 0
           columns:
             abo_month_ttc: 2
             price_kwh_ttc: 4
-    - page: 3
-      table_index: 1
-      skip_rows: 4
-      slices:
         - option: HPHC
           puissance_column: 0
           columns:

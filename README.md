@@ -1,6 +1,6 @@
 # OpenWatt
 
-Open Data electricity tariffs comparator for France — transparent, reproducible, historical.
+Open Data electricity tariffs comparator for France â€” transparent, reproducible, historical.
 
 ## Contents
 - specs/: project specifications (Spec-Kit)
@@ -28,14 +28,14 @@ Open Data electricity tariffs comparator for France — transparent, reproducible,
 5. Alembic is ready for future migrations (`alembic init migrations`).
 
 ## Ingestion & parsers
-- Supplier scrapers are declared in `parsers/config/<supplier>.yaml` (selectors, URLs, parser version).
-- Run the YAML-driven parser against an existing artifact:
-    python -m ingest.pipeline edf --html tests/snapshots/edf/edf_2025_02.html --observed-at 2025-02-12T08:00:00Z
-- Or download the latest source defined in YAML:
-    python -m ingest.pipeline edf --fetch
+- Supplier scrapers are declared in `parsers/config/<supplier>.yaml` (selectors ou tables PDF, parser version).
+- Run the parser against an existing artifact (HTML ou PDF) :
+    python -m ingest.pipeline edf --html tests/snapshots/edf/edf_tarif_bleu.pdf --observed-at 2025-02-12T08:00:00Z
+- Or download the latest source defined in YAML et persister en base :
+    python -m ingest.pipeline total_heures_eco --fetch --persist
   The raw file lands in `artifacts/raw/` and the parsed JSON in `artifacts/parsed/`.
-- Snapshot outputs live in `tests/snapshots/<supplier>/` and are validated by `pytest` to keep the Spec-Kit contract green.
-- Current coverage: EDF (`edf_v1`), Engie (`engie_v1`), TotalEnergies (`totale_v1`). Add new suppliers by cloning the YAML + snapshot pattern (HTML or text-based PDF).
+- Snapshot outputs live in `tests/snapshots/<supplier>/` et sont valides par `pytest`.
+- Current coverage: EDF (`edf_pdf_v1`), Engie (`engie_pdf_v1`), TotalEnergies (`total_heures_eco_v1`, `total_standard_fixe_v1`) et Mint Energie (`mint_indexe_trv_v1`, `mint_classic_green_v1`, `mint_smart_green_v1`). Ajoutez un fournisseur en clonant ce pattern YAML + snapshot.
 
 ## UI hand-off
 - Generate an OpenAPI payload for frontend tooling:
@@ -46,10 +46,10 @@ Open Data electricity tariffs comparator for France — transparent, reproducible,
 - Set `NEXT_PUBLIC_API_BASE` to point at your FastAPI instance before fetching data.
 
 ## API endpoints (alpha)
-- GET /health — liveness probe for CI/CD monitors.
-- GET /v1/tariffs — latest observations filtered by option, puissance, include_stale (`data_status = fresh|verifying|stale|broken`).
-- GET /v1/tariffs/history — insert-only log with supplier/option/puissance/since/until filters.
-- GET /v1/guards/trve-diff — compares last observations against TRVE reference to flag ok/alert.
+- GET /health â€” liveness probe for CI/CD monitors.
+- GET /v1/tariffs â€” latest observations filtered by option, puissance, include_stale (`data_status = fresh|verifying|stale|broken`).
+- GET /v1/tariffs/history â€” insert-only log with supplier/option/puissance/since/until filters.
+- GET /v1/guards/trve-diff â€” compares last observations against TRVE reference to flag ok/alert.
 
 ## Tests
 1. Snapshot fixtures live in `tests/snapshots/` (EDF, Engie, TotalEnergies).
@@ -59,4 +59,4 @@ Open Data electricity tariffs comparator for France — transparent, reproducible,
 
 ## License
 
-Licensed under the MIT License — see `LICENSE` for details.
+Licensed under the MIT License â€” see `LICENSE` for details.

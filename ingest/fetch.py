@@ -6,18 +6,46 @@ from pathlib import Path
 from typing import Tuple
 
 import requests
+from requests.adapters import HTTPAdapter, Retry
 
 from parsers.core.config import SupplierConfig
 
 DEFAULT_RAW_DIR = Path("artifacts/raw")
+DEFAULT_TIMEOUT = 60
+DEFAULT_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 OpenWattBot/0.1"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8",
+}
 
 
-def fetch_supplier_artifact(config: SupplierConfig, raw_dir: Path | None = None) -> tuple[Path, str]:
+def _http_session() -> requests.Session:
+    retry = Retry(
+        total=3,
+        backoff_factor=1.0,
+        status_forcelist=(429, 500, 502, 503, 504),
+        allowed_methods=["GET"],
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session = requests.Session()
+    session.headers.update(DEFAULT_HEADERS)
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+    return session
+
+
+def fetch_supplier_artifact(
+    config: SupplierConfig, raw_dir: Path | None = None, timeout: int = DEFAULT_TIMEOUT
+) -> tuple[Path, str]:
     """Download the supplier source (HTML/PDF) and store it locally."""
     raw_dir = raw_dir or DEFAULT_RAW_DIR
     raw_dir.mkdir(parents=True, exist_ok=True)
 
-    response = requests.get(str(config.source.url), timeout=30)
+    session = _http_session()
+    response = session.get(str(config.source.url), timeout=timeout)
     response.raise_for_status()
     content = response.content
     checksum = sha256(content).hexdigest()

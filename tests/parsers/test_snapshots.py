@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import json
 from pathlib import Path
@@ -10,18 +10,21 @@ TARIFF_SCHEMA = json.loads(Path("specs/data-contracts/tariff.schema.json").read_
 SNAPSHOT_DIR = Path(__file__).parent.parent / "snapshots"
 
 SNAPSHOT_CASES = [
-    ("edf", "edf_2025_02.html", "edf_2025_02_expected.json"),
-    ("engie", "engie_2025_02.html", "engie_2025_02_expected.json"),
-    ("total", "total_2025_02.html", "total_2025_02_expected.json"),
+    ("edf", "edf_tarif_bleu.pdf", "edf_2025_02_expected.json"),
+    ("engie", "engie_reference.pdf", "engie_2025_02_expected.json"),
+    ("total", "total_heures_eco.pdf", "total_heures_eco_expected.json"),
+    ("total", "total_standard_fixe.pdf", "total_standard_fixe_expected.json"),
+    ("mint", "mint_indexe_trv.pdf", "mint_indexe_trv_expected.json"),
+    ("mint", "mint_classic_green.pdf", "mint_classic_green_expected.json"),
+    ("mint", "mint_smart_green.pdf", "mint_smart_green_expected.json"),
 ]
 
 
-@pytest.mark.parametrize("supplier,html_name,_", SNAPSHOT_CASES)
-def test_snapshot_artifacts_exist(supplier: str, html_name: str, _: str):
-    html_file = SNAPSHOT_DIR / supplier / html_name
-    assert html_file.exists(), f"HTML snapshot missing for {supplier}"
-    text = html_file.read_text(encoding="utf-8")
-    assert "tarifs" in text.lower()
+@pytest.mark.parametrize("supplier,artifact_name,_", SNAPSHOT_CASES)
+def test_snapshot_artifacts_exist(supplier: str, artifact_name: str, _: str):
+    artifact_file = SNAPSHOT_DIR / supplier / artifact_name
+    assert artifact_file.exists(), f"Snapshot artifact missing for {supplier}"
+    assert artifact_file.stat().st_size > 1000
 
 
 @pytest.mark.parametrize("supplier,_,expected_name", SNAPSHOT_CASES)

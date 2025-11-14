@@ -1,11 +1,13 @@
-# TotalEnergies parser runbook (totale_v1)
+# TotalEnergies parser runbook (Heures Eco & Standard Fixe)
 
-- **URL**: https://www.totalenergies.fr/offres-electricite
-- **Selectors**: `section.tariffs article` rows with data-* attributes for option, puissance, abonnement, kwht.
-- **Cadence**: updates roughly monthly; rely on nightly checksum + TRVE guard.
-- **Notes**: TEMPO option currently simplified (single price field). Extend selectors when HP/HC become available.
-- **Recovery**:
-  1. Store latest HTML in `tests/snapshots/total/`.
-  2. Update YAML if attributes change.
-  3. Regenerate JSON expectation via `python -m ingest.pipeline totalenergies tests/snapshots/total/<file>.html --observed-at <ISO>`.
-  4. Run `pytest tests/parsers -k total` before merge.
+- **PDF sources** :
+  - Heures Eco : https://www.totalenergies.fr/fileadmin/Digital/Groupe/PDF/Documents_contractuels/Particuliers/Tarifs_TotalEnergies/fr/grille-tarifaire-heures-eco-particuliers.pdf
+  - Standard Fixe : https://www.totalenergies.fr/fileadmin/Digital/Groupe/PDF/Documents_contractuels/Particuliers/Tarifs_TotalEnergies/fr/grille-tarifaire-standard-fixe-particuliers.pdf
+- **Extraction** : `parsers/config/total_heures_eco.yaml` et `.../total_standard_fixe.yaml` decrivent les tables Base + HP/HC (page 1) et les colonnes TTC a conserver. Les colonnes TRV affichees dans le PDF sont ignorees.
+- **Cadence** : mises a jour lors des evolutions TRV ou promotions internes. La job nightly telecharge le PDF, calcule un hash, parse les tables et persiste en insert-only.
+- **Recovery** :
+  1. Placer le PDF mis a jour dans `tests/snapshots/total/`.
+  2. Verifier les index de colonnes (Total reorganise parfois les colonnes TRV/Offre).
+  3. Regenerer le JSON :  
+     `python -m ingest.pipeline total_heures_eco --html tests/snapshots/total/<file>.pdf --observed-at <ISO> --output tests/snapshots/total/total_heures_eco_expected.json`
+  4. Lancer `pytest tests/parsers -k total`.

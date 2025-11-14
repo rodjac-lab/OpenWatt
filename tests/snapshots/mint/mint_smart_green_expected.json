@@ -1,0 +1,27 @@
+[
+  {
+    "supplier": "MintEnergie",
+    "parser_version": "mint_smart_green_v1",
+    "source_url": "https://doc.mint-energie.com/MintEnergie/MINT_ENERGIE_Fiche_Tarifs_23224_SMART_GREEN.pdf",
+    "source_checksum": "c04ac59295dba1cd3593fef5891b68e79cd9a54f8b4b516377083405bc695b29",
+    "observed_at": "2025-02-12T08:00:00Z",
+    "data_status": "fresh",
+    "abo_month_ttc": 14.72,
+    "price_kwh_ttc": 0.1952,
+    "puissance_kva": 3,
+    "option": "BASE"
+  },
+  {
+    "supplier": "MintEnergie",
+    "parser_version": "mint_smart_green_v1",
+    "source_url": "https://doc.mint-energie.com/MintEnergie/MINT_ENERGIE_Fiche_Tarifs_23224_SMART_GREEN.pdf",
+    "source_checksum": "c04ac59295dba1cd3593fef5891b68e79cd9a54f8b4b516377083405bc695b29",
+    "observed_at": "2025-02-12T08:00:00Z",
+    "data_status": "fresh",
+    "abo_month_ttc": 17.45,
+    "price_kwh_hp_ttc": 0.2081,
+    "price_kwh_hc_ttc": 0.1635,
+    "puissance_kva": 6,
+    "option": "HPHC"
+  }
+]

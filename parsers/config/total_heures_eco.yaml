@@ -1,0 +1,22 @@
+supplier: TotalEnergies
+parser_version: total_heures_eco_v1
+source:
+  url: https://www.totalenergies.fr/fileadmin/Digital/Groupe/PDF/Documents_contractuels/Particuliers/Tarifs_TotalEnergies/fr/grille-tarifaire-heures-eco-particuliers.pdf
+  format: pdf
+pdf:
+  tables:
+    - page: 0
+      table_index: 0
+      skip_rows: 5
+      slices:
+        - option: BASE
+          puissance_column: 0
+          columns:
+            abo_month_ttc: 2
+            price_kwh_ttc: 6
+        - option: HPHC
+          puissance_column: 7
+          columns:
+            abo_month_ttc: 9
+            price_kwh_hp_ttc: 13
+            price_kwh_hc_ttc: 17

@@ -1,14 +1,27 @@
 supplier: EDF
-parser_version: edf_v1
+parser_version: edf_pdf_v1
 source:
-  url: https://edf.fr/tarifs
-  format: html
-selectors:
-  rows: "section#tariffs article"
-  fields:
-    option: "@data-option"
-    puissance_kva: "@data-puissance"
-    abo_month_ttc: "@data-abonnement"
-    price_kwh_ttc: "@data-kwht"
-    price_kwh_hp_ttc: "@data-kwhhp"
-    price_kwh_hc_ttc: "@data-kwhhc"
+  url: https://particulier.edf.fr/content/dam/2-Actifs/Documents/Offres/Grille_prix_Tarif_Bleu.pdf
+  format: pdf
+pdf:
+  tables:
+    - page: 0
+      table_index: 0
+      skip_rows: 2
+      use_clean_rows: true
+      slices:
+        - option: BASE
+          puissance_column: 0
+          columns:
+            abo_month_ttc: 1
+            price_kwh_ttc: 2
+    - page: 0
+      table_index: 1
+      skip_rows: 3
+      slices:
+        - option: HPHC
+          puissance_column: 0
+          columns:
+            abo_month_ttc: 1
+            price_kwh_hp_ttc: 2
+            price_kwh_hc_ttc: 3
