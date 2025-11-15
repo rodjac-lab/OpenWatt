@@ -1,0 +1,81 @@
+version: "3.9"
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: openwatt-db-prod
+    restart: always
+    environment:
+      POSTGRES_DB: openwatt
+      POSTGRES_USER: ${DB_USER:-openwatt}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Database password required}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/ddl.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U openwatt"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - openwatt-network
+
+  # FastAPI Backend
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: openwatt-api-prod
+    restart: always
+    environment:
+      OPENWATT_DATABASE_URL: postgresql+asyncpg://${DB_USER:-openwatt}:${DB_PASSWORD:?Database password required}@db:5432/openwatt
+      OPENWATT_ENABLE_DB: "true"
+      OPENWATT_SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL:-}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - openwatt-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Next.js Frontend
+  ui:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    container_name: openwatt-ui-prod
+    restart: always
+    environment:
+      NEXT_PUBLIC_API_BASE: http://api:8000
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - openwatt-network
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  pgdata:
+    driver: local
+
+networks:
+  openwatt-network:
+    driver: bridge
