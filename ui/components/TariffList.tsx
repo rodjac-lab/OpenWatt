@@ -67,7 +67,7 @@ export function TariffList() {
       <header className="tariff-header">
         <div>
           <h2>Comparateur</h2>
-          <p>Données issues des parsers PDF (insert-only). Tri par coût annuel TTC.</p>
+          <p>DonnÃ©es issues des parsers PDF (insert-only). Tri par coÃ»t annuel TTC.</p>
         </div>
       </header>
 
@@ -125,10 +125,10 @@ export function TariffList() {
               <th>Fournisseur</th>
               <th>Option</th>
               <th>Puissance</th>
-              <th>Abonnement €/mois</th>
-              <th>€/kWh (base / HP / HC)</th>
-              <th>Coût annuel estimé</th>
-              <th>Fraîcheur</th>
+              <th>Abonnement â‚¬/mois</th>
+              <th>â‚¬/kWh (base / HP / HC)</th>
+              <th>CoÃ»t annuel estimÃ©</th>
+              <th>FraÃ®cheur</th>
             </tr>
           </thead>
           <tbody>
@@ -142,7 +142,7 @@ export function TariffList() {
                   {row.price_kwh_ttc ?? "-"} / {row.price_kwh_hp_ttc ?? "-"} / {row.price_kwh_hc_ttc ?? "-"}
                 </td>
                 <td className="cost">
-                  {row.annualCost ? `${row.annualCost.toFixed(0)} €` : "n/a"}
+                  {row.annualCost ? `${row.annualCost.toFixed(0)} â‚¬` : "n/a"}
                 </td>
                 <td>
                   <FreshnessBadge status={row.data_status ?? "stale"} />

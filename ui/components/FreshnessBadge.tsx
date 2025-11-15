@@ -11,8 +11,8 @@ const STATUS_CLASSES: Record<string, string> = {
 
 const STATUS_LABELS: Record<string, string> = {
   fresh: "Frais",
-  verifying: "Vérification en cours",
-  stale: "Obsolète",
+  verifying: "VÃ©rification en cours",
+  stale: "ObsolÃ¨te",
   broken: "En panne",
 };
 
