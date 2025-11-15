@@ -7,6 +7,7 @@ from typing import Iterable
 from sqlalchemy.exc import SQLAlchemyError
 
 from api.app.core.config import settings
+from api.app.db import models
 from api.app.db.repositories.tariffs import TariffRepository
 from api.app.db.session import get_session
 from api.app.models.enums import FreshnessStatus, TariffOption
@@ -188,7 +189,7 @@ def _matches_filters(obs: TariffObservation, filters: TariffHistoryFilters) -> b
     return True
 
 
-def compute_trve_diff() -> TrveDiffResponse:
+def compute_trve_diff_seed() -> TrveDiffResponse:
     now = datetime.now(timezone.utc)
     items = [
         TrveDiffEntry(
@@ -209,3 +210,53 @@ def compute_trve_diff() -> TrveDiffResponse:
         ),
     ]
     return TrveDiffResponse(generated_at=now, items=items)
+
+
+async def compute_trve_diff() -> TrveDiffResponse:
+    now = datetime.now(timezone.utc)
+    if not settings.enable_db:
+        return compute_trve_diff_seed()
+    try:
+        async with get_session() as session:
+            repo = TariffRepository(session)
+            observations = await repo.fetch_latest(include_stale=True)
+            trve_rows = await repo.fetch_trve_reference()
+    except SQLAlchemyError as exc:
+        logger.warning("DB compute_trve_diff failed, returning seed data: %s", exc)
+        return compute_trve_diff_seed()
+
+    trve_map: dict[tuple[TariffOption, int], models.TrveReference] = {}
+    for row in trve_rows:
+        trve_map[(row.option, row.puissance_kva)] = row
+
+    entries: list[TrveDiffEntry] = []
+    for obs in observations:
+        ref = trve_map.get((obs.option, obs.puissance_kva))
+        if not ref:
+            continue
+        delta = _compute_delta_eur_per_mwh(obs, ref)
+        status = "alert" if abs(delta) > 10 else "ok"
+        entries.append(
+            TrveDiffEntry(
+                supplier=obs.supplier,
+                option=obs.option,
+                puissance_kva=obs.puissance_kva,
+                delta_eur_per_mwh=delta,
+                compared_at=now,
+                status=status,
+            )
+        )
+    if not entries:
+        return compute_trve_diff_seed()
+    return TrveDiffResponse(generated_at=now, items=entries)
+
+
+def _compute_delta_eur_per_mwh(obs: TariffObservation, ref: models.TrveReference) -> float:
+    base_price = ref.price_kwh_ttc
+    obs_price = obs.price_kwh_ttc
+    if obs.option == TariffOption.HPHC:
+        base_price = ref.price_kwh_hp_ttc or ref.price_kwh_ttc
+        obs_price = obs.price_kwh_hp_ttc
+    if base_price is None or obs_price is None:
+        return 0.0
+    return (float(obs_price) - float(base_price)) * 1000.0

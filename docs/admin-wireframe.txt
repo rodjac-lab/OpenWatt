@@ -1,0 +1,42 @@
+Admin Console (wireframe textuel)
+=================================
+
+Header
+------
+[OpenWatt Admin] [Dark mode toggle] [User]
+
+Layout global
+-------------
+1. Timeline / Job Status (full width)
+2. Section métriques (3 cartes côte à côte)
+   - Health Index
+   - API Monitoring
+   - Action shortcuts / CTA (ex: lancer ingestion)
+3. Section Fournisseurs (full width table paginée)
+4. Section Outils (inspection PDF + override)
+5. Job history / logs (full width)
+
+Détails
+-------
+1. Timeline
+   | Supplier | Last run | Status | Message | [Voir logs]
+
+2. Health / API cards
+   - Health Index: gauge Fresh/Stale + bouton "Voir détail"
+   - API Monitoring: latence, taux erreurs, badge OK/alert
+   - Action shortcuts: boutons pour lancer jobs manuels ou export
+
+3. Table Fournisseurs (full width)
+   Columns: Supplier | Parser version | Source URL | Snapshots | Status | Actions
+   - Filtres par statut
+   - Pagination / recherche
+   - CTA "Ajouter un fournisseur" en haut à droite
+
+4. Outils opérateurs
+   - Inspection PDF (form + preview)
+   - Override source (form + log)
+   -> Affichés côte à côte sur desktop, stacked sur mobile
+
+5. Job history / logs
+   - Accordéon par date ou fournisseur
+   - Bouton "Télécharger logs"

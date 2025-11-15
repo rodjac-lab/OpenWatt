@@ -41,8 +41,8 @@ export function TariffList() {
     <section>
       <header className="tariff-header">
         <div>
-          <h2>Tarifs observés</h2>
-          <p>Données insert-only issues des parseurs YAML.</p>
+          <h2>Tarifs observÃ©s</h2>
+          <p>DonnÃ©es insert-only issues des parseurs YAML.</p>
         </div>
         <label>
           Option
@@ -54,7 +54,7 @@ export function TariffList() {
           </select>
         </label>
       </header>
-      {loading && <p>Chargement…</p>}
+      {loading && <p>Chargementâ€¦</p>}
       {error && <p className="error">{error}</p>}
       {!loading && !error && (
         <table className="tariff-table">
@@ -63,9 +63,9 @@ export function TariffList() {
               <th>Fournisseur</th>
               <th>Option</th>
               <th>Puissance</th>
-              <th>Abonnement €/mois</th>
+              <th>Abonnement â‚¬/mois</th>
               <th>kWh (BASE/HP/HC)</th>
-              <th>Fraîcheur</th>
+              <th>FraÃ®cheur</th>
             </tr>
           </thead>
           <tbody>
@@ -76,7 +76,7 @@ export function TariffList() {
                 <td>{row.puissance_kva} kVA</td>
                 <td>{row.abo_month_ttc?.toFixed?.(2)}</td>
                 <td>
-                  {row.price_kwh_ttc ?? "—"} / {row.price_kwh_hp_ttc ?? "—"} / {row.price_kwh_hc_ttc ?? "—"}
+                  {row.price_kwh_ttc ?? "â€”"} / {row.price_kwh_hp_ttc ?? "â€”"} / {row.price_kwh_hc_ttc ?? "â€”"}
                 </td>
                 <td>
                   <FreshnessBadge status={row.data_status ?? "stale"} />

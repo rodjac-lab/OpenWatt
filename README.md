@@ -26,7 +26,9 @@ Open Data electricity tariffs comparator for France — transparent, reproducibl
 3. Apply the canonical schema:
    - Postgres: `python scripts/apply_ddl.py` (wraps `psql -f db/ddl.sql`).
    - Any SQLAlchemy-compatible URL (incl. SQLite for local dev): `python scripts/bootstrap_db.py --database-url sqlite+aiosqlite:///artifacts/dev.sqlite`.
-4. Export `OPENWATT_DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/openwatt` (or the SQLite URL above) and set `OPENWATT_ENABLE_DB=1` before launching uvicorn.
+4. Import the TRVE reference grid (official CRE annex B PDF parsed under `tests/snapshots/trve/`):
+   `OPENWATT_DATABASE_URL=<db-url> python scripts/import_trve.py tests/snapshots/trve/trve_cre_2025_07_expected.json --valid-from 2025-08-01 --truncate`
+5. Export `OPENWATT_DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/openwatt` (or the SQLite URL above) and set `OPENWATT_ENABLE_DB=1` before launching uvicorn.
 5. Alembic is ready for future migrations (`alembic init migrations`).
 
 ## Ingestion & parsers

@@ -97,3 +97,8 @@ class TariffRepository:
         if now - observed_at > timedelta(days=14):
             return FreshnessStatus.STALE
         return FreshnessStatus.FRESH
+
+    async def fetch_trve_reference(self) -> list[models.TrveReference]:
+        stmt = select(models.TrveReference)
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())

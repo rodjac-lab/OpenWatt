@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -56,6 +56,18 @@ def seeded_db(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
                 source_checksum="0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
             )
             session.add_all([fresh_row, stale_row])
+
+            trve_row = models.TrveReference(
+                option=TariffOption.HPHC,
+                puissance_kva=9,
+                price_kwh_ttc=None,
+                price_kwh_hp_ttc=0.14,
+                price_kwh_hc_ttc=0.12,
+                abo_month_ttc=20.0,
+                valid_from=now.date(),
+                valid_to=None,
+            )
+            session.add(trve_row)
             await session.commit()
 
     asyncio.run(_prepare())
@@ -97,3 +109,13 @@ def test_tariff_history_returns_db_rows(seeded_db, client):
     assert len(body["items"]) == 2
     observed_at_values = {item["observed_at"] for item in body["items"]}
     assert len(observed_at_values) == 2  # two distinct observations from the DB
+
+
+def test_trve_diff_guard_db(seeded_db, client):
+    response = client.get("/v1/guards/trve-diff")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["items"]
+    engie_entry = next(item for item in payload["items"] if item["supplier"] == "Engie" and item["option"] == "HPHC")
+    assert engie_entry["status"] == "alert"
+    assert engie_entry["delta_eur_per_mwh"] == pytest.approx((0.15097 - 0.14) * 1000, rel=1e-3)

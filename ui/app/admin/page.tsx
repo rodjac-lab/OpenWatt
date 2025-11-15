@@ -1,0 +1,351 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+
+import type { components } from "../../lib/openapi-types";
+
+type Tariff = components["schemas"]["TariffObservation"];
+type TrveDiff = components["schemas"]["TrveDiffEntry"];
+
+interface HealthPayload {
+  status: string;
+  service: string;
+  timestamp_utc: string;
+}
+
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
+
+interface JobStatus {
+  supplier: string;
+  status: "ok" | "nok";
+  message: string;
+  observed_at?: string;
+}
+
+export default function AdminConsole() {
+  const [health, setHealth] = useState<HealthPayload | null>(null);
+  const [tariffs, setTariffs] = useState<Tariff[]>([]);
+  const [trveDiff, setTrveDiff] = useState<TrveDiff[]>([]);
+  const [tariffError, setTariffError] = useState<string | null>(null);
+  const [latencyMs, setLatencyMs] = useState<number | null>(null);
+  const [inspectionMessage, setInspectionMessage] = useState<string>("Aucun fichier analysé");
+  const [overrideLog, setOverrideLog] = useState<string>("");
+
+  useEffect(() => {
+    document.body.classList.add("admin-theme");
+    return () => document.body.classList.remove("admin-theme");
+  }, []);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/health`)
+      .then((res) => res.json())
+      .then((payload) => setHealth(payload))
+      .catch(() => setHealth(null));
+  }, []);
+
+  useEffect(() => {
+    const started = performance.now();
+    fetch(`${API_BASE}/v1/tariffs?include_stale=true`)
+      .then((res) => {
+        if (!res.ok) throw new Error(res.statusText);
+        return res.json();
+      })
+      .then((payload) => setTariffs(payload.items ?? []))
+      .catch((err) => setTariffError(err.message))
+      .finally(() => setLatencyMs(Math.round(performance.now() - started)));
+  }, []);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/v1/guards/trve-diff`)
+      .then((res) => res.json())
+      .then((payload) => setTrveDiff(payload.items ?? []))
+      .catch(() => setTrveDiff([]));
+  }, []);
+
+  const freshnessStats = useMemo(() => {
+    const stats = { fresh: 0, verifying: 0, stale: 0, broken: 0 };
+    tariffs.forEach((row) => {
+      const key = (row.data_status ?? "stale") as keyof typeof stats;
+      stats[key] = (stats[key] ?? 0) + 1;
+    });
+    const total = tariffs.length || 1;
+    return { stats, total };
+  }, [tariffs]);
+
+  const jobStatuses: JobStatus[] = useMemo(() => {
+    const latestPerSupplier = new Map<string, JobStatus>();
+    tariffs.forEach((row) => {
+      const existing = latestPerSupplier.get(row.supplier);
+      if (!existing || (row.observed_at && row.observed_at > (existing.observed_at ?? ""))) {
+        latestPerSupplier.set(row.supplier, {
+          supplier: row.supplier,
+          status: row.data_status === "broken" ? "nok" : "ok",
+          message: row.data_status === "broken" ? "Parser en erreur" : "Dernier run OK",
+          observed_at: row.observed_at ?? undefined,
+        });
+      }
+    });
+    if (latestPerSupplier.size === 0) {
+      return [
+        {
+          supplier: "EDF",
+          status: "ok",
+          message: "En attente de données (dummy)",
+        },
+      ];
+    }
+    return Array.from(latestPerSupplier.values()).sort((a, b) => (b.observed_at ?? "").localeCompare(a.observed_at ?? ""));
+  }, [tariffs]);
+
+  const supplierRows = useMemo(() => {
+    const map = new Map<
+      string,
+      {
+        supplier: string;
+        parser_version?: string;
+        source_url?: string;
+        statuses: Set<string>;
+        observations: number;
+      }
+    >();
+    tariffs.forEach((row) => {
+      if (!map.has(row.supplier)) {
+        map.set(row.supplier, {
+          supplier: row.supplier,
+          parser_version: row.parser_version,
+          source_url: row.source_url,
+          statuses: new Set(),
+          observations: 0,
+        });
+      }
+      const entry = map.get(row.supplier)!;
+      if (row.parser_version) entry.parser_version = row.parser_version;
+      if (row.source_url) entry.source_url = row.source_url;
+      if (row.data_status) entry.statuses.add(row.data_status);
+      entry.observations += 1;
+    });
+    return Array.from(map.values());
+  }, [tariffs]);
+
+  function handleInspection(files: FileList | null) {
+    if (!files || files.length === 0) {
+      setInspectionMessage("Aucun fichier sélectionné");
+      return;
+    }
+    const file = files[0];
+    setInspectionMessage(`Fichier "${file.name}" (${Math.round(file.size / 1024)} Ko) prêt pour inspection CLI.`);
+  }
+
+  function handleOverrideSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const supplier = formData.get("supplier");
+    const url = formData.get("url");
+    const observed = formData.get("observed_at");
+    setOverrideLog(
+      `Override déclenché pour ${supplier} -> ${url} @ ${observed || new Date().toISOString().slice(0, 10)} (simulation UI)`
+    );
+    event.currentTarget.reset();
+  }
+
+  const sections = [
+    { id: "jobs", label: "Surveillance" },
+    { id: "health", label: "Santé" },
+    { id: "suppliers", label: "Fournisseurs" },
+    { id: "tools", label: "Outils" },
+    { id: "logs", label: "Logs" },
+  ];
+
+  return (
+    <div className="admin-shell">
+      <nav className="admin-nav">
+        <div className="admin-nav__brand">
+          <span className="brand-icon">⚡</span>
+          <strong>OpenWatt</strong>
+        </div>
+        <div className="admin-nav__tabs">
+          {sections.map((section) => (
+            <a key={section.id} href={`#${section.id}`}>
+              {section.label}
+            </a>
+          ))}
+        </div>
+        <div className="admin-nav__actions">
+          <span className="pill">{health?.status === "ok" ? "API OK" : "API ?"}</span>
+          <button className="btn btn--ghost" onClick={() => window.location.reload()}>
+            Rafraîchir
+          </button>
+        </div>
+      </nav>
+
+      <main className="admin-page">
+        <section id="jobs" className="panel panel--flat">
+          <div className="panel__header">
+            <div>
+              <p className="panel__eyebrow">Surveillance</p>
+              <h2 className="panel__title">Jobs nightly</h2>
+            </div>
+            <time>{new Date().toLocaleString("fr-FR")}</time>
+          </div>
+        <div className="job-list">
+          {jobStatuses.map((job) => (
+            <article key={job.supplier} className="job-item">
+              <div>
+                <span className="job-item__label">{job.supplier}</span>
+                <p className="job-item__message">{job.message}</p>
+              </div>
+              <div className="job-item__meta">
+                <time>{job.observed_at ? new Date(job.observed_at).toLocaleString("fr-FR") : "?"}</time>
+                <span className={`pill ${job.status === "ok" ? "pill--ok" : "pill--alert"}`}>
+                  {job.status === "ok" ? "OK" : "NOK"}
+                </span>
+              </div>
+            </article>
+          ))}
+          {jobStatuses.length === 0 && <p className="muted">Aucune exécution détectée.</p>}
+        </div>
+        </section>
+
+        <section id="health" className="metric-grid">
+          <article className="panel metric">
+            <p className="panel__eyebrow">Qualité data</p>
+            <h3 className="panel__title">Santé base</h3>
+            <p>
+              {((freshnessStats.stats.fresh / (freshnessStats.total || 1)) * 100).toFixed(0)}% d&apos;observations fresh (
+              {freshnessStats.stats.fresh}/{freshnessStats.total})
+            </p>
+            <div className="progress">
+              <span style={{ width: `${(freshnessStats.stats.fresh / (freshnessStats.total || 1)) * 100}%` }} />
+          </div>
+          <ul>
+            <li>verifying : {freshnessStats.stats.verifying}</li>
+            <li>stale : {freshnessStats.stats.stale}</li>
+            <li>broken : {freshnessStats.stats.broken}</li>
+          </ul>
+          </article>
+          <article className="panel metric">
+            <p className="panel__eyebrow">Observabilité</p>
+            <h3 className="panel__title">API monitoring</h3>
+            {tariffError ? (
+              <p className="error">Erreur : {tariffError}</p>
+          ) : (
+            <>
+              <p>Latence moyenne</p>
+              <strong>{latencyMs ?? "?"} ms</strong>
+              <p>TRVE deltas (items): {trveDiff.length}</p>
+            </>
+          )}
+          </article>
+          <article className="panel metric">
+            <p className="panel__eyebrow">Raccourcis</p>
+            <h3 className="panel__title">Actions rapides</h3>
+            <button className="btn" onClick={() => window.location.reload()}>
+              Rafraîchir dashboard
+            </button>
+            <button className="btn btn--ghost" onClick={() => window.open("/api", "_blank")}>
+              Voir doc API
+            </button>
+          </article>
+        </section>
+
+        <section id="suppliers" className="panel">
+        <header className="panel__header">
+          <div>
+            <h2>Fournisseurs & parsers</h2>
+            <p>Liste extraite des observations en base.</p>
+          </div>
+          <button className="btn btn--ghost">Ajouter un fournisseur</button>
+        </header>
+        <div className="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Fournisseur</th>
+                <th>Parser</th>
+                <th>Source</th>
+                <th>Observations</th>
+                <th>Statuts</th>
+              </tr>
+            </thead>
+            <tbody>
+              {supplierRows.map((row) => (
+                <tr key={row.supplier}>
+                  <td>{row.supplier}</td>
+                  <td>{row.parser_version ?? "?"}</td>
+                  <td className="truncate">
+                    <a href={row.source_url} target="_blank" rel="noreferrer">
+                      {row.source_url ?? "?"}
+                    </a>
+                  </td>
+                  <td>{row.observations}</td>
+                  <td>
+                    {Array.from(row.statuses).map((status) => (
+                      <span key={status} className="badge badge--grey">
+                        {status}
+                      </span>
+                    ))}
+                  </td>
+                </tr>
+              ))}
+              {supplierRows.length === 0 && (
+                <tr>
+                  <td colSpan={5}>Aucune observation chargée.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        </section>
+
+        <section id="tools" className="panel tools-grid">
+        <div>
+          <h3>Inspection PDF</h3>
+          <p>Utiliser ce module pour vérifier rapidement une table PDF avant de mettre à jour un snapshot.</p>
+          <input type="file" accept=".pdf" onChange={(event) => handleInspection(event.target.files)} />
+          <p className="muted">{inspectionMessage}</p>
+        </div>
+        <div>
+          <h3>Override source</h3>
+          <form className="override-form" onSubmit={handleOverrideSubmit}>
+            <label>
+              Fournisseur
+              <input required name="supplier" placeholder="ex: Engie" />
+            </label>
+            <label>
+              URL source temporaire
+              <input required name="url" type="url" placeholder="https://..." />
+            </label>
+            <label>
+              Observed at (optionnel)
+              <input name="observed_at" type="date" />
+            </label>
+            <button className="btn" type="submit">
+              Lancer override
+            </button>
+          </form>
+          {overrideLog && <p className="muted">{overrideLog}</p>}
+        </div>
+        </section>
+
+        <section id="logs" className="panel">
+        <header className="panel__header">
+          <h2>Logs ingestion</h2>
+          <button className="btn btn--ghost">Télécharger JSON</button>
+        </header>
+        <div className="job-history">
+          {jobStatuses.map((job) => (
+            <details key={`${job.supplier}-${job.observed_at ?? "n/a"}`}>
+              <summary>
+                {job.supplier} — {job.observed_at ? new Date(job.observed_at).toLocaleString("fr-FR") : "n/a"} (
+                {job.status.toUpperCase()})
+              </summary>
+              <p>{job.message}</p>
+            </details>
+          ))}
+          {jobStatuses.length === 0 && <p>Aucune exécution enregistrée.</p>}
+        </div>
+        </section>
+      </main>
+    </div>
+  );
+}

@@ -41,3 +41,12 @@ last_updated: 2025-11-11
 - Table triable par coût annuel
 - Dark mode toggle persistant
 - Chargement: skeletons, erreurs: toasts
+
+## Admin console (observabilité interne)
+- `/admin` réservé aux opérateurs (auth simple).
+- **Jobs nightly** : liste des exécutions ingest (min: status OK/NOK, fournisseur, timestamp, message d'erreur si NOK). Affichage type timeline + badge cause ("fetch_failed", "parse_error", "persist_blocked").
+- **Santé base** : indicateur agrégé du freshness (pourcentage d'observations `fresh` vs `stale/broken`) + alertes lorsque un fournisseur est >7j. Carte résumée + lien vers détail.
+- **Inspection PDF** : interface pour déposer/choisir un PDF (`tests/snapshots/...`) et afficher les tables extraites (basée sur l'outil CLI backlog) pour valider colonnes/puissances. Possibilité de voir le diff YAML -> table.
+- **Override source** : formulaire permettant de saisir temporairement une URL PDF/HTML et lancer `python -m ingest.pipeline <supplier> --fetch` avec cette URL (stockage en base + log). Journalisation + confirmation.
+- **Gestion fournisseurs** : vue listant tous les parsers configurés (nom, version, URL source, statut activé/désactivé). Actions rapides : éditer l'URL source (ou champ YAML), désactiver/activer un fournisseur, bouton "Ajouter un fournisseur" qui pré-remplit un YAML à partir d'un template (avec checklist snapshots/tests). Indique si les snapshots de référence existent et si les tests `pytest -k <supplier>` passent (dernière exécution).
+- **Monitoring API** : mini section montrant latence moyenne et taux d'erreur des endpoints `/v1/tariffs` et `/v1/tariffs/history` (données issues des logs uvicorn ou d'un ping interne). Si indispo, afficher un bandeau "API degraded".

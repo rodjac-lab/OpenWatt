@@ -12,4 +12,4 @@ router = APIRouter(prefix=f"{settings.api_v1_prefix}/guards", tags=["guards"])
 @router.get("/trve-diff", response_model=TrveDiffResponse, summary="Ecart vs TRVE")
 async def get_trve_diff() -> TrveDiffResponse:
     """Return last validation snapshot between observed tariffs and TRVE reference."""
-    return tariff_service.compute_trve_diff()
+    return await tariff_service.compute_trve_diff()
