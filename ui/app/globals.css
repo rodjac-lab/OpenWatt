@@ -444,6 +444,10 @@ body.admin-theme .override-form input {
   color: #e2e8f0;
 }
 
+body.admin-theme input[list] {
+  background: #0f172a;
+}
+
 body.admin-theme input[type="file"] {
   color: #cbd5f5;
 }
@@ -457,4 +461,20 @@ body.admin-theme input[type="file"] {
 
 body.admin-theme .job-history details {
   border-color: rgba(226, 232, 240, 0.2);
+}
+
+.inspect-preview {
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 10px;
+  padding: 0.75rem;
+  margin-top: 0.75rem;
+  background: rgba(15, 23, 42, 0.4);
+  max-height: 220px;
+  overflow: auto;
+}
+
+.inspect-preview pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.85rem;
 }

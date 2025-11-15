@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from pathlib import Path
+
+import pytest
+
 from api.app.models.tariffs import FreshnessStatus
 
 
@@ -61,3 +65,19 @@ def test_admin_overrides_without_db(client):
 
     response = client.post("/v1/admin/overrides", json={"supplier": "EDF", "url": "https://example.com"})
     assert response.status_code == 503
+
+
+def test_admin_inspect_pdf(client, tmp_path):
+    pdf_path = Path("tests/snapshots/engie/engie_reference.pdf")
+    if not pdf_path.exists():
+        pytest.skip("PDF snapshot missing")
+    with pdf_path.open("rb") as handle:
+        response = client.post(
+            "/v1/admin/inspect",
+            data={"supplier": "engie", "limit": 5},
+            files={"file": ("engie_reference.pdf", handle, "application/pdf")},
+        )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["count"] >= 1
+    assert len(body["items"]) >= 1

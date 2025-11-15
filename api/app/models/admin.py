@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel, Field, HttpUrl
 
@@ -36,3 +37,8 @@ class OverrideEntry(BaseModel):
 
 class OverrideHistoryResponse(BaseModel):
     items: list[OverrideEntry]
+
+
+class InspectResponse(BaseModel):
+    count: int
+    items: list[dict[str, Any]]

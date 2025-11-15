@@ -46,6 +46,11 @@ export default function AdminConsole() {
   const [tariffError, setTariffError] = useState<string | null>(null);
   const [latencyMs, setLatencyMs] = useState<number | null>(null);
   const [inspectionMessage, setInspectionMessage] = useState<string>("Aucun fichier analysé");
+  const [inspectionFile, setInspectionFile] = useState<File | null>(null);
+  const [inspectionSupplier, setInspectionSupplier] = useState<string>("");
+  const [inspectionResult, setInspectionResult] = useState<any[]>([]);
+  const [inspectionError, setInspectionError] = useState<string | null>(null);
+  const [inspectionLoading, setInspectionLoading] = useState(false);
   const [overrideMessage, setOverrideMessage] = useState<string>("");
   const [runs, setRuns] = useState<AdminRunPayload[]>([]);
   const [runsError, setRunsError] = useState<string | null>(null);
@@ -140,13 +145,54 @@ export default function AdminConsole() {
     return Array.from(map.values());
   }, [tariffs]);
 
-  function handleInspection(files: FileList | null) {
+  useEffect(() => {
+    if (!inspectionSupplier && supplierRows.length > 0) {
+      setInspectionSupplier(supplierRows[0].supplier);
+    }
+  }, [inspectionSupplier, supplierRows]);
+
+  function handleInspectionFile(files: FileList | null) {
     if (!files || files.length === 0) {
+      setInspectionFile(null);
       setInspectionMessage("Aucun fichier sélectionné");
       return;
     }
     const file = files[0];
-    setInspectionMessage(`Fichier "${file.name}" (${Math.round(file.size / 1024)} Ko) prêt pour inspection CLI.`);
+    setInspectionFile(file);
+    setInspectionMessage(`Fichier "${file.name}" (${Math.round(file.size / 1024)} Ko) prêt pour inspection.`);
+  }
+
+  function handleInspectionSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!inspectionSupplier) {
+      setInspectionError("Choisissez un fournisseur.");
+      return;
+    }
+    if (!inspectionFile) {
+      setInspectionError("Ajoutez un PDF à analyser.");
+      return;
+    }
+    setInspectionLoading(true);
+    setInspectionError(null);
+    setInspectionResult([]);
+    const formData = new FormData();
+    formData.append("supplier", inspectionSupplier);
+    formData.append("limit", "50");
+    formData.append("file", inspectionFile);
+    fetch(`${API_BASE}/v1/admin/inspect`, {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(res.statusText);
+        return res.json();
+      })
+      .then((payload) => {
+        setInspectionResult(payload.items ?? []);
+        setInspectionMessage(`${payload.count} lignes extraites (affichage limité)`);
+      })
+      .catch((err) => setInspectionError(err.message))
+      .finally(() => setInspectionLoading(false));
   }
 
   function handleOverrideSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -333,8 +379,38 @@ export default function AdminConsole() {
         <div>
           <h3>Inspection PDF</h3>
           <p>Utiliser ce module pour vérifier rapidement une table PDF avant de mettre à jour un snapshot.</p>
-          <input type="file" accept=".pdf" onChange={(event) => handleInspection(event.target.files)} />
+          <form className="override-form" onSubmit={handleInspectionSubmit}>
+            <label>
+              Fournisseur
+              <input
+                name="inspect_supplier"
+                list="supplier-options"
+                value={inspectionSupplier}
+                onChange={(e) => setInspectionSupplier(e.target.value)}
+                placeholder="engie"
+              />
+            </label>
+            <datalist id="supplier-options">
+              {supplierRows.map((row) => (
+                <option key={row.supplier} value={row.supplier} />
+              ))}
+            </datalist>
+            <label>
+              Fichier PDF
+              <input type="file" accept=".pdf" onChange={(event) => handleInspectionFile(event.target.files)} />
+            </label>
+            <button className="btn" type="submit" disabled={inspectionLoading}>
+              {inspectionLoading ? "Analyse..." : "Inspecter"}
+            </button>
+          </form>
           <p className="muted">{inspectionMessage}</p>
+          {inspectionError && <p className="error">{inspectionError}</p>}
+          {inspectionResult.length > 0 && (
+            <div className="inspect-preview">
+              <p>{inspectionResult.length} lignes (aperçu des premières):</p>
+              <pre>{JSON.stringify(inspectionResult.slice(0, 3), null, 2)}</pre>
+            </div>
+          )}
         </div>
         <div>
           <h3>Override source</h3>

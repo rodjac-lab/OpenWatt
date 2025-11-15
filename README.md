@@ -38,6 +38,8 @@ Open Data electricity tariffs comparator for France — transparent, reproducibl
 - Or download the latest source defined in YAML et persister en base :
     python -m ingest.pipeline total_heures_eco --fetch --persist
   The raw file lands in `artifacts/raw/` and the parsed JSON in `artifacts/parsed/`.
+- Automate all suppliers sequentially (ideal for cron) :
+    python scripts/run_ingest_all.py --observed-at 2025-02-15T00:00:00+00:00
 - Snapshot outputs live in `tests/snapshots/<supplier>/` et sont valides par `pytest`.
 - Current coverage: EDF (`edf_pdf_v1`), Engie (`engie_pdf_v1`), TotalEnergies (`total_heures_eco_v1`, `total_standard_fixe_v1`) et Mint Energie (`mint_indexe_trv_v1`, `mint_classic_green_v1`, `mint_smart_green_v1`). Ajoutez un fournisseur en clonant ce pattern YAML + snapshot.
 
@@ -50,10 +52,13 @@ Open Data electricity tariffs comparator for France — transparent, reproducibl
 - Set `NEXT_PUBLIC_API_BASE` to point at your FastAPI instance before fetching data.
 
 ## API endpoints (alpha)
-- GET /health — liveness probe for CI/CD monitors.
-- GET /v1/tariffs — latest observations filtered by option, puissance, include_stale (`data_status = fresh|verifying|stale|broken`).
-- GET /v1/tariffs/history — insert-only log with supplier/option/puissance/since/until filters.
-- GET /v1/guards/trve-diff — compares last observations against TRVE reference to flag ok/alert.
+- GET /health - liveness probe for CI/CD monitors.
+- GET /v1/tariffs - latest observations filtered by option, puissance, include_stale (`data_status = fresh|verifying|stale|broken`).
+- GET /v1/tariffs/history - insert-only log with supplier/option/puissance/since/until filters.
+- GET /v1/guards/trve-diff - compares last observations against TRVE reference to flag ok/alert.
+- GET /v1/admin/runs - expose l'état des jobs ingestion (console opérateur).
+- GET/POST /v1/admin/overrides - journalise/déclenche un override manuel (`--fetch` temporaire).
+- POST /v1/admin/inspect - upload d'un PDF pour visualiser les lignes extraites via YAML.
 
 ## Tests
 1. Snapshot fixtures live in `tests/snapshots/` (EDF, Engie, TotalEnergies).

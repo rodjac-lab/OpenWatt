@@ -1,10 +1,14 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, status
+import tempfile
+from pathlib import Path
+
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
 
 from api.app.core.config import settings
 from api.app.models.admin import (
     AdminRunsResponse,
+    InspectResponse,
     OverrideCreatePayload,
     OverrideEntry,
     OverrideHistoryResponse,
@@ -37,3 +41,28 @@ async def create_override(payload: OverrideCreatePayload) -> OverrideEntry:
         return await admin_service.create_override(payload)
     except Exception as exc:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc)) from exc
+
+
+@router.post(
+    "/inspect",
+    response_model=InspectResponse,
+    summary="Inspecter un PDF via config YAML",
+)
+async def inspect_pdf(supplier: str = Form(...), file: UploadFile = File(...), limit: int = Form(50)) -> InspectResponse:
+    temp_path: Path | None = None
+    try:
+        suffix = Path(file.filename or "upload.pdf").suffix or ".pdf"
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+            content = await file.read()
+            if not content:
+                raise HTTPException(status_code=400, detail="Empty file")
+            tmp.write(content)
+            temp_path = Path(tmp.name)
+        return await admin_service.inspect_upload(supplier=supplier, file_path=temp_path, limit=limit)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="File not found")
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    finally:
+        if temp_path:
+            temp_path.unlink(missing_ok=True)

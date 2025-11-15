@@ -65,4 +65,21 @@ paths:
                 url: { type: string, format: uri }
                 observed_at: { type: string, format: date-time }
               required: [supplier, url]
+  /v1/admin/inspect:
+    post:
+      summary: Inspecter un PDF selon un parser YAML
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                supplier: { type: string, description: "Code du parser (ex: engie)" }
+                file_path: { type: string, description: "Chemin local du PDF à analyser" }
+                table_hint: { type: integer, description: "Index de table optionnel" }
+              required: [supplier, file_path]
+      responses:
+        "200":
+          description: JSON des cellules extraites (preview non persisté)
 ```
+

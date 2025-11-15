@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
+from hashlib import sha256
+from pathlib import Path
+import tempfile
 
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -12,12 +15,15 @@ from api.app.db.session import get_session
 from api.app.models.admin import (
     AdminRunItem,
     AdminRunsResponse,
+    InspectResponse,
     OverrideCreatePayload,
     OverrideEntry,
     OverrideHistoryResponse,
 )
 from api.app.models.enums import FreshnessStatus
 from api.app.services.tariff_service import _seed_observations
+from parsers.core.config import load_supplier_config
+from parsers.core import parser as yaml_parser
 
 logger = logging.getLogger(__name__)
 
@@ -92,3 +98,19 @@ async def _latest_observations():
     if not observations:
         observations = _seed_observations()
     return observations
+
+
+async def inspect_upload(*, supplier: str, file_path: Path, limit: int = 50) -> InspectResponse:
+    config = load_supplier_config(supplier)
+    if not file_path.exists():
+        raise FileNotFoundError(file_path)
+
+    data = file_path.read_bytes()
+    checksum = sha256(data).hexdigest()
+    rows = yaml_parser.parse_file(
+        config,
+        file_path,
+        observed_at=datetime.now(timezone.utc),
+        source_checksum=checksum,
+    )
+    return InspectResponse(count=len(rows), items=rows[:limit])
