@@ -119,3 +119,23 @@ def test_trve_diff_guard_db(seeded_db, client):
     engie_entry = next(item for item in payload["items"] if item["supplier"] == "Engie" and item["option"] == "HPHC")
     assert engie_entry["status"] == "alert"
     assert engie_entry["delta_eur_per_mwh"] == pytest.approx((0.15097 - 0.14) * 1000, rel=1e-3)
+
+
+def test_admin_runs_db(seeded_db, client):
+    response = client.get("/v1/admin/runs")
+    assert response.status_code == 200
+    body = response.json()
+    assert any(item["supplier"] == "Engie" for item in body["items"])
+
+
+def test_admin_override_crud_db(seeded_db, client):
+    payload = {"supplier": "Engie", "url": "https://example.com/manual.pdf"}
+    resp = client.post("/v1/admin/overrides", json=payload)
+    assert resp.status_code == 202
+    created = resp.json()
+    assert created["supplier"] == "Engie"
+
+    history = client.get("/v1/admin/overrides")
+    assert history.status_code == 200
+    items = history.json()["items"]
+    assert any(entry["id"] == created["id"] for entry in items)

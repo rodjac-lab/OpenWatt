@@ -40,6 +40,14 @@ create table if not exists trve_reference (
   valid_to date
 );
 
+create table if not exists admin_overrides (
+  id bigserial primary key,
+  supplier text not null,
+  url text not null,
+  observed_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
 -- latest view
 create or replace view latest_tariffs as
 select t.* from (

@@ -4,7 +4,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 
 from api.app.core.config import settings
-from api.app.routes import guards, health, tariffs
+from api.app.routes import admin, guards, health, tariffs
 
 app = FastAPI(
     title=settings.project_name,
@@ -17,3 +17,4 @@ app = FastAPI(
 app.include_router(health.router)
 app.include_router(tariffs.router)
 app.include_router(guards.router)
+app.include_router(admin.router)

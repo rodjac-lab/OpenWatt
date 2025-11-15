@@ -13,14 +13,31 @@ interface HealthPayload {
   timestamp_utc: string;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
-
-interface JobStatus {
+interface AdminRunPayload {
   supplier: string;
   status: "ok" | "nok";
   message: string;
-  observed_at?: string;
+  observed_at?: string | null;
 }
+
+interface AdminRunsResponse {
+  generated_at: string;
+  items: AdminRunPayload[];
+}
+
+interface OverrideEntryPayload {
+  id: number;
+  supplier: string;
+  url: string;
+  observed_at?: string | null;
+  created_at: string;
+}
+
+interface OverrideHistoryResponse {
+  items: OverrideEntryPayload[];
+}
+
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
 
 export default function AdminConsole() {
   const [health, setHealth] = useState<HealthPayload | null>(null);
@@ -29,7 +46,11 @@ export default function AdminConsole() {
   const [tariffError, setTariffError] = useState<string | null>(null);
   const [latencyMs, setLatencyMs] = useState<number | null>(null);
   const [inspectionMessage, setInspectionMessage] = useState<string>("Aucun fichier analysé");
-  const [overrideLog, setOverrideLog] = useState<string>("");
+  const [overrideMessage, setOverrideMessage] = useState<string>("");
+  const [runs, setRuns] = useState<AdminRunPayload[]>([]);
+  const [runsError, setRunsError] = useState<string | null>(null);
+  const [overrideHistory, setOverrideHistory] = useState<OverrideEntryPayload[]>([]);
+  const [overrideError, setOverrideError] = useState<string | null>(null);
 
   useEffect(() => {
     document.body.classList.add("admin-theme");
@@ -62,6 +83,23 @@ export default function AdminConsole() {
       .catch(() => setTrveDiff([]));
   }, []);
 
+  useEffect(() => {
+    fetch(`${API_BASE}/v1/admin/runs`)
+      .then((res) => {
+        if (!res.ok) throw new Error(res.statusText);
+        return res.json() as Promise<AdminRunsResponse>;
+      })
+      .then((payload) => setRuns(payload.items ?? []))
+      .catch((err) => setRunsError(err.message));
+  }, []);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/v1/admin/overrides`)
+      .then((res) => res.json() as Promise<OverrideHistoryResponse>)
+      .then((payload) => setOverrideHistory(payload.items ?? []))
+      .catch((err) => setOverrideError(err.message));
+  }, []);
+
   const freshnessStats = useMemo(() => {
     const stats = { fresh: 0, verifying: 0, stale: 0, broken: 0 };
     tariffs.forEach((row) => {
@@ -70,31 +108,6 @@ export default function AdminConsole() {
     });
     const total = tariffs.length || 1;
     return { stats, total };
-  }, [tariffs]);
-
-  const jobStatuses: JobStatus[] = useMemo(() => {
-    const latestPerSupplier = new Map<string, JobStatus>();
-    tariffs.forEach((row) => {
-      const existing = latestPerSupplier.get(row.supplier);
-      if (!existing || (row.observed_at && row.observed_at > (existing.observed_at ?? ""))) {
-        latestPerSupplier.set(row.supplier, {
-          supplier: row.supplier,
-          status: row.data_status === "broken" ? "nok" : "ok",
-          message: row.data_status === "broken" ? "Parser en erreur" : "Dernier run OK",
-          observed_at: row.observed_at ?? undefined,
-        });
-      }
-    });
-    if (latestPerSupplier.size === 0) {
-      return [
-        {
-          supplier: "EDF",
-          status: "ok",
-          message: "En attente de données (dummy)",
-        },
-      ];
-    }
-    return Array.from(latestPerSupplier.values()).sort((a, b) => (b.observed_at ?? "").localeCompare(a.observed_at ?? ""));
   }, [tariffs]);
 
   const supplierRows = useMemo(() => {
@@ -139,12 +152,29 @@ export default function AdminConsole() {
   function handleOverrideSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const supplier = formData.get("supplier");
-    const url = formData.get("url");
+    const payload: Record<string, string> = {
+      supplier: String(formData.get("supplier") || ""),
+      url: String(formData.get("url") || ""),
+    };
     const observed = formData.get("observed_at");
-    setOverrideLog(
-      `Override déclenché pour ${supplier} -> ${url} @ ${observed || new Date().toISOString().slice(0, 10)} (simulation UI)`
-    );
+    if (observed) {
+      payload.observed_at = `${observed}T00:00:00Z`;
+    }
+    setOverrideMessage("Override en cours...");
+    fetch(`${API_BASE}/v1/admin/overrides`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(res.statusText);
+        return res.json() as Promise<OverrideEntryPayload>;
+      })
+      .then((entry) => {
+        setOverrideMessage(`Override enregistré pour ${entry.supplier}`);
+        setOverrideHistory((prev) => [entry, ...prev]);
+      })
+      .catch((err) => setOverrideMessage(`Erreur: ${err.message}`));
     event.currentTarget.reset();
   }
 
@@ -188,21 +218,23 @@ export default function AdminConsole() {
             <time>{new Date().toLocaleString("fr-FR")}</time>
           </div>
         <div className="job-list">
-          {jobStatuses.map((job) => (
-            <article key={job.supplier} className="job-item">
-              <div>
-                <span className="job-item__label">{job.supplier}</span>
-                <p className="job-item__message">{job.message}</p>
-              </div>
-              <div className="job-item__meta">
-                <time>{job.observed_at ? new Date(job.observed_at).toLocaleString("fr-FR") : "?"}</time>
-                <span className={`pill ${job.status === "ok" ? "pill--ok" : "pill--alert"}`}>
-                  {job.status === "ok" ? "OK" : "NOK"}
-                </span>
-              </div>
-            </article>
-          ))}
-          {jobStatuses.length === 0 && <p className="muted">Aucune exécution détectée.</p>}
+          {runsError && <p className="error">{runsError}</p>}
+          {!runsError &&
+            runs.map((job) => (
+              <article key={`${job.supplier}-${job.observed_at ?? "n/a"}`} className="job-item">
+                <div>
+                  <span className="job-item__label">{job.supplier}</span>
+                  <p className="job-item__message">{job.message}</p>
+                </div>
+                <div className="job-item__meta">
+                  <time>{job.observed_at ? new Date(job.observed_at).toLocaleString("fr-FR") : "?"}</time>
+                  <span className={`pill ${job.status === "ok" ? "pill--ok" : "pill--alert"}`}>
+                    {job.status === "ok" ? "OK" : "NOK"}
+                  </span>
+                </div>
+              </article>
+            ))}
+          {!runsError && runs.length === 0 && <p className="muted">Aucune exécution détectée.</p>}
         </div>
         </section>
 
@@ -323,26 +355,28 @@ export default function AdminConsole() {
               Lancer override
             </button>
           </form>
-          {overrideLog && <p className="muted">{overrideLog}</p>}
+          {overrideMessage && <p className="muted">{overrideMessage}</p>}
+          {overrideError && <p className="error">{overrideError}</p>}
         </div>
         </section>
 
         <section id="logs" className="panel">
         <header className="panel__header">
-          <h2>Logs ingestion</h2>
-          <button className="btn btn--ghost">Télécharger JSON</button>
+          <h2>Overrides manuels</h2>
+          <button className="btn btn--ghost" onClick={() => window.location.reload()}>
+            Rafraîchir
+          </button>
         </header>
         <div className="job-history">
-          {jobStatuses.map((job) => (
-            <details key={`${job.supplier}-${job.observed_at ?? "n/a"}`}>
+          {overrideHistory.map((entry) => (
+            <details key={entry.id}>
               <summary>
-                {job.supplier} — {job.observed_at ? new Date(job.observed_at).toLocaleString("fr-FR") : "n/a"} (
-                {job.status.toUpperCase()})
+                {entry.supplier} → {entry.url} ({new Date(entry.created_at).toLocaleString("fr-FR")})
               </summary>
-              <p>{job.message}</p>
+              <p>Observed at: {entry.observed_at ? new Date(entry.observed_at).toLocaleDateString("fr-FR") : "non défini"}</p>
             </details>
           ))}
-          {jobStatuses.length === 0 && <p>Aucune exécution enregistrée.</p>}
+          {overrideHistory.length === 0 && <p className="muted">Aucun override enregistré.</p>}
         </div>
         </section>
       </main>

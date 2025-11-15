@@ -47,4 +47,22 @@ paths:
   /v1/guards/trve-diff:
     get:
       summary: Écart vs TRVE (dernier tarif)
+  /v1/admin/runs:
+    get:
+      summary: Historique des jobs ingest (console admin)
+  /v1/admin/overrides:
+    get:
+      summary: Historique des overrides sources
+    post:
+      summary: Declarer une URL manuelle pour relancer un fetch/parser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                supplier: { type: string }
+                url: { type: string, format: uri }
+                observed_at: { type: string, format: date-time }
+              required: [supplier, url]
 ```

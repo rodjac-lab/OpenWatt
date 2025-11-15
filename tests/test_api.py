@@ -44,3 +44,20 @@ def test_trve_diff_guard(client):
     payload = response.json()
     assert payload["items"]
     assert {item["status"] for item in payload["items"]}.issubset({"ok", "alert"})
+
+
+def test_admin_runs_seed(client):
+    response = client.get("/v1/admin/runs")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["items"]
+    assert {"supplier", "status", "message"} <= set(body["items"][0].keys())
+
+
+def test_admin_overrides_without_db(client):
+    response = client.get("/v1/admin/overrides")
+    assert response.status_code == 200
+    assert response.json()["items"] == []
+
+    response = client.post("/v1/admin/overrides", json={"supplier": "EDF", "url": "https://example.com"})
+    assert response.status_code == 503

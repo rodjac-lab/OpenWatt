@@ -52,3 +52,13 @@ class TrveReference(Base):
     abo_month_ttc: Mapped[float] = mapped_column(Numeric(8, 4), nullable=False)
     valid_from: Mapped[date] = mapped_column(Date, nullable=False)
     valid_to: Mapped[Optional[date]] = mapped_column(Date)
+
+
+class AdminOverride(Base):
+    __tablename__ = "admin_overrides"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    supplier: Mapped[str] = mapped_column(String, nullable=False)
+    url: Mapped[str] = mapped_column(Text, nullable=False)
+    observed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
