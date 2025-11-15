@@ -72,6 +72,38 @@ main.admin-page {
   padding: 0.4rem;
 }
 
+.tariff-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.tariff-controls label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  gap: 0.25rem;
+}
+
+.tariff-controls input,
+.tariff-controls select {
+  padding: 0.4rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5f5;
+}
+
+.hc-slider {
+  position: relative;
+}
+
+.hc-slider span {
+  font-size: 0.85rem;
+  color: #475569;
+  margin-top: 0.2rem;
+  text-align: right;
+}
+
 .tariff-table {
   width: 100%;
   border-collapse: collapse;
@@ -424,6 +456,10 @@ body.admin-theme .table-wrapper tr:hover {
 .muted {
   color: #6b7280;
   font-size: 0.9rem;
+}
+
+.cost {
+  font-weight: 700;
 }
 
 .override-form {

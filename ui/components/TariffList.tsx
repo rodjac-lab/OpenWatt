@@ -6,16 +6,20 @@ import type { components } from "../lib/openapi-types";
 import { FreshnessBadge } from "./FreshnessBadge";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
+const PUISSANCES = [3, 6, 9, 12, 15, 18, 24, 30, 36];
 
 type Tariff = components["schemas"]["Tariff"];
 
-interface Filters {
-  option: Tariff["option"] | "";
-}
+type OptionFilter = Tariff["option"] | "";
+
+type TableRow = Tariff & { annualCost: number };
 
 export function TariffList() {
   const [tariffs, setTariffs] = useState<Tariff[]>([]);
-  const [filters, setFilters] = useState<Filters>({ option: "" as Filters["option"] });
+  const [option, setOption] = useState<OptionFilter>("");
+  const [puissance, setPuissance] = useState<number | "">("");
+  const [consumption, setConsumption] = useState(5000);
+  const [hcShare, setHcShare] = useState(40);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -29,54 +33,116 @@ export function TariffList() {
   }, []);
 
   const filtered = useMemo(() => {
-    if (!filters.option) return tariffs;
-    return tariffs.filter((row) => row.option === filters.option);
-  }, [tariffs, filters.option]);
+    return tariffs.filter((row) => {
+      if (option && row.option !== option) return false;
+      if (puissance && row.puissance_kva !== puissance) return false;
+      return true;
+    });
+  }, [tariffs, option, puissance]);
 
-  function handleOptionChange(value: string) {
-    setFilters((prev) => ({ ...prev, option: value as Filters["option"] }));
+  function computeAnnualCost(row: Tariff): number {
+    const abo = (row.abo_month_ttc ?? 0) * 12;
+    if (row.option === "HPHC") {
+      const hpPrice = row.price_kwh_hp_ttc ?? row.price_kwh_ttc ?? 0;
+      const hcPrice = row.price_kwh_hc_ttc ?? row.price_kwh_ttc ?? hpPrice;
+      const hpConso = consumption * (1 - hcShare / 100);
+      const hcConso = consumption * (hcShare / 100);
+      return abo + hpConso * hpPrice + hcConso * hcPrice;
+    }
+    if (row.option === "BASE" || row.option === "TEMPO") {
+      const basePrice = row.price_kwh_ttc ?? row.price_kwh_hp_ttc ?? 0;
+      return abo + consumption * basePrice;
+    }
+    return abo;
   }
+
+  const tableRows: TableRow[] = useMemo(() => {
+    return filtered
+      .map((row) => ({ ...row, annualCost: computeAnnualCost(row) }))
+      .sort((a, b) => a.annualCost - b.annualCost);
+  }, [filtered, consumption, hcShare]);
 
   return (
     <section>
       <header className="tariff-header">
         <div>
-          <h2>Tarifs observÃ©s</h2>
-          <p>DonnÃ©es insert-only issues des parseurs YAML.</p>
+          <h2>Comparateur</h2>
+          <p>Données issues des parsers PDF (insert-only). Tri par coût annuel TTC.</p>
         </div>
+      </header>
+
+      <div className="tariff-controls">
         <label>
           Option
-          <select value={filters.option} onChange={(e) => handleOptionChange(e.target.value)}>
+          <select value={option} onChange={(e) => setOption(e.target.value as OptionFilter)}>
             <option value="">Toutes</option>
             <option value="BASE">BASE</option>
             <option value="HPHC">HPHC</option>
             <option value="TEMPO">TEMPO</option>
           </select>
         </label>
-      </header>
-      {loading && <p>Chargementâ€¦</p>}
+        <label>
+          Puissance
+          <select value={puissance} onChange={(e) => setPuissance(e.target.value ? Number(e.target.value) : "")}>  
+            <option value="">Toutes</option>
+            {PUISSANCES.map((p) => (
+              <option key={p} value={p}>
+                {p} kVA
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Consommation annuelle (kWh)
+          <input
+            type="number"
+            min={500}
+            step={100}
+            value={consumption}
+            onChange={(e) => setConsumption(Math.max(0, Number(e.target.value)))}
+          />
+        </label>
+        <label className="hc-slider">
+          % Heures creuses
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={hcShare}
+            onChange={(e) => setHcShare(Number(e.target.value))}
+            disabled={option && option !== "HPHC" && option !== ""}
+          />
+          <span>{hcShare}%</span>
+        </label>
+      </div>
+
+      {loading && <p>Chargement...</p>}
       {error && <p className="error">{error}</p>}
       {!loading && !error && (
-        <table className="tariff-table">
+        <table className="tariff-table comparator">
           <thead>
             <tr>
               <th>Fournisseur</th>
               <th>Option</th>
               <th>Puissance</th>
-              <th>Abonnement â‚¬/mois</th>
-              <th>kWh (BASE/HP/HC)</th>
-              <th>FraÃ®cheur</th>
+              <th>Abonnement €/mois</th>
+              <th>€/kWh (base / HP / HC)</th>
+              <th>Coût annuel estimé</th>
+              <th>Fraîcheur</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((row) => (
+            {tableRows.map((row) => (
               <tr key={`${row.supplier}-${row.option}-${row.puissance_kva}`}>
                 <td>{row.supplier}</td>
                 <td>{row.option}</td>
                 <td>{row.puissance_kva} kVA</td>
-                <td>{row.abo_month_ttc?.toFixed?.(2)}</td>
+                <td>{row.abo_month_ttc?.toFixed?.(2) ?? "-"}</td>
                 <td>
-                  {row.price_kwh_ttc ?? "â€”"} / {row.price_kwh_hp_ttc ?? "â€”"} / {row.price_kwh_hc_ttc ?? "â€”"}
+                  {row.price_kwh_ttc ?? "-"} / {row.price_kwh_hp_ttc ?? "-"} / {row.price_kwh_hc_ttc ?? "-"}
+                </td>
+                <td className="cost">
+                  {row.annualCost ? `${row.annualCost.toFixed(0)} €` : "n/a"}
                 </td>
                 <td>
                   <FreshnessBadge status={row.data_status ?? "stale"} />
