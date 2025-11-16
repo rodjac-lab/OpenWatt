@@ -55,7 +55,10 @@ if __name__ == "__main__":
     parser.add_argument("--observed-at", help="ISO timestamp override (default: now UTC)")
     parser.add_argument(
         "--output",
-        help="Where to write the parsed JSON (default: artifacts/parsed/<supplier>_<timestamp>.json)",
+        help=(
+            "Where to write the parsed JSON "
+            "(default: artifacts/parsed/<supplier>_<timestamp>.json)"
+        ),
     )
     parser.add_argument(
         "--raw-dir",

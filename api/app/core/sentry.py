@@ -32,7 +32,7 @@ def configure_sentry() -> None:
     sentry_sdk.init(
         dsn=settings.sentry_dsn,
         environment=settings.environment,
-        release=f"openwatt@0.1.0",  # TODO: Get from git tag
+        release="openwatt@0.1.0",  # TODO: Get from git tag
         # Performance monitoring
         traces_sample_rate=1.0 if settings.environment == "development" else 0.1,
         # Profiles (CPU/memory)

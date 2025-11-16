@@ -8,7 +8,7 @@ from typing import Any, Sequence
 import pdfplumber
 
 from api.app.models.enums import FreshnessStatus, TariffOption
-from parsers.core.config import PdfSliceConfig, PdfTableConfig, SupplierConfig
+from parsers.core.config import PdfSliceConfig, SupplierConfig
 
 
 def normalize_text(value: Any) -> str:

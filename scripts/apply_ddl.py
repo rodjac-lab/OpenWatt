@@ -12,7 +12,8 @@ def run_psql(database_url: str, ddl_path: Path) -> None:
     psql = shutil.which("psql")
     if not psql:
         sys.exit(
-            "psql executable not found. Install PostgreSQL client tools or run inside the docker container."
+            "psql executable not found. Install PostgreSQL client tools "
+            "or run inside the docker container."
         )
 
     # Convert asyncpg URL format to standard postgresql:// format for psql

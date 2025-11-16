@@ -22,7 +22,9 @@ class Settings(BaseSettings):
     )
     enable_db: bool = Field(
         default=False,
-        description="Set to true to use the PostgreSQL persistence layer instead of the in-memory seed.",
+        description=(
+            "Set to true to use the PostgreSQL persistence layer " "instead of the in-memory seed."
+        ),
     )
 
     model_config = SettingsConfigDict(

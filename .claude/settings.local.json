@@ -11,7 +11,9 @@
       "Bash(gh run view:*)",
       "Bash(python -m black:*)",
       "Bash(pip install:*)",
-      "Bash(npx prettier --write .)"
+      "Bash(npx prettier --write .)",
+      "Bash(git push)",
+      "Bash(python -m flake8:*)"
     ],
     "deny": [],
     "ask": []

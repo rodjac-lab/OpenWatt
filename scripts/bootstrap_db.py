@@ -27,7 +27,10 @@ async def _bootstrap(database_url: str, *, drop: bool) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Create the OpenWatt schema on the configured database (works with Postgres or SQLite)."
+        description=(
+            "Create the OpenWatt schema on the configured database "
+            "(works with Postgres or SQLite)."
+        )
     )
     parser.add_argument(
         "--database-url",

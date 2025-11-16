@@ -4,7 +4,6 @@ import logging
 from datetime import datetime, timezone
 from hashlib import sha256
 from pathlib import Path
-import tempfile
 
 from sqlalchemy.exc import SQLAlchemyError
 

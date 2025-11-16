@@ -3,7 +3,6 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from hashlib import sha256
 from pathlib import Path
-from typing import Tuple
 
 import requests
 from requests.adapters import HTTPAdapter, Retry

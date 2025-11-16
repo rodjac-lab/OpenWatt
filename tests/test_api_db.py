@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -40,7 +40,10 @@ def seeded_db(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
                 abo_month_ttc=38.95,
                 observed_at=now - timedelta(days=2),
                 parser_version="engie_pdf_v1",
-                source_url="https://particuliers.engie.fr/content/dam/pdf/fiches-descriptives/fiche-descriptive-elec-reference-3-ans.pdf",
+                source_url=(
+                    "https://particuliers.engie.fr/content/dam/pdf/"
+                    "fiches-descriptives/fiche-descriptive-elec-reference-3-ans.pdf"
+                ),
                 source_checksum="f2f9d6fca563bf9a94f4e5a3c30c35b6aecb5ba8cb4d9138313ecc48f2e19a09",
             )
             stale_row = models.Tariff(
