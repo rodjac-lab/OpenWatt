@@ -13,7 +13,10 @@
       "Bash(pip install:*)",
       "Bash(npx prettier --write .)",
       "Bash(git push)",
-      "Bash(python -m flake8:*)"
+      "Bash(python -m flake8:*)",
+      "Bash(parsers/__init__.py)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
