@@ -11,6 +11,14 @@ class Settings(BaseSettings):
     default_timezone: str = "UTC"
     database_url: str = Field("postgresql+asyncpg://openwatt:openwatt@localhost:5432/openwatt")
     slack_webhook_url: str | None = None
+    sentry_dsn: str | None = Field(
+        default=None,
+        description="Sentry DSN for error tracking. Set to enable Sentry integration.",
+    )
+    environment: str = Field(
+        default="development",
+        description="Environment name (development, staging, production)",
+    )
     enable_db: bool = Field(
         default=False,
         description="Set to true to use the PostgreSQL persistence layer instead of the in-memory seed.",
