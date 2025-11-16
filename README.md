@@ -29,7 +29,12 @@ Open Data electricity tariffs comparator for France — transparent, reproducibl
 - **Frontend Tests**: Vitest + React Testing Library (15 tests, 99% coverage)
 - **Documentation**: Complete guides for testing, monitoring, logging
 
-**See**: [docs/sprint-1-summary.md](docs/sprint-1-summary.md), [docs/sprint-2-summary.md](docs/sprint-2-summary.md), [docs/audit.md](docs/audit.md)
+### Sprint 3 - Code Quality (In Progress) ⏳
+- **AdminConsole Refactoring**: 462 → 269 lines (-42%), 6 modular components ✅
+- **Type Safety**: Centralized TypeScript interfaces (types.ts) ✅
+- **Maintainability**: Component size < 100 lines, clean architecture ✅
+
+**See**: [Sprint 1](docs/sprint-1-summary.md), [Sprint 2](docs/sprint-2-summary.md), [AdminConsole Refactoring](docs/adminConsole-refactoring-complete.md), [Audit](docs/audit.md)
 
 ---
 
@@ -165,12 +170,13 @@ docker compose -f docker-compose.prod.yaml exec api python scripts/apply_ddl.py
 - [Sprint 1 Summary](docs/sprint-1-summary.md) - Production readiness (Docker, CI/CD, linting)
 - [Sprint 2 Summary](docs/sprint-2-summary.md) - Monitoring & robustness (logs, Sentry, tests)
 - [Sprint 2 Frontend Tests](docs/sprint-2-frontend-tests-complete.md) - Detailed frontend testing report
+- [AdminConsole Refactoring Complete](docs/adminConsole-refactoring-complete.md) - Sprint 3 refactoring report ✨ NEW
 
 ### Development Guides
 - [Frontend Testing Guide](docs/frontend-testing.md) - Vitest + React Testing Library (complete guide)
 - [Logging Guide](docs/logging.md) - Structured logging with structlog
 - [Monitoring Setup Guide](docs/monitoring-setup-guide.md) - Sentry + Prometheus + Grafana deployment
-- [AdminConsole Refactor Guide](docs/adminConsole-refactor-guide.md) - Guide for future refactoring
+- [AdminConsole Refactor Guide (OLD)](docs/refactoring-admin-console.md) - Original guide (superseded by complete report)
 
 ### Specifications
 - [specs/constitution.md](specs/constitution.md) - Spec-Kit principles and charter
