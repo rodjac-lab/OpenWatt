@@ -48,15 +48,15 @@ jobs:
           --output artifacts/ci_edf.json
       - name: Flag verifying payloads
         run: |
-          python - <<'PY'
-import json
-from pathlib import Path
+          python -c '
+          import json
+          from pathlib import Path
 
-payload = json.loads(Path("artifacts/ci_edf.json").read_text())
-statuses = {item.get("data_status") for item in payload}
-if "verifying" in statuses:
-    print("::warning::Observation en cours de verification (data_status=verifying)")
-PY
+          payload = json.loads(Path("artifacts/ci_edf.json").read_text())
+          statuses = {item.get("data_status") for item in payload}
+          if "verifying" in statuses:
+              print("::warning::Observation en cours de verification (data_status=verifying)")
+          '
       - name: Upload ingest artifact
         uses: actions/upload-artifact@v4
         with:
