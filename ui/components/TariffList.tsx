@@ -8,7 +8,7 @@ import { FreshnessBadge } from "./FreshnessBadge";
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
 const PUISSANCES = [3, 6, 9, 12, 15, 18, 24, 30, 36];
 
-type Tariff = components["schemas"]["Tariff"];
+type Tariff = components["schemas"]["TariffObservation"];
 
 type OptionFilter = Tariff["option"] | "";
 
@@ -110,7 +110,7 @@ export function TariffList() {
             max={100}
             value={hcShare}
             onChange={(e) => setHcShare(Number(e.target.value))}
-            disabled={option && option !== "HPHC" && option !== ""}
+            disabled={Boolean(option && option !== "HPHC")}
           />
           <span>{hcShare}%</span>
         </label>

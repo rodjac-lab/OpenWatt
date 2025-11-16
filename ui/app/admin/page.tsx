@@ -3,39 +3,25 @@
 import { useEffect, useMemo, useState } from "react";
 
 import type { components } from "../../lib/openapi-types";
+import { AdminNav } from "../../components/admin/AdminNav";
+import { JobsPanel } from "../../components/admin/JobsPanel";
+import { MetricsPanel } from "../../components/admin/MetricsPanel";
+import { SuppliersPanel } from "../../components/admin/SuppliersPanel";
+import { ToolsPanel } from "../../components/admin/ToolsPanel";
+import { OverrideHistoryPanel } from "../../components/admin/OverrideHistoryPanel";
+import type {
+  AdminRunPayload,
+  AdminRunsResponse,
+  AdminSection,
+  FreshnessStats,
+  HealthPayload,
+  OverrideEntryPayload,
+  OverrideHistoryResponse,
+  SupplierRow,
+} from "./types";
 
 type Tariff = components["schemas"]["TariffObservation"];
 type TrveDiff = components["schemas"]["TrveDiffEntry"];
-
-interface HealthPayload {
-  status: string;
-  service: string;
-  timestamp_utc: string;
-}
-
-interface AdminRunPayload {
-  supplier: string;
-  status: "ok" | "nok";
-  message: string;
-  observed_at?: string | null;
-}
-
-interface AdminRunsResponse {
-  generated_at: string;
-  items: AdminRunPayload[];
-}
-
-interface OverrideEntryPayload {
-  id: number;
-  supplier: string;
-  url: string;
-  observed_at?: string | null;
-  created_at: string;
-}
-
-interface OverrideHistoryResponse {
-  items: OverrideEntryPayload[];
-}
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
 
@@ -105,7 +91,7 @@ export default function AdminConsole() {
       .catch((err) => setOverrideError(err.message));
   }, []);
 
-  const freshnessStats = useMemo(() => {
+  const freshnessStats: FreshnessStats = useMemo(() => {
     const stats = { fresh: 0, verifying: 0, stale: 0, broken: 0 };
     tariffs.forEach((row) => {
       const key = (row.data_status ?? "stale") as keyof typeof stats;
@@ -115,7 +101,7 @@ export default function AdminConsole() {
     return { stats, total };
   }, [tariffs]);
 
-  const supplierRows = useMemo(() => {
+  const supplierRows: SupplierRow[] = useMemo(() => {
     const map = new Map<
       string,
       {
@@ -142,7 +128,13 @@ export default function AdminConsole() {
       if (row.data_status) entry.statuses.add(row.data_status);
       entry.observations += 1;
     });
-    return Array.from(map.values());
+    return Array.from(map.values()).map((entry) => ({
+      supplier: entry.supplier,
+      parser_version: entry.parser_version,
+      source_url: entry.source_url,
+      statuses: Array.from(entry.statuses),
+      observations: entry.observations,
+    }));
   }, [tariffs]);
 
   useEffect(() => {
@@ -224,7 +216,7 @@ export default function AdminConsole() {
     event.currentTarget.reset();
   }
 
-  const sections = [
+  const sections: AdminSection[] = [
     { id: "jobs", label: "Surveillance" },
     { id: "health", label: "Santé" },
     { id: "suppliers", label: "Fournisseurs" },
@@ -232,229 +224,45 @@ export default function AdminConsole() {
     { id: "logs", label: "Logs" },
   ];
 
+  const handlePageRefresh = () => window.location.reload();
+  const handleOpenDocs = () => window.open("/api", "_blank");
+  const supplierNames = supplierRows.map((row) => row.supplier);
+  const currentTime = new Date().toLocaleString("fr-FR");
+
   return (
     <div className="admin-shell">
-      <nav className="admin-nav">
-        <div className="admin-nav__brand">
-          <span className="brand-icon">⚡</span>
-          <strong>OpenWatt</strong>
-        </div>
-        <div className="admin-nav__tabs">
-          {sections.map((section) => (
-            <a key={section.id} href={`#${section.id}`}>
-              {section.label}
-            </a>
-          ))}
-        </div>
-        <div className="admin-nav__actions">
-          <span className="pill">{health?.status === "ok" ? "API OK" : "API ?"}</span>
-          <button className="btn btn--ghost" onClick={() => window.location.reload()}>
-            Rafraîchir
-          </button>
-        </div>
-      </nav>
+      <AdminNav sections={sections} healthStatus={health?.status} onRefresh={handlePageRefresh} />
 
       <main className="admin-page">
-        <section id="jobs" className="panel panel--flat">
-          <div className="panel__header">
-            <div>
-              <p className="panel__eyebrow">Surveillance</p>
-              <h2 className="panel__title">Jobs nightly</h2>
-            </div>
-            <time>{new Date().toLocaleString("fr-FR")}</time>
-          </div>
-        <div className="job-list">
-          {runsError && <p className="error">{runsError}</p>}
-          {!runsError &&
-            runs.map((job) => (
-              <article key={`${job.supplier}-${job.observed_at ?? "n/a"}`} className="job-item">
-                <div>
-                  <span className="job-item__label">{job.supplier}</span>
-                  <p className="job-item__message">{job.message}</p>
-                </div>
-                <div className="job-item__meta">
-                  <time>{job.observed_at ? new Date(job.observed_at).toLocaleString("fr-FR") : "?"}</time>
-                  <span className={`pill ${job.status === "ok" ? "pill--ok" : "pill--alert"}`}>
-                    {job.status === "ok" ? "OK" : "NOK"}
-                  </span>
-                </div>
-              </article>
-            ))}
-          {!runsError && runs.length === 0 && <p className="muted">Aucune exécution détectée.</p>}
-        </div>
-        </section>
+        <JobsPanel runs={runs} runsError={runsError} currentTime={currentTime} />
 
-        <section id="health" className="metric-grid">
-          <article className="panel metric">
-            <p className="panel__eyebrow">Qualité data</p>
-            <h3 className="panel__title">Santé base</h3>
-            <p>
-              {((freshnessStats.stats.fresh / (freshnessStats.total || 1)) * 100).toFixed(0)}% d&apos;observations fresh (
-              {freshnessStats.stats.fresh}/{freshnessStats.total})
-            </p>
-            <div className="progress">
-              <span style={{ width: `${(freshnessStats.stats.fresh / (freshnessStats.total || 1)) * 100}%` }} />
-          </div>
-          <ul>
-            <li>verifying : {freshnessStats.stats.verifying}</li>
-            <li>stale : {freshnessStats.stats.stale}</li>
-            <li>broken : {freshnessStats.stats.broken}</li>
-          </ul>
-          </article>
-          <article className="panel metric">
-            <p className="panel__eyebrow">Observabilité</p>
-            <h3 className="panel__title">API monitoring</h3>
-            {tariffError ? (
-              <p className="error">Erreur : {tariffError}</p>
-          ) : (
-            <>
-              <p>Latence moyenne</p>
-              <strong>{latencyMs ?? "?"} ms</strong>
-              <p>TRVE deltas (items): {trveDiff.length}</p>
-            </>
-          )}
-          </article>
-          <article className="panel metric">
-            <p className="panel__eyebrow">Raccourcis</p>
-            <h3 className="panel__title">Actions rapides</h3>
-            <button className="btn" onClick={() => window.location.reload()}>
-              Rafraîchir dashboard
-            </button>
-            <button className="btn btn--ghost" onClick={() => window.open("/api", "_blank")}>
-              Voir doc API
-            </button>
-          </article>
-        </section>
+        <MetricsPanel
+          freshness={freshnessStats}
+          tariffError={tariffError}
+          latencyMs={latencyMs}
+          trveDiffCount={trveDiff.length}
+          onRefreshDashboard={handlePageRefresh}
+          onOpenDocs={handleOpenDocs}
+        />
 
-        <section id="suppliers" className="panel">
-        <header className="panel__header">
-          <div>
-            <h2>Fournisseurs & parsers</h2>
-            <p>Liste extraite des observations en base.</p>
-          </div>
-          <button className="btn btn--ghost">Ajouter un fournisseur</button>
-        </header>
-        <div className="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Fournisseur</th>
-                <th>Parser</th>
-                <th>Source</th>
-                <th>Observations</th>
-                <th>Statuts</th>
-              </tr>
-            </thead>
-            <tbody>
-              {supplierRows.map((row) => (
-                <tr key={row.supplier}>
-                  <td>{row.supplier}</td>
-                  <td>{row.parser_version ?? "?"}</td>
-                  <td className="truncate">
-                    <a href={row.source_url} target="_blank" rel="noreferrer">
-                      {row.source_url ?? "?"}
-                    </a>
-                  </td>
-                  <td>{row.observations}</td>
-                  <td>
-                    {Array.from(row.statuses).map((status) => (
-                      <span key={status} className="badge badge--grey">
-                        {status}
-                      </span>
-                    ))}
-                  </td>
-                </tr>
-              ))}
-              {supplierRows.length === 0 && (
-                <tr>
-                  <td colSpan={5}>Aucune observation chargée.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        </section>
+        <SuppliersPanel supplierRows={supplierRows} />
 
-        <section id="tools" className="panel tools-grid">
-        <div>
-          <h3>Inspection PDF</h3>
-          <p>Utiliser ce module pour vérifier rapidement une table PDF avant de mettre à jour un snapshot.</p>
-          <form className="override-form" onSubmit={handleInspectionSubmit}>
-            <label>
-              Fournisseur
-              <input
-                name="inspect_supplier"
-                list="supplier-options"
-                value={inspectionSupplier}
-                onChange={(e) => setInspectionSupplier(e.target.value)}
-                placeholder="engie"
-              />
-            </label>
-            <datalist id="supplier-options">
-              {supplierRows.map((row) => (
-                <option key={row.supplier} value={row.supplier} />
-              ))}
-            </datalist>
-            <label>
-              Fichier PDF
-              <input type="file" accept=".pdf" onChange={(event) => handleInspectionFile(event.target.files)} />
-            </label>
-            <button className="btn" type="submit" disabled={inspectionLoading}>
-              {inspectionLoading ? "Analyse..." : "Inspecter"}
-            </button>
-          </form>
-          <p className="muted">{inspectionMessage}</p>
-          {inspectionError && <p className="error">{inspectionError}</p>}
-          {inspectionResult.length > 0 && (
-            <div className="inspect-preview">
-              <p>{inspectionResult.length} lignes (aperçu des premières):</p>
-              <pre>{JSON.stringify(inspectionResult.slice(0, 3), null, 2)}</pre>
-            </div>
-          )}
-        </div>
-        <div>
-          <h3>Override source</h3>
-          <form className="override-form" onSubmit={handleOverrideSubmit}>
-            <label>
-              Fournisseur
-              <input required name="supplier" placeholder="ex: Engie" />
-            </label>
-            <label>
-              URL source temporaire
-              <input required name="url" type="url" placeholder="https://..." />
-            </label>
-            <label>
-              Observed at (optionnel)
-              <input name="observed_at" type="date" />
-            </label>
-            <button className="btn" type="submit">
-              Lancer override
-            </button>
-          </form>
-          {overrideMessage && <p className="muted">{overrideMessage}</p>}
-          {overrideError && <p className="error">{overrideError}</p>}
-        </div>
-        </section>
+        <ToolsPanel
+          supplierOptions={supplierNames}
+          inspectionSupplier={inspectionSupplier}
+          inspectionMessage={inspectionMessage}
+          inspectionError={inspectionError}
+          inspectionResult={inspectionResult}
+          inspectionLoading={inspectionLoading}
+          onInspectionSupplierChange={setInspectionSupplier}
+          onInspectionFileChange={handleInspectionFile}
+          onInspectionSubmit={handleInspectionSubmit}
+          onOverrideSubmit={handleOverrideSubmit}
+          overrideMessage={overrideMessage}
+          overrideError={overrideError}
+        />
 
-        <section id="logs" className="panel">
-        <header className="panel__header">
-          <h2>Overrides manuels</h2>
-          <button className="btn btn--ghost" onClick={() => window.location.reload()}>
-            Rafraîchir
-          </button>
-        </header>
-        <div className="job-history">
-          {overrideHistory.map((entry) => (
-            <details key={entry.id}>
-              <summary>
-                {entry.supplier} → {entry.url} ({new Date(entry.created_at).toLocaleString("fr-FR")})
-              </summary>
-              <p>Observed at: {entry.observed_at ? new Date(entry.observed_at).toLocaleDateString("fr-FR") : "non défini"}</p>
-            </details>
-          ))}
-          {overrideHistory.length === 0 && <p className="muted">Aucun override enregistré.</p>}
-        </div>
-        </section>
+        <OverrideHistoryPanel entries={overrideHistory} onRefresh={handlePageRefresh} />
       </main>
     </div>
   );
