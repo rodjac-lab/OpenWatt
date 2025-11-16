@@ -4,16 +4,70 @@
 [![codecov](https://codecov.io/gh/rodjac-lab/OpenWatt/branch/main/graph/badge.svg)](https://codecov.io/gh/rodjac-lab/OpenWatt)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Production Ready](https://img.shields.io/badge/status-production--ready-green.svg)](docs/audit.md)
 
 Open Data electricity tariffs comparator for France — transparent, reproducible, historical.
+
+**✅ Production-ready** (Nov 2025) - Docker + CI/CD + Tests + Monitoring
+
+---
+
+## 🎉 What's New (Sprint 1 & 2 - Nov 2025)
+
+### Sprint 1 - Production Readiness ✅
+- **Docker**: Multi-stage Dockerfiles (API + UI) + docker-compose.prod.yaml
+- **CI/CD**: Complete GitHub Actions workflow (linting, tests, builds)
+- **Linting**: black, flake8, mypy (Python) + ESLint, Prettier (TypeScript)
+- **Pre-commit hooks**: Automated code quality checks
+- **Coverage**: 70% enforced (backend), 99% (frontend)
+
+### Sprint 2 - Monitoring & Robustness ✅
+- **Logging**: Structured JSON logs (structlog) for production
+- **Monitoring**: Sentry error tracking + Prometheus metrics (code ready)
+- **Tracing**: Request-ID middleware for distributed tracing
+- **Robustness**: Retry logic (tenacity) + Rate limiting (token bucket)
+- **Frontend Tests**: Vitest + React Testing Library (15 tests, 99% coverage)
+- **Documentation**: Complete guides for testing, monitoring, logging
+
+**See**: [docs/sprint-1-summary.md](docs/sprint-1-summary.md), [docs/sprint-2-summary.md](docs/sprint-2-summary.md), [docs/audit.md](docs/audit.md)
+
+---
+
+## 🚀 Quick Start (Production Mode)
+
+**New!** Run the entire stack with Docker:
+
+```bash
+# 1. Clone and configure
+git clone https://github.com/rodjac-lab/OpenWatt.git
+cd OpenWatt
+cp .env.example .env  # Edit if needed
+
+# 2. Start all services (PostgreSQL + API + UI)
+docker compose -f docker-compose.prod.yaml up -d
+
+# 3. Apply database schema
+docker compose -f docker-compose.prod.yaml exec api python scripts/apply_ddl.py
+
+# 4. Access services
+# - UI: http://localhost:3000
+# - API: http://localhost:8000
+# - API Docs: http://localhost:8000/docs
+# - Metrics: http://localhost:8000/metrics
+```
+
+**See**: [Deployment Guide](docs/deployment.md) (coming soon)
+
+---
 
 ## Contents
 - specs/: project specifications (Spec-Kit)
 - db/: PostgreSQL DDL (insert-only)
 - .github/: workflows and automation
 - api/, ingest/, parsers/: backend + ingest code
-- tests/: unit and snapshot tests
-- ui/: Next.js client (alpha scaffold)
+- tests/: unit and snapshot tests (backend + frontend)
+- ui/: Next.js client with Vitest tests
+- docs/: comprehensive documentation (Sprint 1 & 2 guides)
 
 ## Backend development
 1. Ensure Python 3.11+ is installed (per Spec-Kit charter).
@@ -66,10 +120,92 @@ Open Data electricity tariffs comparator for France — transparent, reproducibl
 - POST /v1/admin/inspect - upload d'un PDF pour visualiser les lignes extraites via YAML.
 
 ## Tests
+
+### Backend Tests (pytest)
 1. Snapshot fixtures live in `tests/snapshots/` (EDF, Engie, TotalEnergies).
 2. Run the suite locally:
-    pytest
-3. CI should block on failing snapshots or API regressions per Spec-Kit charter.
+    ```bash
+    pytest                           # Run all tests
+    pytest --cov                     # With coverage report
+    pytest --cov --cov-report=html   # Generate HTML coverage report
+    ```
+3. **Coverage enforced**: 70% minimum (CI fails if < 70%)
+
+### Frontend Tests (Vitest) - **NEW!**
+1. Test files: `ui/components/__tests__/*.test.tsx`
+2. Run the suite:
+    ```bash
+    cd ui
+    npm test                 # Run tests once
+    npm run test:watch       # Watch mode
+    npm run test:ui          # Browser UI
+    npm run test:coverage    # With coverage report
+    ```
+3. **Coverage**: 99.43% (FreshnessBadge: 100%, TariffList: 99.36%)
+4. **CI validation**: Automatic on every PR/push
+
+**See**: [Frontend Testing Guide](docs/frontend-testing.md)
+
+### CI/CD
+- GitHub Actions runs **all tests** (backend + frontend) on every PR/push
+- Linting (black, flake8, mypy, ESLint, Prettier)
+- Docker builds validation
+- Coverage upload to Codecov
+- **Blocks merge if any check fails** ✅
+
+---
+
+## 📚 Documentation
+
+### Getting Started
+- [README](README.md) - This file (Quick start, development setup)
+- [Audit Report](docs/audit.md) - Complete project audit (updated post-Sprint 1 & 2)
+
+### Sprint Documentation
+- [Sprint 1 Summary](docs/sprint-1-summary.md) - Production readiness (Docker, CI/CD, linting)
+- [Sprint 2 Summary](docs/sprint-2-summary.md) - Monitoring & robustness (logs, Sentry, tests)
+- [Sprint 2 Frontend Tests](docs/sprint-2-frontend-tests-complete.md) - Detailed frontend testing report
+
+### Development Guides
+- [Frontend Testing Guide](docs/frontend-testing.md) - Vitest + React Testing Library (complete guide)
+- [Logging Guide](docs/logging.md) - Structured logging with structlog
+- [Monitoring Setup Guide](docs/monitoring-setup-guide.md) - Sentry + Prometheus + Grafana deployment
+- [AdminConsole Refactor Guide](docs/adminConsole-refactor-guide.md) - Guide for future refactoring
+
+### Specifications
+- [specs/constitution.md](specs/constitution.md) - Spec-Kit principles and charter
+- [specs/api.md](specs/api.md) - OpenAPI specification
+- [specs/openapi.generated.json](specs/openapi.generated.json) - Generated OpenAPI schema
+
+### Architecture
+- **Stack**: FastAPI (Python 3.11+) + Next.js 14 + PostgreSQL 16
+- **Pattern**: Insert-only history (immutable database)
+- **Testing**: pytest (backend 70%+) + Vitest (frontend 99%+)
+- **Monitoring**: structlog + Sentry + Prometheus
+- **Deployment**: Docker multi-stage + docker-compose
+
+---
+
+## 📊 Project Status
+
+**Current Version**: Production-ready beta (Nov 2025)
+**Note**: 8.5/10 (see [audit report](docs/audit.md))
+
+### Completed ✅
+- Sprint 1: Production readiness (100%)
+- Sprint 2: Monitoring & robustness (87.5%)
+
+### Roadmap (Sprint 3-4)
+1. AdminConsole refactoring
+2. Alembic migrations active
+3. PostgreSQL backup automation
+4. End-to-end tests (Playwright)
+5. Secrets management (dotenv-vault)
+6. State management UI (TanStack Query)
+
+**See**: [Audit Report - Plan d'Action](docs/audit.md#plan-daction---statut-actuel)
+
+---
 
 ## License
 
