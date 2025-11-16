@@ -1,4 +1,5 @@
 """Services fetching tariff data while keeping Spec-Kit semantics."""
+
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
@@ -146,7 +147,9 @@ async def fetch_latest_tariffs(
         try:
             async with get_session() as session:
                 repo = TariffRepository(session)
-                observations = await repo.fetch_latest(option=option, puissance=puissance, include_stale=include_stale)
+                observations = await repo.fetch_latest(
+                    option=option, puissance=puissance, include_stale=include_stale
+                )
         except SQLAlchemyError as exc:
             logger.warning("DB fetch_latest_tariffs failed, falling back to seed data: %s", exc)
             observations = None

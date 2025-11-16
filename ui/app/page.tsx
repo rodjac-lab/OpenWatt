@@ -29,7 +29,10 @@ export default function Home() {
         <div>
           <p className="hero__eyebrow">Spec-Kit • Open Data</p>
           <h1>OpenWatt UI</h1>
-          <p>Comparateur des tarifs électricité FR — statuts fresh / verifying / stale / broken alignés sur la spec.</p>
+          <p>
+            Comparateur des tarifs électricité FR — statuts fresh / verifying / stale / broken
+            alignés sur la spec.
+          </p>
         </div>
         <div className="health">
           <h3>API health</h3>

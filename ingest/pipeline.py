@@ -49,7 +49,9 @@ if __name__ == "__main__":
         action="store_true",
         help="Download the source defined in parsers/config/<supplier>.yaml before parsing",
     )
-    parser.add_argument("--persist", action="store_true", help="Persist parsed rows into the database")
+    parser.add_argument(
+        "--persist", action="store_true", help="Persist parsed rows into the database"
+    )
     parser.add_argument("--observed-at", help="ISO timestamp override (default: now UTC)")
     parser.add_argument(
         "--output",
@@ -61,7 +63,9 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    observed = datetime.fromisoformat(args.observed_at) if args.observed_at else datetime.now(timezone.utc)
+    observed = (
+        datetime.fromisoformat(args.observed_at) if args.observed_at else datetime.now(timezone.utc)
+    )
     config = load_supplier_config(args.supplier)
 
     if args.fetch:
@@ -90,7 +94,9 @@ if __name__ == "__main__":
     else:
         DEFAULT_PARSED_DIR.mkdir(parents=True, exist_ok=True)
         safe_supplier = args.supplier.lower()
-        output_path = DEFAULT_PARSED_DIR / f"{safe_supplier}_{observed.strftime('%Y%m%dT%H%M%SZ')}.json"
+        output_path = (
+            DEFAULT_PARSED_DIR / f"{safe_supplier}_{observed.strftime('%Y%m%dT%H%M%SZ')}.json"
+        )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(rows, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"Wrote parsed payload to {output_path}")

@@ -23,7 +23,9 @@ async def get_admin_runs() -> AdminRunsResponse:
     return await admin_service.fetch_runs()
 
 
-@router.get("/overrides", response_model=OverrideHistoryResponse, summary="Historique des overrides")
+@router.get(
+    "/overrides", response_model=OverrideHistoryResponse, summary="Historique des overrides"
+)
 async def get_overrides() -> OverrideHistoryResponse:
     return await admin_service.list_overrides()
 
@@ -36,11 +38,15 @@ async def get_overrides() -> OverrideHistoryResponse:
 )
 async def create_override(payload: OverrideCreatePayload) -> OverrideEntry:
     if not settings.enable_db:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Database not enabled")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Database not enabled"
+        )
     try:
         return await admin_service.create_override(payload)
     except Exception as exc:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc)
+        ) from exc
 
 
 @router.post(
@@ -48,7 +54,9 @@ async def create_override(payload: OverrideCreatePayload) -> OverrideEntry:
     response_model=InspectResponse,
     summary="Inspecter un PDF via config YAML",
 )
-async def inspect_pdf(supplier: str = Form(...), file: UploadFile = File(...), limit: int = Form(50)) -> InspectResponse:
+async def inspect_pdf(
+    supplier: str = Form(...), file: UploadFile = File(...), limit: int = Form(50)
+) -> InspectResponse:
     temp_path: Path | None = None
     try:
         suffix = Path(file.filename or "upload.pdf").suffix or ".pdf"
@@ -58,7 +66,9 @@ async def inspect_pdf(supplier: str = Form(...), file: UploadFile = File(...), l
                 raise HTTPException(status_code=400, detail="Empty file")
             tmp.write(content)
             temp_path = Path(tmp.name)
-        return await admin_service.inspect_upload(supplier=supplier, file_path=temp_path, limit=limit)
+        return await admin_service.inspect_upload(
+            supplier=supplier, file_path=temp_path, limit=limit
+        )
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="File not found")
     except ValueError as exc:

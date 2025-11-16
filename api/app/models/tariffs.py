@@ -19,7 +19,9 @@ class TariffObservation(BaseModel):
     parser_version: str
     source_url: HttpUrl
     source_checksum: str = Field(..., min_length=64, max_length=64)
-    data_status: FreshnessStatus = Field(..., description="fresh/verifying/stale/broken per constitution")
+    data_status: FreshnessStatus = Field(
+        ..., description="fresh/verifying/stale/broken per constitution"
+    )
     last_verified: datetime | None = None
 
 

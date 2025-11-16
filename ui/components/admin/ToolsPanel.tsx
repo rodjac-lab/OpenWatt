@@ -33,7 +33,10 @@ export function ToolsPanel({
     <section id="tools" className="panel tools-grid">
       <div>
         <h3>Inspection PDF</h3>
-        <p>Utiliser ce module pour vérifier rapidement une table PDF avant de mettre à jour un snapshot.</p>
+        <p>
+          Utiliser ce module pour vérifier rapidement une table PDF avant de mettre à jour un
+          snapshot.
+        </p>
         <form className="override-form" onSubmit={onInspectionSubmit}>
           <label>
             Fournisseur
@@ -52,7 +55,11 @@ export function ToolsPanel({
           </datalist>
           <label>
             Fichier PDF
-            <input type="file" accept=".pdf" onChange={(event) => onInspectionFileChange(event.target.files)} />
+            <input
+              type="file"
+              accept=".pdf"
+              onChange={(event) => onInspectionFileChange(event.target.files)}
+            />
           </label>
           <button className="btn" type="submit" disabled={inspectionLoading}>
             {inspectionLoading ? "Analyse..." : "Inspecter"}

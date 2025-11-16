@@ -1,4 +1,5 @@
 """Pytest fixtures anchored to the FastAPI app defined by the Spec-Kit."""
+
 from __future__ import annotations
 
 import pytest

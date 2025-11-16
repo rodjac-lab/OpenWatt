@@ -20,7 +20,12 @@ export function OverrideHistoryPanel({ entries, onRefresh }: OverrideHistoryPane
             <summary>
               {entry.supplier} → {entry.url} ({new Date(entry.created_at).toLocaleString("fr-FR")})
             </summary>
-            <p>Observed at: {entry.observed_at ? new Date(entry.observed_at).toLocaleDateString("fr-FR") : "non défini"}</p>
+            <p>
+              Observed at:{" "}
+              {entry.observed_at
+                ? new Date(entry.observed_at).toLocaleDateString("fr-FR")
+                : "non défini"}
+            </p>
           </details>
         ))}
         {entries.length === 0 && <p className="muted">Aucun override enregistré.</p>}

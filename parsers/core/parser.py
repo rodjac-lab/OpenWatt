@@ -75,7 +75,9 @@ def parse_file(
     source_checksum: str,
 ) -> list[dict[str, Any]]:
     if config.source.format == "pdf":
-        return pdf_parser.parse_pdf(config, artifact_path, observed_at=observed_at, source_checksum=source_checksum)
+        return pdf_parser.parse_pdf(
+            config, artifact_path, observed_at=observed_at, source_checksum=source_checksum
+        )
     parser = YamlTariffParser(config)
     html = artifact_path.read_text(encoding="utf-8")
     return parser.parse_html(html, observed_at=observed_at, source_checksum=source_checksum)

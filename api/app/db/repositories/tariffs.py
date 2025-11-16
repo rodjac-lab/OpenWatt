@@ -40,7 +40,10 @@ class TariffRepository:
         observations: list[TariffObservation] = []
         for row in rows:
             obs = self._to_observation(row)
-            if include_stale or obs.data_status not in {FreshnessStatus.STALE, FreshnessStatus.BROKEN}:
+            if include_stale or obs.data_status not in {
+                FreshnessStatus.STALE,
+                FreshnessStatus.BROKEN,
+            }:
                 observations.append(obs)
         return observations
 
@@ -57,9 +60,15 @@ class TariffRepository:
         if puissance := filters.get("puissance_kva"):
             stmt = stmt.where(models.Tariff.puissance_kva == puissance)
         if since := filters.get("since"):
-            stmt = stmt.where(models.Tariff.observed_at >= datetime.combine(since, datetime.min.time(), tzinfo=timezone.utc))
+            stmt = stmt.where(
+                models.Tariff.observed_at
+                >= datetime.combine(since, datetime.min.time(), tzinfo=timezone.utc)
+            )
         if until := filters.get("until"):
-            stmt = stmt.where(models.Tariff.observed_at <= datetime.combine(until, datetime.max.time(), tzinfo=timezone.utc))
+            stmt = stmt.where(
+                models.Tariff.observed_at
+                <= datetime.combine(until, datetime.max.time(), tzinfo=timezone.utc)
+            )
         stmt = stmt.order_by(models.Tariff.observed_at.desc()).limit(1024)
         result = await self.session.execute(stmt)
         rows = result.scalars().all()
@@ -74,8 +83,12 @@ class TariffRepository:
             option=row.option,
             puissance_kva=row.puissance_kva,
             price_kwh_ttc=float(row.price_kwh_ttc) if row.price_kwh_ttc is not None else None,
-            price_kwh_hp_ttc=float(row.price_kwh_hp_ttc) if row.price_kwh_hp_ttc is not None else None,
-            price_kwh_hc_ttc=float(row.price_kwh_hc_ttc) if row.price_kwh_hc_ttc is not None else None,
+            price_kwh_hp_ttc=(
+                float(row.price_kwh_hp_ttc) if row.price_kwh_hp_ttc is not None else None
+            ),
+            price_kwh_hc_ttc=(
+                float(row.price_kwh_hc_ttc) if row.price_kwh_hc_ttc is not None else None
+            ),
             abo_month_ttc=float(row.abo_month_ttc),
             observed_at=observed_at,
             parser_version=row.parser_version,
@@ -92,7 +105,11 @@ class TariffRepository:
             observed_at = observed_at.replace(tzinfo=timezone.utc)
         if row.notes and "broken" in row.notes.lower():
             return FreshnessStatus.BROKEN
-        if row.notes and "validation" in row.notes.lower() and (now - observed_at) <= timedelta(hours=48):
+        if (
+            row.notes
+            and "validation" in row.notes.lower()
+            and (now - observed_at) <= timedelta(hours=48)
+        ):
             return FreshnessStatus.VERIFYING
         if now - observed_at > timedelta(days=14):
             return FreshnessStatus.STALE

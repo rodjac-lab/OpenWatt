@@ -6,7 +6,9 @@ from pathlib import Path
 import jsonschema
 import pytest
 
-TARIFF_SCHEMA = json.loads(Path("specs/data-contracts/tariff.schema.json").read_text(encoding="utf-8"))
+TARIFF_SCHEMA = json.loads(
+    Path("specs/data-contracts/tariff.schema.json").read_text(encoding="utf-8")
+)
 SNAPSHOT_DIR = Path(__file__).parent.parent / "snapshots"
 
 SNAPSHOT_CASES = [

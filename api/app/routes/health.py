@@ -1,4 +1,5 @@
 """Liveness endpoint keeping parity with Spec-Kit availability requirements."""
+
 from __future__ import annotations
 
 from datetime import datetime, timezone

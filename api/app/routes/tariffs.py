@@ -33,7 +33,9 @@ async def get_latest_tariffs(
     ),
 ) -> TariffCollection:
     """Expose `/v1/tariffs` tel que decrit dans `specs/api.md`."""
-    return await tariff_service.fetch_latest_tariffs(option=option, puissance=puissance, include_stale=include_stale)
+    return await tariff_service.fetch_latest_tariffs(
+        option=option, puissance=puissance, include_stale=include_stale
+    )
 
 
 @router.get(
@@ -45,8 +47,12 @@ async def get_tariff_history(
     supplier: str | None = Query(default=None, description="Filtrer par fournisseur"),
     option: TariffOption | None = Query(default=None),
     puissance: int | None = Query(default=None, ge=min(PUISSANCE_VALUES), le=max(PUISSANCE_VALUES)),
-    since: date | None = Query(default=None, description="Inclure les observations a partir de cette date"),
-    until: date | None = Query(default=None, description="Inclure les observations jusqu'a cette date"),
+    since: date | None = Query(
+        default=None, description="Inclure les observations a partir de cette date"
+    ),
+    until: date | None = Query(
+        default=None, description="Inclure les observations jusqu'a cette date"
+    ),
 ) -> TariffHistoryResponse:
     filters = TariffHistoryFilters(
         supplier=supplier,

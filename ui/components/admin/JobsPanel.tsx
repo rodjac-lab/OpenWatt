@@ -26,7 +26,9 @@ export function JobsPanel({ runs, runsError, currentTime }: JobsPanelProps) {
                 <p className="job-item__message">{job.message}</p>
               </div>
               <div className="job-item__meta">
-                <time>{job.observed_at ? new Date(job.observed_at).toLocaleString("fr-FR") : "?"}</time>
+                <time>
+                  {job.observed_at ? new Date(job.observed_at).toLocaleString("fr-FR") : "?"}
+                </time>
                 <span className={`pill ${job.status === "ok" ? "pill--ok" : "pill--alert"}`}>
                   {job.status === "ok" ? "OK" : "NOK"}
                 </span>

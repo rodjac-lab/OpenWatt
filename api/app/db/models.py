@@ -25,7 +25,9 @@ class Tariff(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     supplier_id: Mapped[int] = mapped_column(ForeignKey("suppliers.id"), nullable=False)
-    option: Mapped[TariffOption] = mapped_column(Enum(TariffOption, name="tariff_option", native_enum=False), nullable=False)
+    option: Mapped[TariffOption] = mapped_column(
+        Enum(TariffOption, name="tariff_option", native_enum=False), nullable=False
+    )
     puissance_kva: Mapped[int] = mapped_column(Integer, nullable=False)
     price_kwh_ttc: Mapped[Optional[float]] = mapped_column(Numeric(8, 6))
     price_kwh_hp_ttc: Mapped[Optional[float]] = mapped_column(Numeric(8, 6))
@@ -44,7 +46,9 @@ class TrveReference(Base):
     __tablename__ = "trve_reference"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    option: Mapped[TariffOption] = mapped_column(Enum(TariffOption, name="trve_tariff_option", native_enum=False), nullable=False)
+    option: Mapped[TariffOption] = mapped_column(
+        Enum(TariffOption, name="trve_tariff_option", native_enum=False), nullable=False
+    )
     puissance_kva: Mapped[int] = mapped_column(Integer, nullable=False)
     price_kwh_ttc: Mapped[Optional[float]] = mapped_column(Numeric(8, 6))
     price_kwh_hp_ttc: Mapped[Optional[float]] = mapped_column(Numeric(8, 6))
@@ -61,4 +65,6 @@ class AdminOverride(Base):
     supplier: Mapped[str] = mapped_column(String, nullable=False)
     url: Mapped[str] = mapped_column(Text, nullable=False)
     observed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=datetime.utcnow, nullable=False
+    )

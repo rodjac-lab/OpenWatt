@@ -1,4 +1,5 @@
 """FastAPI entrypoint bootstrapped from the OpenWatt Spec-Kit."""
+
 from __future__ import annotations
 
 from fastapi import FastAPI

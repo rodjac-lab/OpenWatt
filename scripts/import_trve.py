@@ -21,9 +21,13 @@ from api.app.models.enums import TariffOption  # noqa: E402
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Import TRVE reference data into the database")
     parser.add_argument("json", help="Path to the JSON file containing TRVE rows")
-    parser.add_argument("--valid-from", dest="valid_from", required=True, help="ISO date YYYY-MM-DD")
+    parser.add_argument(
+        "--valid-from", dest="valid_from", required=True, help="ISO date YYYY-MM-DD"
+    )
     parser.add_argument("--valid-to", dest="valid_to", help="Optional ISO date YYYY-MM-DD")
-    parser.add_argument("--truncate", action="store_true", help="Delete existing TRVE rows before import")
+    parser.add_argument(
+        "--truncate", action="store_true", help="Delete existing TRVE rows before import"
+    )
     return parser.parse_args()
 
 

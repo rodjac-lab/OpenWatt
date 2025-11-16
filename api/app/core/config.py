@@ -1,4 +1,5 @@
 """Application configuration derived from the Spec-Kit."""
+
 from __future__ import annotations
 
 from pydantic import Field

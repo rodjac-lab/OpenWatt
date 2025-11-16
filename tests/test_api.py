@@ -63,7 +63,9 @@ def test_admin_overrides_without_db(client):
     assert response.status_code == 200
     assert response.json()["items"] == []
 
-    response = client.post("/v1/admin/overrides", json={"supplier": "EDF", "url": "https://example.com"})
+    response = client.post(
+        "/v1/admin/overrides", json={"supplier": "EDF", "url": "https://example.com"}
+    )
     assert response.status_code == 503
 
 

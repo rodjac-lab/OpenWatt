@@ -151,7 +151,9 @@ export default function AdminConsole() {
     }
     const file = files[0];
     setInspectionFile(file);
-    setInspectionMessage(`Fichier "${file.name}" (${Math.round(file.size / 1024)} Ko) prêt pour inspection.`);
+    setInspectionMessage(
+      `Fichier "${file.name}" (${Math.round(file.size / 1024)} Ko) prêt pour inspection.`
+    );
   }
 
   function handleInspectionSubmit(event: React.FormEvent<HTMLFormElement>) {

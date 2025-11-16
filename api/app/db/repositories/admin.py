@@ -28,6 +28,10 @@ class AdminRepository:
         return entry
 
     async def list_overrides(self, limit: int = 50) -> list[models.AdminOverride]:
-        stmt = select(models.AdminOverride).order_by(models.AdminOverride.created_at.desc()).limit(limit)
+        stmt = (
+            select(models.AdminOverride)
+            .order_by(models.AdminOverride.created_at.desc())
+            .limit(limit)
+        )
         result = await self.session.execute(stmt)
         return list(result.scalars().all())

@@ -2,6 +2,7 @@
 
 Implements token bucket algorithm with per-domain rate limiting.
 """
+
 from __future__ import annotations
 
 import time
@@ -69,10 +70,7 @@ class RateLimiter:
 
             # Refill tokens based on elapsed time
             elapsed = now - bucket["last_update"]
-            bucket["tokens"] = min(
-                self.burst_size,
-                bucket["tokens"] + elapsed * self.rate
-            )
+            bucket["tokens"] = min(self.burst_size, bucket["tokens"] + elapsed * self.rate)
             bucket["last_update"] = now
 
             # Check if we have tokens
@@ -94,10 +92,7 @@ class RateLimiter:
             Dict mapping domain to {tokens, last_update}
         """
         with self._lock:
-            return {
-                domain: bucket.copy()
-                for domain, bucket in self._buckets.items()
-            }
+            return {domain: bucket.copy() for domain, bucket in self._buckets.items()}
 
 
 # Global rate limiter instance

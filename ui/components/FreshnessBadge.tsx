@@ -17,5 +17,9 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export function FreshnessBadge({ status }: { status: string }) {
-  return <span className={clsx("badge", STATUS_CLASSES[status] || "badge--grey")}>{STATUS_LABELS[status] || status}</span>;
+  return (
+    <span className={clsx("badge", STATUS_CLASSES[status] || "badge--grey")}>
+      {STATUS_LABELS[status] || status}
+    </span>
+  );
 }

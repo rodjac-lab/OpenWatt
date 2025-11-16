@@ -83,7 +83,10 @@ export function TariffList() {
         </label>
         <label>
           Puissance
-          <select value={puissance} onChange={(e) => setPuissance(e.target.value ? Number(e.target.value) : "")}>  
+          <select
+            value={puissance}
+            onChange={(e) => setPuissance(e.target.value ? Number(e.target.value) : "")}
+          >
             <option value="">Toutes</option>
             {PUISSANCES.map((p) => (
               <option key={p} value={p}>
@@ -139,7 +142,8 @@ export function TariffList() {
                 <td>{row.puissance_kva} kVA</td>
                 <td>{row.abo_month_ttc?.toFixed?.(2) ?? "-"}</td>
                 <td>
-                  {row.price_kwh_ttc ?? "-"} / {row.price_kwh_hp_ttc ?? "-"} / {row.price_kwh_hc_ttc ?? "-"}
+                  {row.price_kwh_ttc ?? "-"} / {row.price_kwh_hp_ttc ?? "-"} /{" "}
+                  {row.price_kwh_hc_ttc ?? "-"}
                 </td>
                 <td className="cost">
                   {row.annualCost ? `${row.annualCost.toFixed(0)} €` : "n/a"}

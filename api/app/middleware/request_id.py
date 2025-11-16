@@ -2,6 +2,7 @@
 
 Adds unique request_id to every HTTP request for correlation across logs.
 """
+
 from __future__ import annotations
 
 import uuid

@@ -24,12 +24,16 @@ def run_pipeline(supplier: str, observed_at: str | None) -> int:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run ingest.pipeline for all suppliers sequentially")
+    parser = argparse.ArgumentParser(
+        description="Run ingest.pipeline for all suppliers sequentially"
+    )
     parser.add_argument(
         "--suppliers",
         help="Comma-separated list of suppliers (default: all configs under parsers/config)",
     )
-    parser.add_argument("--observed-at", help="Optional ISO timestamp override (e.g. 2025-02-15T00:00:00+00:00)")
+    parser.add_argument(
+        "--observed-at", help="Optional ISO timestamp override (e.g. 2025-02-15T00:00:00+00:00)"
+    )
     args = parser.parse_args()
 
     if args.suppliers:
@@ -38,7 +42,9 @@ def main() -> None:
         suppliers = detect_suppliers(Path("parsers/config"))
 
     if not suppliers:
-        parser.error("No suppliers found. Provide --suppliers or add YAML files under parsers/config/")
+        parser.error(
+            "No suppliers found. Provide --suppliers or add YAML files under parsers/config/"
+        )
 
     print(f"Running ingest pipeline for {len(suppliers)} suppliers...")
     failures: list[str] = []

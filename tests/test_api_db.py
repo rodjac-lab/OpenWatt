@@ -116,7 +116,11 @@ def test_trve_diff_guard_db(seeded_db, client):
     assert response.status_code == 200
     payload = response.json()
     assert payload["items"]
-    engie_entry = next(item for item in payload["items"] if item["supplier"] == "Engie" and item["option"] == "HPHC")
+    engie_entry = next(
+        item
+        for item in payload["items"]
+        if item["supplier"] == "Engie" and item["option"] == "HPHC"
+    )
     assert engie_entry["status"] == "alert"
     assert engie_entry["delta_eur_per_mwh"] == pytest.approx((0.15097 - 0.14) * 1000, rel=1e-3)
 

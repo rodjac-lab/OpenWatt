@@ -1,4 +1,5 @@
 """Sentry configuration for error tracking and performance monitoring."""
+
 from __future__ import annotations
 
 import sentry_sdk

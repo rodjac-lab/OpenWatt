@@ -16,7 +16,11 @@ CASES = [
     ("edf", "edf/edf_tarif_bleu.pdf", "edf/edf_2025_02_expected.json"),
     ("engie", "engie/engie_reference.pdf", "engie/engie_2025_02_expected.json"),
     ("total_heures_eco", "total/total_heures_eco.pdf", "total/total_heures_eco_expected.json"),
-    ("total_standard_fixe", "total/total_standard_fixe.pdf", "total/total_standard_fixe_expected.json"),
+    (
+        "total_standard_fixe",
+        "total/total_standard_fixe.pdf",
+        "total/total_standard_fixe_expected.json",
+    ),
     ("mint_indexe_trv", "mint/mint_indexe_trv.pdf", "mint/mint_indexe_trv_expected.json"),
     ("mint_classic_green", "mint/mint_classic_green.pdf", "mint/mint_classic_green_expected.json"),
     ("mint_smart_green", "mint/mint_smart_green.pdf", "mint/mint_smart_green_expected.json"),

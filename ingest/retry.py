@@ -2,6 +2,7 @@
 
 Uses tenacity for robust retry behavior with configurable backoff.
 """
+
 from __future__ import annotations
 
 import logging
@@ -48,11 +49,13 @@ def retry_on_network_error(
             min=min_wait_seconds,
             max=max_wait_seconds,
         ),
-        retry=retry_if_exception_type((
-            ConnectionError,
-            TimeoutError,
-            OSError,
-        )),
+        retry=retry_if_exception_type(
+            (
+                ConnectionError,
+                TimeoutError,
+                OSError,
+            )
+        ),
         before_sleep=before_sleep_log(logger, logging.WARNING),
         after=after_log(logger, logging.DEBUG),
         reraise=True,

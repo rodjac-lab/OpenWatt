@@ -3,6 +3,7 @@
 Uses structlog for structured JSON logging with request-id correlation.
 Designed for production observability (ELK stack, CloudWatch, etc.).
 """
+
 from __future__ import annotations
 
 import logging
