@@ -7,10 +7,9 @@ __pycache__/
 artifacts/
 ui/node_modules/
 ui/.next/
+ui/coverage/
 .pytest_cache/
 .env
 .env.*
 !.env.example
-ui/node_modules/
-ui/.next/
 
