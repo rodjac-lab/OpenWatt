@@ -1,14 +1,14 @@
 ---
 id: elec-tariffs-fr.api
-version: 0.2.0
+version: 0.1.0
 status: draft
-last_updated: 2025-11-22
+last_updated: 2025-11-11
 ---
 
 # 📡 API (extrait OpenAPI)
 ```yaml
 openapi: 3.0.3
-info: { title: Elec Tariffs FR API, version: 0.2.0 }
+info: { title: Elec Tariffs FR API, version: 0.1.0 }
 paths:
   /v1/tariffs:
     get:
@@ -67,7 +67,7 @@ paths:
               required: [supplier, url]
   /v1/admin/inspect:
     post:
-      summary: Inspecter un PDF selon un parser YAML (Debug interne)
+      summary: Inspecter un PDF selon un parser YAML
       requestBody:
         content:
           application/json:
@@ -81,39 +81,5 @@ paths:
       responses:
         "200":
           description: JSON des cellules extraites (preview non persisté)
-  /v1/audit/roast:
-    post:
-      summary: Analyse "Drop & Roast" d'une facture PDF via LLM
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                file: { type: string, format: binary }
-              required: [file]
-      responses:
-        "200":
-          description: Résultat du roast vs TRVE
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  verdict: { type: string, enum: [SCAM, SAFE, GENIUS, UNKNOWN] }
-                  details:
-                    type: object
-                    properties:
-                      annual_cost_user: { type: number }
-                      annual_cost_trv: { type: number }
-                      diff_euros: { type: number }
-                      supplier_detected: { type: string }
-                      offer_detected: { type: string }
-                  chart_data:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        month: { type: string, format: date }
-                        user_cumul: { type: number }
-                        trv_cumul: { type: number }
+```
+
