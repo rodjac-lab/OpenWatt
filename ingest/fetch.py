@@ -8,6 +8,10 @@ import requests
 from requests.adapters import HTTPAdapter, Retry
 
 from parsers.core.config import SupplierConfig
+from api.app.core.logging import get_logger
+
+logger = get_logger(__name__)
+
 
 DEFAULT_RAW_DIR = Path("artifacts/raw")
 DEFAULT_TIMEOUT = 60
@@ -44,8 +48,14 @@ def fetch_supplier_artifact(
     raw_dir.mkdir(parents=True, exist_ok=True)
 
     session = _http_session()
-    response = session.get(str(config.source.url), timeout=timeout)
-    response.raise_for_status()
+    logger.info("fetch_started", url=str(config.source.url))
+    try:
+        response = session.get(str(config.source.url), timeout=timeout)
+        response.raise_for_status()
+    except requests.RequestException as e:
+        logger.error("fetch_failed", url=str(config.source.url), error=str(e))
+        raise
+
     content = response.content
     checksum = sha256(content).hexdigest()
 

@@ -10,7 +10,10 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from api.app.db.models import Supplier, Tariff
 from api.app.db.session import get_session_factory
 from api.app.models.enums import Puissance, TariffOption
+from api.app.core.logging import get_logger
 from parsers.core.config import SupplierConfig
+
+logger = get_logger(__name__)
 
 
 class IngestRow(BaseModel):
@@ -42,6 +45,12 @@ class TariffPersister:
             for row in rows:
                 data = IngestRow(**row)
                 if await self._row_exists(session, supplier_id, data):
+                    logger.debug(
+                        "row_skipped_exists",
+                        supplier=config.supplier,
+                        option=data.option,
+                        puissance=data.puissance_kva,
+                    )
                     continue
                 session.add(
                     Tariff(
