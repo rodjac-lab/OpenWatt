@@ -49,27 +49,25 @@ export function TariffList() {
     });
   }, [tariffs, option, puissance]);
 
-  const tableRows: TableRow[] = useMemo(() => {
-    function computeAnnualCost(row: Tariff): number {
-      const abo = (row.abo_month_ttc ?? 0) * 12;
-      if (row.option === "HPHC") {
-        const hpPrice = row.price_kwh_hp_ttc ?? row.price_kwh_ttc ?? 0;
-        const hcPrice = row.price_kwh_hc_ttc ?? row.price_kwh_ttc ?? hpPrice;
-        const hpConso = consumption * (1 - hcShare / 100);
-        const hcConso = consumption * (hcShare / 100);
-        return abo + hpConso * hpPrice + hcConso * hcPrice;
-      }
-      if (row.option === "BASE" || row.option === "TEMPO") {
-        const basePrice = row.price_kwh_ttc ?? row.price_kwh_hp_ttc ?? 0;
-        return abo + consumption * basePrice;
-      }
-      return abo;
+  const computeAnnualCost = (row: Tariff): number => {
+    const abo = (row.abo_month_ttc ?? 0) * 12;
+    if (row.option === "HPHC") {
+      const hpPrice = row.price_kwh_hp_ttc ?? row.price_kwh_ttc ?? 0;
+      const hcPrice = row.price_kwh_hc_ttc ?? row.price_kwh_ttc ?? hpPrice;
+      const hpConso = consumption * (1 - hcShare / 100);
+      const hcConso = consumption * (hcShare / 100);
+      return abo + hpConso * hpPrice + hcConso * hcPrice;
     }
+    if (row.option === "BASE" || row.option === "TEMPO") {
+      const basePrice = row.price_kwh_ttc ?? row.price_kwh_hp_ttc ?? 0;
+      return abo + consumption * basePrice;
+    }
+    return abo;
+  };
 
-    return filtered
-      .map((row) => ({ ...row, annualCost: computeAnnualCost(row) }))
-      .sort((a, b) => a.annualCost - b.annualCost);
-  }, [filtered, consumption, hcShare]);
+  const tableRows: TableRow[] = filtered
+    .map((row) => ({ ...row, annualCost: computeAnnualCost(row) }))
+    .sort((a, b) => a.annualCost - b.annualCost);
 
   const handleProfileSelect = (profileId: string, value: number) => {
     setSelectedProfile(profileId);
@@ -78,7 +76,6 @@ export function TariffList() {
 
   const handleConsumptionChange = (value: number) => {
     setConsumption(value);
-    // Deselect profile if user manually changes consumption
     setSelectedProfile(null);
   };
 
@@ -162,7 +159,7 @@ export function TariffList() {
       {loading && <p>Chargement...</p>}
       {error && <p className="error">{error}</p>}
       {!loading && !error && (
-        <table className="tariff-table comparator">
+        <table className="tariff-table comparator" key={`table-${consumption}-${hcShare}`}>
           <thead>
             <tr>
               <th>Fournisseur</th>
@@ -175,8 +172,8 @@ export function TariffList() {
             </tr>
           </thead>
           <tbody>
-            {tableRows.map((row) => (
-              <tr key={`${row.supplier}-${row.option}-${row.puissance_kva}`}>
+            {tableRows.map((row, index) => (
+              <tr key={`${row.supplier}-${row.option}-${row.puissance_kva}-${index}`}>
                 <td>{row.supplier}</td>
                 <td>{row.option}</td>
                 <td>{row.puissance_kva} kVA</td>
