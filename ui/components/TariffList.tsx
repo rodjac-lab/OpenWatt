@@ -16,7 +16,7 @@ type OptionFilter = Tariff["option"] | "";
 type TableRow = Tariff & { annualCost: number };
 
 const CONSUMPTION_PROFILES = [
-  { id: "small", icon: "🏠", label: "Petit appart", value: 2000 },
+  { id: "small", icon: "🏢", label: "Petit appart", value: 2000 },
   { id: "medium", icon: "🏡", label: "Maison moyenne", value: 5000 },
   { id: "large", icon: "🏘️", label: "Grande maison", value: 8000 },
   { id: "electric", icon: "⚡", label: "Tout électrique", value: 12000 },
@@ -49,23 +49,23 @@ export function TariffList() {
     });
   }, [tariffs, option, puissance]);
 
-  function computeAnnualCost(row: Tariff): number {
-    const abo = (row.abo_month_ttc ?? 0) * 12;
-    if (row.option === "HPHC") {
-      const hpPrice = row.price_kwh_hp_ttc ?? row.price_kwh_ttc ?? 0;
-      const hcPrice = row.price_kwh_hc_ttc ?? row.price_kwh_ttc ?? hpPrice;
-      const hpConso = consumption * (1 - hcShare / 100);
-      const hcConso = consumption * (hcShare / 100);
-      return abo + hpConso * hpPrice + hcConso * hcPrice;
-    }
-    if (row.option === "BASE" || row.option === "TEMPO") {
-      const basePrice = row.price_kwh_ttc ?? row.price_kwh_hp_ttc ?? 0;
-      return abo + consumption * basePrice;
-    }
-    return abo;
-  }
-
   const tableRows: TableRow[] = useMemo(() => {
+    function computeAnnualCost(row: Tariff): number {
+      const abo = (row.abo_month_ttc ?? 0) * 12;
+      if (row.option === "HPHC") {
+        const hpPrice = row.price_kwh_hp_ttc ?? row.price_kwh_ttc ?? 0;
+        const hcPrice = row.price_kwh_hc_ttc ?? row.price_kwh_ttc ?? hpPrice;
+        const hpConso = consumption * (1 - hcShare / 100);
+        const hcConso = consumption * (hcShare / 100);
+        return abo + hpConso * hpPrice + hcConso * hcPrice;
+      }
+      if (row.option === "BASE" || row.option === "TEMPO") {
+        const basePrice = row.price_kwh_ttc ?? row.price_kwh_hp_ttc ?? 0;
+        return abo + consumption * basePrice;
+      }
+      return abo;
+    }
+
     return filtered
       .map((row) => ({ ...row, annualCost: computeAnnualCost(row) }))
       .sort((a, b) => a.annualCost - b.annualCost);
