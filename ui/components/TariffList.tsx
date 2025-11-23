@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import clsx from "clsx";
 
 import type { components } from "../lib/openapi-types";
 import { FreshnessBadge } from "./FreshnessBadge";
@@ -14,12 +15,20 @@ type OptionFilter = Tariff["option"] | "";
 
 type TableRow = Tariff & { annualCost: number };
 
+const CONSUMPTION_PROFILES = [
+  { id: "small", icon: "🏠", label: "Petit appart", value: 2000 },
+  { id: "medium", icon: "🏡", label: "Maison moyenne", value: 5000 },
+  { id: "large", icon: "🏘️", label: "Grande maison", value: 8000 },
+  { id: "electric", icon: "⚡", label: "Tout électrique", value: 12000 },
+] as const;
+
 export function TariffList() {
   const [tariffs, setTariffs] = useState<Tariff[]>([]);
   const [option, setOption] = useState<OptionFilter>("");
   const [puissance, setPuissance] = useState<number | "">("");
   const [consumption, setConsumption] = useState(5000);
   const [hcShare, setHcShare] = useState(40);
+  const [selectedProfile, setSelectedProfile] = useState<string | null>("medium");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -62,6 +71,17 @@ export function TariffList() {
       .sort((a, b) => a.annualCost - b.annualCost);
   }, [filtered, consumption, hcShare]);
 
+  const handleProfileSelect = (profileId: string, value: number) => {
+    setSelectedProfile(profileId);
+    setConsumption(value);
+  };
+
+  const handleConsumptionChange = (value: number) => {
+    setConsumption(value);
+    // Deselect profile if user manually changes consumption
+    setSelectedProfile(null);
+  };
+
   return (
     <section>
       <header className="tariff-header">
@@ -70,6 +90,26 @@ export function TariffList() {
           <p>Données issues des parsers PDF (insert-only). Tri par coût annuel TTC.</p>
         </div>
       </header>
+
+      <div className="profiles">
+        <h3 className="profiles__title">Choisissez votre profil de consommation</h3>
+        <div className="profiles__grid">
+          {CONSUMPTION_PROFILES.map((profile) => (
+            <button
+              key={profile.id}
+              type="button"
+              className={clsx("profile-card", {
+                "profile-card--selected": selectedProfile === profile.id,
+              })}
+              onClick={() => handleProfileSelect(profile.id, profile.value)}
+            >
+              <div className="profile-card__icon">{profile.icon}</div>
+              <div className="profile-card__label">{profile.label}</div>
+              <div className="profile-card__value">{profile.value.toLocaleString()} kWh/an</div>
+            </button>
+          ))}
+        </div>
+      </div>
 
       <div className="tariff-controls">
         <label>
@@ -102,7 +142,7 @@ export function TariffList() {
             min={500}
             step={100}
             value={consumption}
-            onChange={(e) => setConsumption(Math.max(0, Number(e.target.value)))}
+            onChange={(e) => handleConsumptionChange(Math.max(0, Number(e.target.value)))}
           />
         </label>
         <label className="hc-slider">
