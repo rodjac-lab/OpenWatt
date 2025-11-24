@@ -17,11 +17,12 @@ body.admin-theme {
 }
 
 main.landing {
-  max-width: 720px;
+  max-width: 1000px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  padding: 0 2rem;
 }
 
 main.admin-page {
@@ -82,6 +83,7 @@ main.admin-page {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
   margin-bottom: 1rem;
+  align-items: end;
 }
 
 .tariff-controls label {
@@ -113,13 +115,47 @@ main.admin-page {
   width: 100%;
   border-collapse: collapse;
   margin-top: 1rem;
+  font-size: 0.95rem;
 }
 
-.tariff-table th,
+.tariff-table th {
+  border-bottom: 2px solid #cbd5e1;
+  padding: 1rem 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #475569;
+  background: #f8fafc;
+}
+
 .tariff-table td {
   border-bottom: 1px solid #e2e8f0;
-  padding: 0.75rem 0.5rem;
+  padding: 1rem 0.75rem;
   text-align: left;
+}
+
+.tariff-table tbody tr:hover {
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+.tariff-table tbody tr:nth-child(even) {
+  background: #fafbfc;
+}
+
+.tariff-table tbody tr:nth-child(even):hover {
+  background: #f1f5f9;
+}
+
+.tariff-table td:nth-child(4),
+.tariff-table td:nth-child(5),
+.tariff-table td:nth-child(6),
+.tariff-table th:nth-child(4),
+.tariff-table th:nth-child(5),
+.tariff-table th:nth-child(6) {
+  text-align: right;
 }
 
 .badge {
@@ -595,5 +631,145 @@ body.admin-theme .job-history details {
 @media (max-width: 640px) {
   .profiles__grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Podium Top 3 */
+.podium {
+  margin: 2rem 0;
+}
+
+.podium__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #0f172a;
+}
+
+.podium__grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 1fr;
+  gap: 1rem;
+  align-items: end;
+}
+
+.podium-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.5rem 1rem;
+  border-radius: 16px;
+  border: 2px solid;
+  background: white;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.podium-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.podium-card--gold {
+  border-color: #f59e0b;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  box-shadow: 0 8px 16px rgba(245, 158, 11, 0.3);
+  padding: 2rem 1.25rem;
+}
+
+.podium-card--silver {
+  border-color: #94a3b8;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  box-shadow: 0 6px 12px rgba(148, 163, 184, 0.3);
+}
+
+.podium-card--bronze {
+  border-color: #ea580c;
+  background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%);
+  box-shadow: 0 6px 12px rgba(234, 88, 12, 0.3);
+}
+
+.podium-card__medal {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+.podium-card--gold .podium-card__medal {
+  font-size: 3.5rem;
+}
+
+.podium-card__rank {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  margin-bottom: 0.75rem;
+}
+
+.podium-card__supplier {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #0f172a;
+}
+
+.podium-card--gold .podium-card__supplier {
+  font-size: 1.5rem;
+}
+
+.podium-card__details {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 1rem;
+}
+
+.podium-card__price {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.75rem;
+}
+
+.podium-card--gold .podium-card__price {
+  font-size: 2.5rem;
+  color: #f59e0b;
+}
+
+.podium-card__price span {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.podium-card__savings {
+  font-size: 0.85rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: #fee2e2;
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.podium-card__badge {
+  font-size: 0.9rem;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  background: #22c55e;
+  color: white;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .podium__grid {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .podium-card--gold {
+    order: -1;
   }
 }

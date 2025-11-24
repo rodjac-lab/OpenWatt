@@ -158,6 +158,58 @@ export function TariffList() {
 
       {loading && <p>Chargement...</p>}
       {error && <p className="error">{error}</p>}
+      {!loading && !error && tableRows.length >= 3 && (
+        <div className="podium">
+          <h3 className="podium__title">🏆 Top 3 des meilleures offres</h3>
+          <div className="podium__grid">
+            {/* 2nd place */}
+            <div className="podium-card podium-card--silver">
+              <div className="podium-card__medal">🥈</div>
+              <div className="podium-card__rank">2ème</div>
+              <div className="podium-card__supplier">{tableRows[1].supplier}</div>
+              <div className="podium-card__details">
+                {tableRows[1].option} • {tableRows[1].puissance_kva} kVA
+              </div>
+              <div className="podium-card__price">
+                {tableRows[1].annualCost.toFixed(0)} €<span>/an</span>
+              </div>
+              <div className="podium-card__savings">
+                +{(tableRows[1].annualCost - tableRows[0].annualCost).toFixed(0)} € vs 1er
+              </div>
+            </div>
+
+            {/* 1st place */}
+            <div className="podium-card podium-card--gold">
+              <div className="podium-card__medal">🥇</div>
+              <div className="podium-card__rank">1er</div>
+              <div className="podium-card__supplier">{tableRows[0].supplier}</div>
+              <div className="podium-card__details">
+                {tableRows[0].option} • {tableRows[0].puissance_kva} kVA
+              </div>
+              <div className="podium-card__price">
+                {tableRows[0].annualCost.toFixed(0)} €<span>/an</span>
+              </div>
+              <div className="podium-card__badge">💰 Meilleure offre!</div>
+            </div>
+
+            {/* 3rd place */}
+            <div className="podium-card podium-card--bronze">
+              <div className="podium-card__medal">🥉</div>
+              <div className="podium-card__rank">3ème</div>
+              <div className="podium-card__supplier">{tableRows[2].supplier}</div>
+              <div className="podium-card__details">
+                {tableRows[2].option} • {tableRows[2].puissance_kva} kVA
+              </div>
+              <div className="podium-card__price">
+                {tableRows[2].annualCost.toFixed(0)} €<span>/an</span>
+              </div>
+              <div className="podium-card__savings">
+                +{(tableRows[2].annualCost - tableRows[0].annualCost).toFixed(0)} € vs 1er
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {!loading && !error && (
         <table className="tariff-table comparator" key={`table-${consumption}-${hcShare}`}>
           <thead>
@@ -165,25 +217,32 @@ export function TariffList() {
               <th>Fournisseur</th>
               <th>Option</th>
               <th>Puissance</th>
-              <th>Abonnement €/mois</th>
-              <th>€/kWh (base / HP / HC)</th>
-              <th>Coût annuel estimé</th>
+              <th>Abonnement<br />€/mois</th>
+              <th>Prix kWh<br />Base/HP</th>
+              <th>Prix kWh<br />HC</th>
+              <th>Coût annuel<br />estimé</th>
               <th>Fraîcheur</th>
             </tr>
           </thead>
           <tbody>
             {tableRows.map((row, index) => (
               <tr key={`${row.supplier}-${row.option}-${row.puissance_kva}-${index}`}>
-                <td>{row.supplier}</td>
+                <td><strong>{row.supplier}</strong></td>
                 <td>{row.option}</td>
                 <td>{row.puissance_kva} kVA</td>
-                <td>{row.abo_month_ttc?.toFixed?.(2) ?? "-"}</td>
+                <td>{row.abo_month_ttc?.toFixed?.(2) ?? "-"} €</td>
                 <td>
-                  {row.price_kwh_ttc ?? "-"} / {row.price_kwh_hp_ttc ?? "-"} /{" "}
-                  {row.price_kwh_hc_ttc ?? "-"}
+                  {row.price_kwh_ttc
+                    ? `${row.price_kwh_ttc} €`
+                    : row.price_kwh_hp_ttc
+                    ? `${row.price_kwh_hp_ttc} €`
+                    : "-"}
+                </td>
+                <td>
+                  {row.price_kwh_hc_ttc ? `${row.price_kwh_hc_ttc} €` : "-"}
                 </td>
                 <td className="cost">
-                  {row.annualCost ? `${row.annualCost.toFixed(0)} €` : "n/a"}
+                  <strong>{row.annualCost ? `${row.annualCost.toFixed(0)} €` : "n/a"}</strong>
                 </td>
                 <td>
                   <FreshnessBadge status={row.data_status ?? "stale"} />
