@@ -104,11 +104,17 @@ main.admin-page {
   position: relative;
 }
 
+.hc-slider input[type="range"] {
+  padding: 0.4rem 0;
+  margin: 0;
+}
+
 .hc-slider span {
   font-size: 0.85rem;
   color: #475569;
   margin-top: 0.2rem;
   text-align: right;
+  display: block;
 }
 
 .tariff-table {
@@ -149,6 +155,15 @@ main.admin-page {
   background: #f1f5f9;
 }
 
+.tariff-table tbody tr.trve-row {
+  background: #eff6ff;
+  border-left: 3px solid #3b82f6;
+}
+
+.tariff-table tbody tr.trve-row:hover {
+  background: #dbeafe;
+}
+
 .tariff-table td:nth-child(4),
 .tariff-table td:nth-child(5),
 .tariff-table td:nth-child(6),
@@ -185,6 +200,12 @@ main.admin-page {
 .badge--red {
   background: #fee2e2;
   color: #b91c1c;
+}
+
+.badge--blue {
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
 }
 
 body.admin-theme .badge--grey {
@@ -501,6 +522,59 @@ body.admin-theme .table-wrapper tr:hover {
 
 .cost {
   font-weight: 700;
+}
+
+.vs-trve {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.vs-trve--cheaper {
+  color: #16a34a;
+}
+
+.vs-trve--cheaper::before {
+  content: "✓ ";
+}
+
+.vs-trve--expensive {
+  color: #dc2626;
+}
+
+.vs-trve--expensive::before {
+  content: "⚠ ";
+}
+
+.vs-trve--neutral {
+  color: #64748b;
+}
+
+.podium-card__trve-comparison {
+  font-size: 0.85rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.podium-card__trve-comparison--cheaper {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.podium-card__trve-comparison--cheaper::before {
+  content: "✓ ";
+  font-weight: 800;
+}
+
+.podium-card__trve-comparison--expensive {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.podium-card__trve-comparison--expensive::before {
+  content: "⚠ ";
+  font-weight: 800;
 }
 
 .override-form {

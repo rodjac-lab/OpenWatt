@@ -43,9 +43,46 @@ const mockTariffs = [
   },
 ];
 
+const mockTrveDiff = [
+  {
+    supplier: "EDF",
+    option: "BASE",
+    puissance_kva: 6,
+    delta_eur_per_mwh: 5.0,
+    status: "ok",
+  },
+  {
+    supplier: "ENGIE",
+    option: "HPHC",
+    puissance_kva: 6,
+    delta_eur_per_mwh: -10.0,
+    status: "ok",
+  },
+];
+
+// Helper to mock both API calls
+const mockBothApis = (tariffs = mockTariffs, trveDiff = mockTrveDiff) => {
+  mockFetch.mockImplementation((url: string) => {
+    if (url.includes("/v1/tariffs")) {
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({ items: tariffs }),
+      });
+    }
+    if (url.includes("/v1/guards/trve-diff")) {
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({ items: trveDiff }),
+      });
+    }
+    return Promise.reject(new Error("Unknown URL"));
+  });
+};
+
 describe("TariffList", () => {
   beforeEach(() => {
     mockFetch.mockClear();
+    mockBothApis();
   });
 
   afterEach(() => {
@@ -62,20 +99,15 @@ describe("TariffList", () => {
   });
 
   it("fetches and displays tariffs", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ items: mockTariffs }),
-    });
-
     render(<TariffList />);
 
     await waitFor(() => {
       expect(screen.queryByText(/chargement/i)).not.toBeInTheDocument();
     });
 
-    expect(screen.getByText("EDF")).toBeInTheDocument();
-    expect(screen.getByText("ENGIE")).toBeInTheDocument();
-    expect(screen.getByText("TotalEnergies")).toBeInTheDocument();
+    expect(screen.getAllByText("EDF").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("ENGIE").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("TotalEnergies").length).toBeGreaterThan(0);
   });
 
   it("displays error message when fetch fails", async () => {
@@ -89,11 +121,6 @@ describe("TariffList", () => {
   });
 
   it("filters tariffs by option", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ items: mockTariffs }),
-    });
-
     const user = userEvent.setup();
     render(<TariffList />);
 
@@ -113,11 +140,6 @@ describe("TariffList", () => {
   });
 
   it("filters tariffs by puissance", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ items: mockTariffs }),
-    });
-
     const user = userEvent.setup();
     render(<TariffList />);
 
@@ -137,22 +159,17 @@ describe("TariffList", () => {
   });
 
   it("calculates annual cost correctly for BASE option", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        items: [
-          {
-            id: 1,
-            supplier: "EDF",
-            option: "BASE",
-            puissance_kva: 6,
-            abo_month_ttc: 10.0,
-            price_kwh_ttc: 0.2,
-            data_status: "fresh",
-          },
-        ],
-      }),
-    });
+    mockBothApis([
+      {
+        id: 1,
+        supplier: "EDF",
+        option: "BASE",
+        puissance_kva: 6,
+        abo_month_ttc: 10.0,
+        price_kwh_ttc: 0.2,
+        data_status: "fresh",
+      },
+    ]);
 
     render(<TariffList />);
 
@@ -165,22 +182,17 @@ describe("TariffList", () => {
   });
 
   it("updates consumption and recalculates cost", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        items: [
-          {
-            id: 1,
-            supplier: "EDF",
-            option: "BASE",
-            puissance_kva: 6,
-            abo_month_ttc: 10.0,
-            price_kwh_ttc: 0.2,
-            data_status: "fresh",
-          },
-        ],
-      }),
-    });
+    mockBothApis([
+      {
+        id: 1,
+        supplier: "EDF",
+        option: "BASE",
+        puissance_kva: 6,
+        abo_month_ttc: 10.0,
+        price_kwh_ttc: 0.2,
+        data_status: "fresh",
+      },
+    ]);
 
     const user = userEvent.setup();
     render(<TariffList />);
@@ -201,31 +213,26 @@ describe("TariffList", () => {
   });
 
   it("sorts tariffs by annual cost ascending", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        items: [
-          {
-            id: 1,
-            supplier: "Expensive",
-            option: "BASE",
-            puissance_kva: 6,
-            abo_month_ttc: 20.0,
-            price_kwh_ttc: 0.3,
-            data_status: "fresh",
-          },
-          {
-            id: 2,
-            supplier: "Cheap",
-            option: "BASE",
-            puissance_kva: 6,
-            abo_month_ttc: 5.0,
-            price_kwh_ttc: 0.1,
-            data_status: "fresh",
-          },
-        ],
-      }),
-    });
+    mockBothApis([
+      {
+        id: 1,
+        supplier: "Expensive",
+        option: "BASE",
+        puissance_kva: 6,
+        abo_month_ttc: 20.0,
+        price_kwh_ttc: 0.3,
+        data_status: "fresh",
+      },
+      {
+        id: 2,
+        supplier: "Cheap",
+        option: "BASE",
+        puissance_kva: 6,
+        abo_month_ttc: 5.0,
+        price_kwh_ttc: 0.1,
+        data_status: "fresh",
+      },
+    ]);
 
     render(<TariffList />);
 
@@ -243,11 +250,6 @@ describe("TariffList", () => {
   });
 
   it("renders FreshnessBadge for each tariff", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ items: mockTariffs }),
-    });
-
     render(<TariffList />);
 
     await waitFor(() => {

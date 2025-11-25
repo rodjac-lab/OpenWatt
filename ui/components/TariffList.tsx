@@ -13,7 +13,19 @@ type Tariff = components["schemas"]["TariffObservation"];
 
 type OptionFilter = Tariff["option"] | "";
 
-type TableRow = Tariff & { annualCost: number };
+type TrveDiffEntry = {
+  supplier: string;
+  option: string;
+  puissance_kva: number;
+  delta_eur_per_mwh: number;
+  status: string;
+};
+
+type TableRow = Tariff & {
+  annualCost: number;
+  vsTrve?: number | null;
+  isTrve?: boolean;
+};
 
 const CONSUMPTION_PROFILES = [
   { id: "small", icon: "🏢", label: "Petit appart", value: 2000 },
@@ -24,6 +36,7 @@ const CONSUMPTION_PROFILES = [
 
 export function TariffList() {
   const [tariffs, setTariffs] = useState<Tariff[]>([]);
+  const [trveDiff, setTrveDiff] = useState<TrveDiffEntry[]>([]);
   const [option, setOption] = useState<OptionFilter>("");
   const [puissance, setPuissance] = useState<number | "">("");
   const [consumption, setConsumption] = useState(5000);
@@ -31,12 +44,18 @@ export function TariffList() {
   const [selectedProfile, setSelectedProfile] = useState<string | null>("medium");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [onlyCheaperThanTrve, setOnlyCheaperThanTrve] = useState(false);
 
   useEffect(() => {
     setLoading(true);
-    fetch(`${API_BASE}/v1/tariffs?include_stale=true`)
-      .then((res) => res.json())
-      .then((payload) => setTariffs(payload.items ?? []))
+    Promise.all([
+      fetch(`${API_BASE}/v1/tariffs?include_stale=true`).then((res) => res.json()),
+      fetch(`${API_BASE}/v1/guards/trve-diff`).then((res) => res.json()),
+    ])
+      .then(([tariffsPayload, trvePayload]) => {
+        setTariffs(tariffsPayload.items ?? []);
+        setTrveDiff(trvePayload.items ?? []);
+      })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);
@@ -65,8 +84,34 @@ export function TariffList() {
     return abo;
   };
 
+  const findTrveComparison = (row: Tariff): number | null => {
+    const match = trveDiff.find(
+      (diff) =>
+        diff.supplier.toLowerCase() === row.supplier.toLowerCase() &&
+        diff.option === row.option &&
+        diff.puissance_kva === row.puissance_kva
+    );
+    if (!match) return null;
+    return (match.delta_eur_per_mwh / 1000) * consumption;
+  };
+
+  const isTrveSupplier = (supplier: string): boolean => {
+    return supplier.toLowerCase() === "trve" || supplier.toLowerCase().includes("réglementé");
+  };
+
   const tableRows: TableRow[] = filtered
-    .map((row) => ({ ...row, annualCost: computeAnnualCost(row) }))
+    .map((row) => ({
+      ...row,
+      annualCost: computeAnnualCost(row),
+      vsTrve: findTrveComparison(row),
+      isTrve: isTrveSupplier(row.supplier),
+    }))
+    .filter((row) => {
+      if (onlyCheaperThanTrve && row.vsTrve !== null && row.vsTrve !== undefined) {
+        return row.vsTrve < 0;
+      }
+      return true;
+    })
     .sort((a, b) => a.annualCost - b.annualCost);
 
   const handleProfileSelect = (profileId: string, value: number) => {
@@ -77,6 +122,22 @@ export function TariffList() {
   const handleConsumptionChange = (value: number) => {
     setConsumption(value);
     setSelectedProfile(null);
+  };
+
+  const renderTrveComparison = (row: TableRow) => {
+    if (!row.vsTrve) return null;
+
+    const isCheaper = row.vsTrve < 0;
+    const absValue = Math.abs(row.vsTrve).toFixed(0);
+    const className = isCheaper
+      ? "podium-card__trve-comparison podium-card__trve-comparison--cheaper"
+      : "podium-card__trve-comparison podium-card__trve-comparison--expensive";
+
+    return (
+      <div className={className}>
+        {isCheaper ? `${absValue} € moins cher que le TRVE` : `${absValue} € plus cher que le TRVE`}
+      </div>
+    );
   };
 
   return (
@@ -154,6 +215,14 @@ export function TariffList() {
           />
           <span>{hcShare}%</span>
         </label>
+        <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <input
+            type="checkbox"
+            checked={onlyCheaperThanTrve}
+            onChange={(e) => setOnlyCheaperThanTrve(e.target.checked)}
+          />
+          <span>Uniquement offres &lt; TRVE</span>
+        </label>
       </div>
 
       {loading && <p>Chargement...</p>}
@@ -176,6 +245,7 @@ export function TariffList() {
               <div className="podium-card__savings">
                 +{(tableRows[1].annualCost - tableRows[0].annualCost).toFixed(0)} € vs 1er
               </div>
+              {renderTrveComparison(tableRows[1])}
             </div>
 
             {/* 1st place */}
@@ -190,6 +260,7 @@ export function TariffList() {
                 {tableRows[0].annualCost.toFixed(0)} €<span>/an</span>
               </div>
               <div className="podium-card__badge">💰 Meilleure offre!</div>
+              {renderTrveComparison(tableRows[0])}
             </div>
 
             {/* 3rd place */}
@@ -206,6 +277,7 @@ export function TariffList() {
               <div className="podium-card__savings">
                 +{(tableRows[2].annualCost - tableRows[0].annualCost).toFixed(0)} € vs 1er
               </div>
+              {renderTrveComparison(tableRows[2])}
             </div>
           </div>
         </div>
@@ -221,12 +293,16 @@ export function TariffList() {
               <th>Prix kWh<br />Base/HP</th>
               <th>Prix kWh<br />HC</th>
               <th>Coût annuel<br />estimé</th>
+              <th>vs. TRVE</th>
               <th>Fraîcheur</th>
             </tr>
           </thead>
           <tbody>
             {tableRows.map((row, index) => (
-              <tr key={`${row.supplier}-${row.option}-${row.puissance_kva}-${index}`}>
+              <tr
+                key={`${row.supplier}-${row.option}-${row.puissance_kva}-${index}`}
+                className={clsx({ "trve-row": row.isTrve })}
+              >
                 <td><strong>{row.supplier}</strong></td>
                 <td>{row.option}</td>
                 <td>{row.puissance_kva} kVA</td>
@@ -245,7 +321,23 @@ export function TariffList() {
                   <strong>{row.annualCost ? `${row.annualCost.toFixed(0)} €` : "n/a"}</strong>
                 </td>
                 <td>
-                  <FreshnessBadge status={row.data_status ?? "stale"} />
+                  {row.isTrve ? (
+                    <span className="vs-trve vs-trve--neutral">Référence</span>
+                  ) : row.vsTrve !== null && row.vsTrve !== undefined ? (
+                    <span
+                      className={clsx("vs-trve", {
+                        "vs-trve--cheaper": row.vsTrve < 0,
+                        "vs-trve--expensive": row.vsTrve >= 0,
+                      })}
+                    >
+                      {row.vsTrve < 0 ? "-" : "+"}{Math.abs(row.vsTrve).toFixed(0)} €
+                    </span>
+                  ) : (
+                    <span className="vs-trve vs-trve--neutral">-</span>
+                  )}
+                </td>
+                <td>
+                  <FreshnessBadge status={row.data_status ?? "stale"} isTrve={row.isTrve} />
                 </td>
               </tr>
             ))}
