@@ -40,7 +40,8 @@
       "Bash(find:*)",
       "Bash(sqlite3:*)",
       "Bash(npm test:*)",
-      "Bash(set PYTHONPATH=c:UsersrodolVibeOpenWatt:*)"
+      "Bash(set PYTHONPATH=c:UsersrodolVibeOpenWatt:*)",
+      "Bash(flake8:*)"
     ],
     "deny": [],
     "ask": []

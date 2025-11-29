@@ -122,7 +122,7 @@ jobs:
           OPENWATT_DATABASE_URL: postgresql+asyncpg://openwatt:openwatt@localhost:5432/openwatt_test
           OPENWATT_ENABLE_DB: "true"
           PYTHONPATH: .
-        run: pytest --cov=api --cov=parsers --cov=ingest --cov-report=xml --cov-report=term-missing --cov-fail-under=70
+        run: pytest --import-mode=importlib --cov=api --cov=parsers --cov=ingest --cov-report=xml --cov-report=term-missing --cov-fail-under=70
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
