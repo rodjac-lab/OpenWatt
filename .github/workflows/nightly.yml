@@ -38,7 +38,7 @@ jobs:
       - name: Seed reference data
         run: python -m api.app.db.seed
       - name: Run pytest (DB + parser snapshots)
-        run: pytest --import-mode=importlib
+        run: pytest
       - name: Smoke ingest snapshot regeneration
         run: >
           python -m ingest.pipeline edf
