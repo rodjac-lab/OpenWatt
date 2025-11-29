@@ -50,3 +50,19 @@ export interface AdminSection {
   id: string;
   label: string;
 }
+
+export interface SupplierHealthStatus {
+  supplier: string;
+  last_run_at: string | null;
+  last_run_status: "success" | "failed" | "running" | "source_unavailable" | null;
+  last_success_at: string | null;
+  rows_last_inserted: number;
+  data_status: "fresh" | "stale" | "verifying" | "broken";
+  consecutive_failures: number;
+  error_message?: string | null;
+}
+
+export interface IngestHealthResponse {
+  generated_at: string;
+  suppliers: SupplierHealthStatus[];
+}

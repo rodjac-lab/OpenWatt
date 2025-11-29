@@ -9,12 +9,14 @@ import { MetricsPanel } from "../../components/admin/MetricsPanel";
 import { SuppliersPanel } from "../../components/admin/SuppliersPanel";
 import { ToolsPanel } from "../../components/admin/ToolsPanel";
 import { OverrideHistoryPanel } from "../../components/admin/OverrideHistoryPanel";
+import { MonitoringPanel } from "../../components/admin/MonitoringPanel";
 import type {
   AdminRunPayload,
   AdminRunsResponse,
   AdminSection,
   FreshnessStats,
   HealthPayload,
+  IngestHealthResponse,
   OverrideEntryPayload,
   OverrideHistoryResponse,
   SupplierRow,
@@ -27,6 +29,9 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
 
 export default function AdminConsole() {
   const [health, setHealth] = useState<HealthPayload | null>(null);
+  const [ingestHealth, setIngestHealth] = useState<IngestHealthResponse | null>(null);
+  const [ingestHealthError, setIngestHealthError] = useState<string | null>(null);
+  const [ingestHealthLoading, setIngestHealthLoading] = useState(true);
   const [tariffs, setTariffs] = useState<Tariff[]>([]);
   const [trveDiff, setTrveDiff] = useState<TrveDiff[]>([]);
   const [tariffError, setTariffError] = useState<string | null>(null);
@@ -53,6 +58,25 @@ export default function AdminConsole() {
       .then((res) => res.json())
       .then((payload) => setHealth(payload))
       .catch(() => setHealth(null));
+  }, []);
+
+  const fetchIngestHealth = () => {
+    setIngestHealthLoading(true);
+    fetch(`${API_BASE}/v1/health/ingest`)
+      .then((res) => {
+        if (!res.ok) throw new Error(res.statusText);
+        return res.json();
+      })
+      .then((payload) => {
+        setIngestHealth(payload);
+        setIngestHealthError(null);
+      })
+      .catch((err) => setIngestHealthError(err.message))
+      .finally(() => setIngestHealthLoading(false));
+  };
+
+  useEffect(() => {
+    fetchIngestHealth();
   }, []);
 
   useEffect(() => {
@@ -219,6 +243,7 @@ export default function AdminConsole() {
   }
 
   const sections: AdminSection[] = [
+    { id: "monitoring", label: "Monitoring" },
     { id: "jobs", label: "Surveillance" },
     { id: "health", label: "Santé" },
     { id: "suppliers", label: "Fournisseurs" },
@@ -226,7 +251,10 @@ export default function AdminConsole() {
     { id: "logs", label: "Logs" },
   ];
 
-  const handlePageRefresh = () => window.location.reload();
+  const handlePageRefresh = () => {
+    fetchIngestHealth();
+    window.location.reload();
+  };
   const handleOpenDocs = () => window.open("/api", "_blank");
   const supplierNames = supplierRows.map((row) => row.supplier);
   const currentTime = new Date().toLocaleString("fr-FR");
@@ -236,6 +264,13 @@ export default function AdminConsole() {
       <AdminNav sections={sections} healthStatus={health?.status} onRefresh={handlePageRefresh} />
 
       <main className="admin-page">
+        <MonitoringPanel
+          health={ingestHealth}
+          error={ingestHealthError}
+          loading={ingestHealthLoading}
+          onRefresh={fetchIngestHealth}
+        />
+
         <JobsPanel runs={runs} runsError={runsError} currentTime={currentTime} />
 
         <MetricsPanel
