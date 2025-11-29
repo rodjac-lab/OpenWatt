@@ -2,7 +2,7 @@ name: ingest-live
 
 on:
   schedule:
-    - cron: "30 3 * * *"  # 30 min après le nightly classique
+    - cron: "30 3 * * *"
   workflow_dispatch:
     inputs:
       supplier:
@@ -14,7 +14,7 @@ jobs:
   ingest:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false  # Continue autres suppliers si un échoue
+      fail-fast: false
       matrix:
         supplier: [edf, engie, mint_indexe_trv, mint_classic_green, mint_smart_green, total_heures_eco, total_standard_fixe]
 
@@ -73,12 +73,15 @@ jobs:
       - name: Create issue on failure
         if: failure()
         uses: actions/github-script@v7
+        env:
+          SUPPLIER: ${{ matrix.supplier }}
+          CHECK_OUTCOME: ${{ steps.check.outcome }}
         with:
           script: |
             const supplier = process.env.SUPPLIER || 'unknown';
-            const title = `[INGEST BROKEN] ${supplier} - ${new Date().toISOString().split('T')[0]}`;
+            const today = new Date().toISOString().split('T')[0];
+            const title = '[INGEST BROKEN] ' + supplier + ' - ' + today;
 
-            // Check for existing open issue for this supplier
             const issues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -88,48 +91,38 @@ jobs:
 
             const existing = issues.data.find(i => i.title.includes(supplier.toUpperCase()));
             if (existing) {
-              console.log(`Issue already exists for ${supplier}: #${existing.number}`);
-
-              // Add comment to existing issue
-              const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+              console.log('Issue already exists for ' + supplier + ': #' + existing.number);
+              const runUrl = context.serverUrl + '/' + context.repo.owner + '/' + context.repo.repo + '/actions/runs/' + context.runId;
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: existing.number,
-                body: `Still failing as of ${new Date().toISOString()}\n\n**Run:** ${runUrl}`
+                body: 'Still failing as of ' + new Date().toISOString() + '\n\n**Run:** ' + runUrl
               });
               return;
             }
 
-            // Determine error type
-            const sourceCheckFailed = '${{ steps.check.outcome }}' === 'failure';
+            const sourceCheckFailed = process.env.CHECK_OUTCOME === 'failure';
             const errorType = sourceCheckFailed ? 'Source URL unavailable (404 or timeout)' : 'Parsing error';
-
-            // Create new issue
-            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-            const body = `## Ingest pipeline failed for ${supplier}
-
-**Error type:** ${errorType}
-
-**Run:** ${runUrl}
-
-**Runbook:** Check \`docs/parsers/${supplier.toLowerCase().replace(/_/g, '-')}.md\` for troubleshooting steps
-
-## Action needed
-
-${sourceCheckFailed ? `
-1. Verify the source URL is still accessible
-2. Check if the URL has changed on the supplier's website
-3. Update \`parsers/config/${supplier}.yaml\` with the new URL if needed
-` : `
-1. Check the workflow logs for error messages
-2. Verify the PDF/HTML structure hasn't changed
-3. Update the parser config in \`parsers/config/${supplier}.yaml\` if needed
-4. Update tests snapshots if the structure changed
-`}
-
-5. Test locally with \`python -m ingest.pipeline ${supplier} --fetch --persist\`
-6. Close this issue once resolved`;
+            const runUrl = context.serverUrl + '/' + context.repo.owner + '/' + context.repo.repo + '/actions/runs/' + context.runId;
+            
+            let body = '## Ingest pipeline failed for ' + supplier + '\n\n';
+            body += '**Error type:** ' + errorType + '\n\n';
+            body += '**Run:** ' + runUrl + '\n\n';
+            body += '**Runbook:** Check `docs/parsers/' + supplier.toLowerCase().replace(/_/g, '-') + '.md` for troubleshooting steps\n\n';
+            body += '## Action needed\n\n';
+            if (sourceCheckFailed) {
+              body += '1. Verify the source URL is still accessible\n';
+              body += '2. Check if the URL has changed on the supplier website\n';
+              body += '3. Update `parsers/config/' + supplier + '.yaml` with the new URL if needed\n';
+            } else {
+              body += '1. Check the workflow logs for error messages\n';
+              body += '2. Verify the PDF/HTML structure has not changed\n';
+              body += '3. Update the parser config in `parsers/config/' + supplier + '.yaml` if needed\n';
+              body += '4. Update tests snapshots if the structure changed\n';
+            }
+            body += '5. Test locally with `python -m ingest.pipeline ' + supplier + ' --fetch --persist`\n';
+            body += '6. Close this issue once resolved';
 
             await github.rest.issues.create({
               owner: context.repo.owner,
