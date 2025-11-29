@@ -70,9 +70,9 @@ jobs:
         with:
           script: |
             const supplier = process.env.SUPPLIER || 'unknown';
-            const title = `[INGEST BROKEN] ${supplier} - ${new Date().toISOString().split('T')[0]}`;
+            const today = new Date().toISOString().split('T')[0];
+            const title = '[INGEST BROKEN] ' + supplier + ' - ' + today;
 
-            // Check for existing open issue for this supplier
             const issues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -82,27 +82,22 @@ jobs:
 
             const existing = issues.data.find(i => i.title.includes(supplier.toUpperCase()));
             if (existing) {
-              console.log(`Issue already exists for ${supplier}: #${existing.number}`);
+              console.log('Issue already exists for ' + supplier + ': #' + existing.number);
               return;
             }
 
-            // Create new issue
-            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-            const body = `## Ingest pipeline failed for ${supplier}
-
-**Error:** See workflow logs for details
-
-**Run:** ${runUrl}
-
-**Runbook:** Check \`docs/parsers/${supplier.toLowerCase()}.md\` for troubleshooting steps
-
-## Action needed
-
-1. Check the workflow logs for error messages
-2. Verify the source URL is still accessible
-3. Check if the PDF/HTML structure has changed
-4. Update the parser config if needed
-5. Close this issue once resolved`;
+            const runUrl = context.serverUrl + '/' + context.repo.owner + '/' + context.repo.repo + '/actions/runs/' + context.runId;
+            
+            let body = '## Ingest pipeline failed for ' + supplier + '\n\n';
+            body += '**Error:** See workflow logs for details\n\n';
+            body += '**Run:** ' + runUrl + '\n\n';
+            body += '**Runbook:** Check `docs/parsers/' + supplier.toLowerCase() + '.md` for troubleshooting steps\n\n';
+            body += '## Action needed\n\n';
+            body += '1. Check the workflow logs for error messages\n';
+            body += '2. Verify the source URL is still accessible\n';
+            body += '3. Check if the PDF/HTML structure has changed\n';
+            body += '4. Update the parser config if needed\n';
+            body += '5. Close this issue once resolved';
 
             await github.rest.issues.create({
               owner: context.repo.owner,
