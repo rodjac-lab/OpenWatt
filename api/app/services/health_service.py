@@ -86,7 +86,9 @@ class HealthService:
             "rows_last_inserted": last_run.rows_inserted if last_run else 0,
             "data_status": data_status,
             "consecutive_failures": consecutive_failures,
-            "error_message": last_run.error_message if last_run and last_run.status == "failed" else None,
+            "error_message": (
+                last_run.error_message if last_run and last_run.status == "failed" else None
+            ),
         }
 
     async def _count_consecutive_failures(self, session: AsyncSession, supplier: str) -> int:

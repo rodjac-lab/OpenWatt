@@ -27,9 +27,7 @@ class IngestRunLogger:
     def __init__(self, session_factory: async_sessionmaker[AsyncSession] | None = None):
         self.session_factory = session_factory or get_session_factory()
 
-    async def start_run(
-        self, supplier: str, source_url: str | None = None
-    ) -> int:
+    async def start_run(self, supplier: str, source_url: str | None = None) -> int:
         """Create a new ingest run record with status 'running'."""
         async with self.session_factory() as session:
             run = IngestRun(
@@ -153,7 +151,9 @@ if __name__ == "__main__":
                 )
             else:
                 if not args.html:
-                    parser.error("Provide --html path or use --fetch to download the latest artifact")
+                    parser.error(
+                        "Provide --html path or use --fetch to download the latest artifact"
+                    )
                 artifact_path = Path(args.html)
                 if not artifact_path.exists():
                     if run_id and run_logger:
@@ -178,7 +178,8 @@ if __name__ == "__main__":
                 DEFAULT_PARSED_DIR.mkdir(parents=True, exist_ok=True)
                 safe_supplier = args.supplier.lower()
                 output_path = (
-                    DEFAULT_PARSED_DIR / f"{safe_supplier}_{observed.strftime('%Y%m%dT%H%M%SZ')}.json"
+                    DEFAULT_PARSED_DIR
+                    / f"{safe_supplier}_{observed.strftime('%Y%m%dT%H%M%SZ')}.json"
                 )
             output_path.parent.mkdir(parents=True, exist_ok=True)
             output_path.write_text(

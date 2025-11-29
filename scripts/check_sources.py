@@ -17,9 +17,7 @@ class SourceChecker:
         self.max_retries = max_retries
         self.session = requests.Session()
 
-    def check_url(
-        self, supplier: str, url: str
-    ) -> dict[str, str | int | float | None]:
+    def check_url(self, supplier: str, url: str) -> dict[str, str | int | float | None]:
         """Check if a URL is accessible via HEAD request with retries."""
         attempts = 0
         last_error: str | None = None
