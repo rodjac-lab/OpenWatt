@@ -18,7 +18,17 @@ _session_factory: async_sessionmaker[AsyncSession] | None = None
 def get_engine() -> AsyncEngine:
     global _engine
     if _engine is None:
-        _engine = create_async_engine(settings.database_url, echo=False, future=True)
+        pool_class = None
+        if "test" in settings.database_url or "sqlite" in settings.database_url:
+            from sqlalchemy.pool import NullPool
+            pool_class = NullPool
+        
+        _engine = create_async_engine(
+            settings.database_url, 
+            echo=False, 
+            future=True,
+            poolclass=pool_class
+        )
     return _engine
 
 
