@@ -59,12 +59,12 @@ OpenWatt s’inscrit dans une démarche de **transparence énergétique** et de 
    - `pytest` casse si le HTML change → alerte développeur.
 7. **Alerting & traçabilité**
    - Log JSON : `{date, supplier, url, hash, status}`.
-   - Slack alert si `parse_error`, `prix_anomal`, ou `structure_changed`.
-   - Issue GitHub auto après 2 échecs.
+   - GitHub Issue auto-créée si `parse_error`, `prix_anomal`, ou `structure_changed`.
+   - Notifications via l'app GitHub mobile.
 8. **Stack technique figée**
    - **Python 3.11+**, **PostgreSQL**, **FastAPI + uvicorn**, **BeautifulSoup4**, **pytest**.
    - Orchestration : GitHub Actions (cron 03:15 UTC).
-   - Alertes : Slack Webhook.
+   - Alertes : GitHub Issues auto-créées par les workflows CI.
 9. **Pas de dépendances externes lourdes**
    - Pas de LLM, pas d’OCR, pas de Selenium/Playwright.
    - Sites trop dynamiques → mis en backlog jusqu’à alternative viable.
@@ -107,8 +107,8 @@ OpenWatt s’inscrit dans une démarche de **transparence énergétique** et de 
 - **API :** FastAPI + uvicorn  
 - **Scraping :** requests + BeautifulSoup4  
 - **Tests :** pytest + snapshots  
-- **Automation :** GitHub Actions (cron nightly)  
-- **Alerting :** Slack Webhook + GitHub Issues auto  
+- **Automation :** GitHub Actions (cron nightly)
+- **Alerting :** GitHub Issues auto-créées par les workflows CI  
 
 ---
 

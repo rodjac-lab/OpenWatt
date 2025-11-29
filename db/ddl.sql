@@ -48,6 +48,22 @@ create table if not exists admin_overrides (
   created_at timestamptz not null default now()
 );
 
+-- ingest_runs: historiser chaque exécution du pipeline
+create table if not exists ingest_runs (
+  id serial primary key,
+  supplier varchar(50) not null,
+  started_at timestamptz not null default now(),
+  finished_at timestamptz,
+  status varchar(20) not null check (status in ('running', 'success', 'failed', 'source_unavailable')),
+  rows_inserted integer default 0,
+  error_message text,
+  source_url varchar(500),
+  source_checksum varchar(64),
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_ingest_runs_supplier_started on ingest_runs(supplier, started_at desc);
+
 -- latest view
 create or replace view latest_tariffs as
 select t.* from (
