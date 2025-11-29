@@ -289,10 +289,26 @@ export function TariffList() {
               <th>Fournisseur</th>
               <th>Option</th>
               <th>Puissance</th>
-              <th>Abonnement<br />€/mois</th>
-              <th>Prix kWh<br />Base/HP</th>
-              <th>Prix kWh<br />HC</th>
-              <th>Coût annuel<br />estimé</th>
+              <th>
+                Abonnement
+                <br />
+                €/mois
+              </th>
+              <th>
+                Prix kWh
+                <br />
+                Base/HP
+              </th>
+              <th>
+                Prix kWh
+                <br />
+                HC
+              </th>
+              <th>
+                Coût annuel
+                <br />
+                estimé
+              </th>
               <th>vs. TRVE</th>
               <th>Fraîcheur</th>
             </tr>
@@ -303,7 +319,9 @@ export function TariffList() {
                 key={`${row.supplier}-${row.option}-${row.puissance_kva}-${index}`}
                 className={clsx({ "trve-row": row.isTrve })}
               >
-                <td><strong>{row.supplier}</strong></td>
+                <td>
+                  <strong>{row.supplier}</strong>
+                </td>
                 <td>{row.option}</td>
                 <td>{row.puissance_kva} kVA</td>
                 <td>{row.abo_month_ttc?.toFixed?.(2) ?? "-"} €</td>
@@ -311,12 +329,10 @@ export function TariffList() {
                   {row.price_kwh_ttc
                     ? `${row.price_kwh_ttc} €`
                     : row.price_kwh_hp_ttc
-                    ? `${row.price_kwh_hp_ttc} €`
-                    : "-"}
+                      ? `${row.price_kwh_hp_ttc} €`
+                      : "-"}
                 </td>
-                <td>
-                  {row.price_kwh_hc_ttc ? `${row.price_kwh_hc_ttc} €` : "-"}
-                </td>
+                <td>{row.price_kwh_hc_ttc ? `${row.price_kwh_hc_ttc} €` : "-"}</td>
                 <td className="cost">
                   <strong>{row.annualCost ? `${row.annualCost.toFixed(0)} €` : "n/a"}</strong>
                 </td>
@@ -330,7 +346,8 @@ export function TariffList() {
                         "vs-trve--expensive": row.vsTrve >= 0,
                       })}
                     >
-                      {row.vsTrve < 0 ? "-" : "+"}{Math.abs(row.vsTrve).toFixed(0)} €
+                      {row.vsTrve < 0 ? "-" : "+"}
+                      {Math.abs(row.vsTrve).toFixed(0)} €
                     </span>
                   ) : (
                     <span className="vs-trve vs-trve--neutral">-</span>
