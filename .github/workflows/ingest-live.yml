@@ -10,6 +10,10 @@ on:
         required: false
         default: 'all'
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   ingest:
     runs-on: ubuntu-latest

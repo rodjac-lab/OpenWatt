@@ -4,6 +4,10 @@ on:
     - cron: "15 3 * * *"
   workflow_dispatch:
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   nightly-suite:
     runs-on: ubuntu-latest
