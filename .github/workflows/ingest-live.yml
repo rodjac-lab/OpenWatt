@@ -20,7 +20,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        supplier: [edf, engie, mint_indexe_trv, mint_classic_green, mint_smart_green, total_heures_eco, total_standard_fixe]
+        # Note: edf and engie are excluded because GitHub Actions IPs are blocked by their websites (403 Forbidden)
+        # These suppliers must be ingested manually or from a dedicated server with residential IP
+        supplier: [mint_indexe_trv, mint_classic_green, mint_smart_green, total_heures_eco, total_standard_fixe]
 
     services:
       postgres:
