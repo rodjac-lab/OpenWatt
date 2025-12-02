@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
+import yaml
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -35,11 +37,28 @@ class HealthService:
             }
 
     async def _get_all_suppliers(self, session: AsyncSession) -> list[str]:
-        """Get list of unique suppliers from ingest_runs."""
-        result = await session.execute(
-            select(IngestRun.supplier).distinct().order_by(IngestRun.supplier)
-        )
-        return [row[0] for row in result.all()]
+        """Get list of all configured suppliers from config files.
+
+        Returns suppliers from parsers/config/*.yaml, not just those in DB.
+        This ensures we show all suppliers even if they've never been run.
+        """
+        config_dir = Path("parsers/config")
+
+        if not config_dir.exists():
+            logger.warning("config_directory_not_found", path=str(config_dir))
+            # Fallback to DB if config dir doesn't exist
+            result = await session.execute(
+                select(IngestRun.supplier).distinct().order_by(IngestRun.supplier)
+            )
+            return [row[0] for row in result.all()]
+
+        suppliers = []
+        for config_file in config_dir.glob("*.yaml"):
+            # Use filename (stem) as supplier identifier to avoid duplicates
+            # This matches how the pipeline is invoked: python -m ingest.pipeline <filename>
+            suppliers.append(config_file.stem)
+
+        return sorted(suppliers)
 
     async def _get_supplier_stats(self, session: AsyncSession, supplier: str) -> dict[str, Any]:
         """Get stats for a specific supplier."""
