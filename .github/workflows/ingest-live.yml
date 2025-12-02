@@ -130,10 +130,12 @@ jobs:
             body += '5. Test locally with `python -m ingest.pipeline ' + supplier + ' --fetch --persist`\n';
             body += '6. Close this issue once resolved';
 
-            await github.rest.issues.create({
+            const issue = await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: title,
               body: body,
-              labels: ['bug', 'ingest']
+              labels: ['bug', 'ingest'],
+              assignees: ['rodjac-lab']  // Auto-assign to receive notifications
             });
+            console.log('Created issue #' + issue.data.number + ' and assigned to rodjac-lab');
