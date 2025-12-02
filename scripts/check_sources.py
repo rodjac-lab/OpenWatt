@@ -16,6 +16,10 @@ class SourceChecker:
         self.timeout = timeout
         self.max_retries = max_retries
         self.session = requests.Session()
+        # Set a realistic User-Agent to avoid bot detection
+        self.session.headers.update({
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        })
 
     def check_url(self, supplier: str, url: str) -> dict[str, str | int | float | None]:
         """Check if a URL is accessible via HEAD request with retries."""
