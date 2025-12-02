@@ -62,11 +62,11 @@ jobs:
 
       - name: Check source availability
         id: check
+        continue-on-error: true
         run: |
           if ! python scripts/check_sources.py --supplier ${{ matrix.supplier }}; then
             echo "source_check_failed=true" >> $GITHUB_OUTPUT
-            echo "::error::Source URL check failed for ${{ matrix.supplier }}"
-            exit 1
+            echo "::warning::Source URL pre-check failed for ${{ matrix.supplier }}, but continuing with ingest attempt"
           fi
 
       - name: Run live ingest
