@@ -46,7 +46,7 @@ jobs:
       - name: Smoke ingest snapshot regeneration
         run: >
           python -m ingest.pipeline edf
-          --html tests/snapshots/edf/edf_2025_02.html
+          --html tests/snapshots/edf/edf_tarif_bleu.pdf
           --observed-at 2025-02-12T08:00:00Z
           --persist
           --output artifacts/ci_edf.json
