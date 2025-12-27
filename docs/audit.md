@@ -13,15 +13,15 @@
 
 ### Note Globale: **8.5/10** ⬆️ (+2.0)
 
-| Critère | Score Initial | Score Actuel | Évolution | Commentaire |
-|---------|---------------|--------------|-----------|-------------|
-| Architecture | 8/10 | 8/10 | = | Solide, bien séparée |
-| Documentation | 9/10 | 10/10 | ⬆️ +1 | Exceptionnelle + guides Sprint 1 & 2 |
-| Qualité code | 7/10 | 9/10 | ⬆️ +2 | Linting automatisé + pre-commit hooks |
-| Tests | 5/10 | 9/10 | ⬆️ +4 | Backend 70%+ & Frontend 99%+ |
-| Déploiement | 3/10 | 9/10 | ⬆️ +6 | Docker multi-stage + CI/CD complet |
-| Monitoring | 2/10 | 8/10 | ⬆️ +6 | Logs JSON + Sentry + Prometheus |
-| Sécurité | 6/10 | 7/10 | ⬆️ +1 | Rate limiting + retry, secrets restent à faire |
+| Critère       | Score Initial | Score Actuel | Évolution | Commentaire                                    |
+| ------------- | ------------- | ------------ | --------- | ---------------------------------------------- |
+| Architecture  | 8/10          | 8/10         | =         | Solide, bien séparée                           |
+| Documentation | 9/10          | 10/10        | ⬆️ +1     | Exceptionnelle + guides Sprint 1 & 2           |
+| Qualité code  | 7/10          | 9/10         | ⬆️ +2     | Linting automatisé + pre-commit hooks          |
+| Tests         | 5/10          | 9/10         | ⬆️ +4     | Backend 70%+ & Frontend 99%+                   |
+| Déploiement   | 3/10          | 9/10         | ⬆️ +6     | Docker multi-stage + CI/CD complet             |
+| Monitoring    | 2/10          | 8/10         | ⬆️ +6     | Logs JSON + Sentry + Prometheus                |
+| Sécurité      | 6/10          | 7/10         | ⬆️ +1     | Rate limiting + retry, secrets restent à faire |
 
 **Verdict**: Projet **PRODUCTION-READY** ✅
 Sprint 1 & 2 ont transformé OpenWatt d'un prototype prometteur en une application prête pour la production.
@@ -31,15 +31,18 @@ Sprint 1 & 2 ont transformé OpenWatt d'un prototype prometteur en une applicati
 ## 🎉 ACCOMPLISSEMENTS SPRINT 1 & 2 (Nov 2025)
 
 ### Sprint 1 - Production Readiness (100% ✅)
+
 **Durée**: 2025-11-15
 **Objectif**: Rendre le projet déployable en production
 
 #### 1. Dockerisation complète
+
 - ✅ `Dockerfile` API (multi-stage, non-root, health checks)
 - ✅ `ui/Dockerfile` Next.js (standalone mode optimisé)
 - ✅ `docker-compose.prod.yaml` (orchestration complète db+api+ui)
 
 #### 2. CI/CD GitHub Actions
+
 - ✅ `.github/workflows/ci.yml` - Validation automatique sur PR/push
   - Linting Python (black, flake8, mypy)
   - Linting TypeScript (ESLint, Prettier, tsc)
@@ -49,16 +52,19 @@ Sprint 1 & 2 ont transformé OpenWatt d'un prototype prometteur en une applicati
   - Job ci-success bloque merge si échec
 
 #### 3. Linting & Formatting
+
 - ✅ Configuration pyproject.toml (black, flake8, mypy, pytest)
 - ✅ Pre-commit hooks (.pre-commit-config.yaml)
 - ✅ ESLint + Prettier pour TypeScript
 - ✅ Fix warnings Next.js (appDir deprecated)
 
 #### 4. Coverage enforced
+
 - ✅ Pytest coverage threshold 70% (fail si < 70%)
 - ✅ Upload Codecov pour suivi historique
 
 **Impact Sprint 1**:
+
 - De 0 à 100% déployabilité
 - Code quality automatisée
 - Reproductibilité garantie
@@ -66,35 +72,42 @@ Sprint 1 & 2 ont transformé OpenWatt d'un prototype prometteur en une applicati
 ---
 
 ### Sprint 2 - Monitoring & Robustesse (87.5% ✅)
+
 **Durée**: 2025-11-15 → 2025-11-16
 **Objectif**: Observabilité production et robustesse ingestion
 
 #### 1. Logging structuré
+
 - ✅ `api/app/core/logging.py` - Structlog JSON
 - ✅ Format production-ready (CloudWatch/ELK compatible)
 - ✅ Documentation usage dans `docs/logging.md`
 
 #### 2. Error Tracking
+
 - ✅ `api/app/core/sentry.py` - Sentry SDK
 - ✅ Filtres événements (ignore health checks)
 - ✅ Integration FastAPI middleware
 
 #### 3. Metrics
+
 - ✅ `api/app/core/metrics.py` - Prometheus client
 - ✅ Endpoint `/metrics` (Grafana ready)
 - ✅ Métriques HTTP + business
 
 #### 4. Request Tracing
+
 - ✅ `api/app/middleware/request_id.py`
 - ✅ X-Request-ID header propagation
 - ✅ Binding contexte structlog
 
 #### 5. Robustesse Ingestion
+
 - ✅ `ingest/retry.py` - Retry logic avec tenacity
 - ✅ `ingest/rate_limiter.py` - Token bucket par domaine
 - ✅ Anti-ban automatique
 
 #### 6. Tests Frontend
+
 - ✅ Vitest + React Testing Library + Happy-DOM
 - ✅ 15 tests (FreshnessBadge: 6, TariffList: 9)
 - ✅ Coverage 99.43% (> 70% threshold)
@@ -102,12 +115,14 @@ Sprint 1 & 2 ont transformé OpenWatt d'un prototype prometteur en une applicati
 - ✅ Documentation `docs/frontend-testing.md`
 
 #### 7. Documentation Complète
+
 - ✅ `docs/sprint-1-summary.md`
 - ✅ `docs/sprint-2-summary.md`
 - ✅ `docs/frontend-testing.md`
 - ✅ `docs/monitoring-setup-guide.md`
 
 **Impact Sprint 2**:
+
 - Production observability complète
 - Ingestion 10x plus robuste
 - Tests frontend safe refactoring
@@ -120,35 +135,41 @@ Sprint 1 & 2 ont transformé OpenWatt d'un prototype prometteur en une applicati
 ## ✅ POINTS FORTS MAJEURS
 
 ### 1. Architecture Solide et Moderne
+
 - Séparation claire backend/frontend/parsers/ingestion
 - Pattern insert-only pour l'historisation complète (immutabilité DB)
 - Architecture async moderne (FastAPI + SQLAlchemy async)
 - Support SQLite pour dev local
 
 ### 2. Documentation Exceptionnelle
+
 - Approche "Spec-Kit" unique avec `specs/constitution.md` très détaillée
 - Principes fondateurs clairs et non négociables
 - Runbooks par fournisseur
 - OpenAPI schema complet
 
 ### 3. Parsers Configurables YAML
+
 - Ajout de nouveaux fournisseurs sans toucher au code Python
 - Support PDF (pdfplumber) et HTML (BeautifulSoup)
 - Versioning des parsers
 - Tests snapshots pour régression
 
 ### 4. Admin Console Riche
+
 - Dashboard opérationnel complet dans `ui/app/admin/page.tsx`
 - Inspection PDF inline
 - Gestion overrides manuels
 - Monitoring jobs d'ingestion
 
 ### 5. Types Stricts Partout
+
 - Pydantic pour validation backend
 - TypeScript strict mode activé
 - Types UI générés depuis OpenAPI
 
 ### 6. Validation TRVE
+
 - Comparaison automatique vs tarifs réglementés (référence CRE)
 - Guard endpoint pour détecter écarts
 
@@ -157,9 +178,11 @@ Sprint 1 & 2 ont transformé OpenWatt d'un prototype prometteur en une applicati
 ## ❌ POINTS FAIBLES CRITIQUES (Statut après Sprint 1 & 2)
 
 ### ✅ ~~1. Absence de Dockerfiles~~ → **RÉSOLU** (Sprint 1)
+
 **Gravité initiale: CRITIQUE**
 
 ✅ **Résolu par**:
+
 - `Dockerfile` API multi-stage avec non-root user
 - `ui/Dockerfile` Next.js standalone optimisé
 - `docker-compose.prod.yaml` orchestration complète
@@ -170,9 +193,11 @@ Sprint 1 & 2 ont transformé OpenWatt d'un prototype prometteur en une applicati
 ---
 
 ### ✅ ~~2. Pas de CI sur Pull Requests~~ → **RÉSOLU** (Sprint 1)
+
 **Gravité initiale: CRITIQUE**
 
 ✅ **Résolu par**:
+
 - `.github/workflows/ci.yml` complet avec 6 jobs
 - Linting Python + TypeScript
 - Tests backend + frontend avec coverage
@@ -184,9 +209,11 @@ Sprint 1 & 2 ont transformé OpenWatt d'un prototype prometteur en une applicati
 ---
 
 ### ✅ ~~3. Aucun Test Frontend~~ → **RÉSOLU** (Sprint 2)
+
 **Gravité initiale: CRITIQUE**
 
 ✅ **Résolu par**:
+
 - Vitest + React Testing Library configurés
 - 15 tests (FreshnessBadge: 6, TariffList: 9)
 - Coverage 99.43% (> 70% threshold enforced)
@@ -198,9 +225,11 @@ Sprint 1 & 2 ont transformé OpenWatt d'un prototype prometteur en une applicati
 ---
 
 ### ✅ ~~4. Pas de Linting Automatisé~~ → **RÉSOLU** (Sprint 1)
+
 **Gravité initiale: MAJEURE**
 
 ✅ **Résolu par**:
+
 - pyproject.toml avec black, flake8, mypy
 - .pre-commit-config.yaml pour hooks automatiques
 - ESLint + Prettier pour TypeScript
@@ -211,9 +240,11 @@ Sprint 1 & 2 ont transformé OpenWatt d'un prototype prometteur en une applicati
 ---
 
 ### ✅ ~~5. Monitoring & Observabilité Absents~~ → **RÉSOLU** (Sprint 2)
+
 **Gravité initiale: MAJEURE**
 
 ✅ **Code résolu par**:
+
 - `api/app/core/logging.py` - Structlog JSON
 - `api/app/core/sentry.py` - Sentry SDK
 - `api/app/core/metrics.py` - Prometheus metrics
@@ -222,6 +253,7 @@ Sprint 1 & 2 ont transformé OpenWatt d'un prototype prometteur en une applicati
 - `ingest/rate_limiter.py` - Rate limiting anti-ban
 
 ⚠️ **Infrastructure non déployée** (code prêt, infrastructure à setup):
+
 - Sentry DSN requis
 - Prometheus + Grafana à déployer
 - ELK stack pour logs (optionnel)
@@ -232,6 +264,7 @@ Sprint 1 & 2 ont transformé OpenWatt d'un prototype prometteur en une applicati
 ---
 
 ### ❌ 6. Secrets Management → **NON RÉSOLU** (déféré)
+
 **Gravité: MAJEURE**
 
 Variables sensibles dans `.env` sans protection (pas de vault, secrets manager).
@@ -244,6 +277,7 @@ Variables sensibles dans `.env` sans protection (pas de vault, secrets manager).
 ---
 
 ### ❌ 7. Pas de Stratégie Backup DB → **NON RÉSOLU**
+
 **Gravité: MAJEURE**
 
 Aucun backup automatique PostgreSQL visible.
@@ -258,6 +292,7 @@ Aucun backup automatique PostgreSQL visible.
 ## ⚠️ POINTS FAIBLES RESTANTS (Qualité)
 
 ### 8. AdminConsole Trop Dense → **À FAIRE** (Sprint 3)
+
 `ui/app/admin/page.tsx` fait **462 lignes** (!!!)
 
 **Impact**: Difficile à maintenir, risque de bugs
@@ -266,6 +301,7 @@ Aucun backup automatique PostgreSQL visible.
 **Guide disponible**: `docs/adminConsole-refactor-guide.md`
 
 **Recommandation**: Refactorer en composants modulaires:
+
 - `DashboardMetrics.tsx`
 - `IngestionJobs.tsx`
 - `PDFInspector.tsx`
@@ -276,6 +312,7 @@ Aucun backup automatique PostgreSQL visible.
 ---
 
 ### 9. Pas de State Management UI → **À FAIRE** (Sprint 3)
+
 Fetch API dupliqué partout, pas de cache.
 
 **Recommandation**: Ajouter TanStack Query (React Query) pour cache + retry.
@@ -283,6 +320,7 @@ Fetch API dupliqué partout, pas de cache.
 ---
 
 ### 10. Migrations Alembic Non Utilisées → **À FAIRE** (Sprint 3)
+
 Setup prêt mais aucune migration créée.
 
 **Recommandation**: Générer migration initiale depuis DDL actuel + auto-apply on startup.
@@ -292,6 +330,7 @@ Setup prêt mais aucune migration créée.
 ### ✅ ~~11. Coverage Tests Inconnue~~ → **RÉSOLU** (Sprint 1)
 
 ✅ **Résolu par**:
+
 - pytest-cov configuré dans pyproject.toml
 - Coverage threshold 70% enforced (backend)
 - Coverage 99.43% frontend (Vitest)
@@ -305,6 +344,7 @@ Setup prêt mais aucune migration créée.
 ### ✅ ~~12. Logs Non Structurés~~ → **RÉSOLU** (Sprint 2)
 
 ✅ **Résolu par**:
+
 - structlog JSON configuré
 - `api/app/core/logging.py`
 - Documentation `docs/logging.md`
@@ -316,6 +356,7 @@ Setup prêt mais aucune migration créée.
 ### ✅ ~~13. Pas de Rate Limiting Parsers~~ → **RÉSOLU** (Sprint 2)
 
 ✅ **Résolu par**:
+
 - `ingest/rate_limiter.py` - Token bucket par domaine
 - 1 requête / 5 secondes (configurable)
 - Anti-ban automatique
@@ -327,6 +368,7 @@ Setup prêt mais aucune migration créée.
 ### ✅ ~~14. Pas de Retry Logic Fetch~~ → **RÉSOLU** (Sprint 2)
 
 ✅ **Résolu par**:
+
 - `ingest/retry.py` - Tenacity avec backoff exponentiel
 - 3 tentatives par défaut
 - Logs détaillés des erreurs
@@ -338,6 +380,7 @@ Setup prêt mais aucune migration créée.
 ## 📋 FICHIERS - STATUT APRÈS SPRINT 1 & 2
 
 ### Configuration Qualité
+
 ```
 ✅ pyproject.toml (black, flake8, mypy, pytest) - Sprint 1
 ✅ .pre-commit-config.yaml - Sprint 1
@@ -348,6 +391,7 @@ Setup prêt mais aucune migration créée.
 ```
 
 ### Déploiement
+
 ```
 ✅ Dockerfile (API multi-stage) - Sprint 1
 ✅ ui/Dockerfile (Next.js standalone) - Sprint 1
@@ -357,6 +401,7 @@ Setup prêt mais aucune migration créée.
 ```
 
 ### CI/CD
+
 ```
 ✅ .github/workflows/ci.yml (validation PR complète) - Sprint 1
 ❌ .github/workflows/deploy.yml (à faire Sprint 3)
@@ -364,6 +409,7 @@ Setup prêt mais aucune migration créée.
 ```
 
 ### Documentation
+
 ```
 ✅ docs/sprint-1-summary.md - Sprint 1
 ✅ docs/sprint-2-summary.md - Sprint 2
@@ -380,6 +426,7 @@ Setup prêt mais aucune migration créée.
 ```
 
 ### Tests
+
 ```
 ✅ ui/components/__tests__/ (Vitest setup complet) - Sprint 2
 ✅ ui/vitest.config.ts - Sprint 2
@@ -393,13 +440,13 @@ Setup prêt mais aucune migration créée.
 
 ### Vulnérabilités Identifiées
 
-| Niveau | Problème | Localisation | Impact |
-|--------|----------|--------------|--------|
-| HAUT | Secrets en clair `.env` | Racine projet | Exposition credentials |
-| MOYEN | Pas de rate limiting API | `api/app/main.py` | DoS possible |
-| MOYEN | CORS origins hardcodés | `api/app/main.py:18-21` | Manque flexibilité |
-| BAS | SQLAlchemy raw queries | Aucune trouvée | N/A (ORM partout ✅) |
-| BAS | XSS frontend | UI componentes | Sanitization React OK |
+| Niveau | Problème                 | Localisation            | Impact                 |
+| ------ | ------------------------ | ----------------------- | ---------------------- |
+| HAUT   | Secrets en clair `.env`  | Racine projet           | Exposition credentials |
+| MOYEN  | Pas de rate limiting API | `api/app/main.py`       | DoS possible           |
+| MOYEN  | CORS origins hardcodés   | `api/app/main.py:18-21` | Manque flexibilité     |
+| BAS    | SQLAlchemy raw queries   | Aucune trouvée          | N/A (ORM partout ✅)   |
+| BAS    | XSS frontend             | UI componentes          | Sanitization React OK  |
 
 ### Recommandations Sécurité
 
@@ -415,6 +462,7 @@ Setup prêt mais aucune migration créée.
 ## 📈 SCALABILITÉ
 
 ### Architecture Actuelle
+
 - ✅ API stateless (peut scaler horizontalement)
 - ✅ PostgreSQL prêt pour réplication
 - ❌ Pas de cache Redis
@@ -436,11 +484,13 @@ Setup prêt mais aucune migration créée.
    - **Solution**: S3 / object storage
 
 ### Capacité Estimée Actuelle
+
 - **Requêtes API**: ~100 req/s (single instance)
 - **Utilisateurs simultanés**: ~500
 - **Fournisseurs supportés**: ~20 max avant timeout ingestion
 
 ### Pour 10x Scale
+
 - Load balancer (nginx/HAProxy)
 - 5+ replicas API
 - PostgreSQL HA (Patroni)
@@ -453,6 +503,7 @@ Setup prêt mais aucune migration créée.
 ## 🐛 BUGS POTENTIELS IDENTIFIÉS
 
 ### Bug #1: Division par Zéro (Calcul Coût Annuel)
+
 **Fichier**: `ui/components/TariffList.tsx:40-55`
 
 ```typescript
@@ -470,6 +521,7 @@ Si `usage = 0` ou valeurs `null`, pas de guard.
 ---
 
 ### Bug #2: Encoding UTF-8 PDFs Windows
+
 **Fichier**: `parsers/core/pdf_parser.py`
 
 Potentiel problème encodage caractères spéciaux sur Windows (CRLF vs LF).
@@ -479,6 +531,7 @@ Potentiel problème encodage caractères spéciaux sur Windows (CRLF vs LF).
 ---
 
 ### Bug #3: Race Condition Ingestion Parallèle
+
 Si deux jobs ingestion même fournisseur simultanés → conflit DB (unlikely mais possible).
 
 **Recommandation**: Lock distribué (Redis) ou constraint UNIQUE tarifs.
@@ -486,6 +539,7 @@ Si deux jobs ingestion même fournisseur simultanés → conflit DB (unlikely ma
 ---
 
 ### Bug #4: Next.js Warning `appDir` Deprecated
+
 **Visible**: Console UI startup
 
 ```
@@ -500,18 +554,21 @@ Si deux jobs ingestion même fournisseur simultanés → conflit DB (unlikely ma
 ## 📊 MÉTRIQUES CODE
 
 ### Backend (Python)
+
 - **Lignes totales**: ~1500 (très compact)
 - **Fichiers**: 25+
 - **Complexité cyclomatique moyenne**: Faible (<10)
 - **Type coverage**: ~95% (type hints partout ✅)
 
 ### Frontend (TypeScript)
+
 - **Lignes totales**: ~750
 - **Fichiers**: 8 composants principaux
 - **Composant le plus lourd**: AdminConsole (462 lignes ⚠️)
 - **Type coverage**: 100% (strict mode)
 
 ### Dépendances
+
 - **Python**: 15 packages (léger ✅)
 - **JavaScript**: 8 deps principales (minimal ✅)
 - **Vulnérabilités connues**: Non scanné ⚠️
@@ -641,20 +698,20 @@ Si deux jobs ingestion même fournisseur simultanés → conflit DB (unlikely ma
 
 Analyse du respect de la constitution `specs/constitution.md`:
 
-| Principe | Statut | Commentaire |
-|----------|--------|-------------|
-| Open Data by Design | ✅ | Données publiques GitHub |
-| Insert-Only History | ✅ | Triggers DB enforce immutabilité |
-| TRVE = Source Vérité | ✅ | Guard diff endpoint implémenté |
-| Spec-Driven Build | ✅ | Specs avant code respecté |
-| Config YAML Parsers | ✅ | Tous fournisseurs en YAML |
-| Détection Changements | ✅ | SHA-256 checksums |
-| Tests Snapshots | ✅ | tests/snapshots/ complets |
-| Stack Figée | ✅ | Python 3.11+, PostgreSQL 16 |
-| Runbooks Fournisseurs | ✅ | docs/parsers/*.md |
-| Alerting Slack | ⚠️ | Webhook configuré mais non testé |
-| Orchestration GitHub | ✅ | CI/CD complet depuis Sprint 1 |
-| Issue Auto après 2 Fails | ❌ | Non implémenté |
+| Principe                 | Statut | Commentaire                      |
+| ------------------------ | ------ | -------------------------------- |
+| Open Data by Design      | ✅     | Données publiques GitHub         |
+| Insert-Only History      | ✅     | Triggers DB enforce immutabilité |
+| TRVE = Source Vérité     | ✅     | Guard diff endpoint implémenté   |
+| Spec-Driven Build        | ✅     | Specs avant code respecté        |
+| Config YAML Parsers      | ✅     | Tous fournisseurs en YAML        |
+| Détection Changements    | ✅     | SHA-256 checksums                |
+| Tests Snapshots          | ✅     | tests/snapshots/ complets        |
+| Stack Figée              | ✅     | Python 3.11+, PostgreSQL 16      |
+| Runbooks Fournisseurs    | ✅     | docs/parsers/\*.md               |
+| Alerting Slack           | ⚠️     | Webhook configuré mais non testé |
+| Orchestration GitHub     | ✅     | CI/CD complet depuis Sprint 1    |
+| Issue Auto après 2 Fails | ❌     | Non implémenté                   |
 
 **Score conformité**: 10/12 (83%) ⬆️ (+8%)
 
@@ -663,6 +720,7 @@ Analyse du respect de la constitution `specs/constitution.md`:
 ## 🎓 ÉVALUATION PAR CATÉGORIE (Avant → Après Sprint 1 & 2)
 
 ### Code Quality: **7/10 → 9/10** ⬆️ (+2)
+
 ✅ Type hints partout
 ✅ Naming conventions
 ✅ Séparation concerns
@@ -671,6 +729,7 @@ Analyse du respect de la constitution `specs/constitution.md`:
 ⚠️ Complexité AdminConsole (reste à faire)
 
 ### Tests: **5/10 → 9/10** ⬆️ (+4)
+
 ✅ Tests backend présents
 ✅ Snapshots parsers
 ✅ Coverage mesurée et enforced (70% backend, 99% frontend) ← NOUVEAU
@@ -679,6 +738,7 @@ Analyse du respect de la constitution `specs/constitution.md`:
 ❌ Pas de tests e2e (Sprint 3)
 
 ### Documentation: **9/10 → 10/10** ⬆️ (+1)
+
 ✅ Constitution exceptionnelle
 ✅ README détaillé
 ✅ Runbooks fournisseurs
@@ -689,6 +749,7 @@ Analyse du respect de la constitution `specs/constitution.md`:
 ❌ Pas de CONTRIBUTING.md (Sprint 3)
 
 ### Déploiement: **3/10 → 9/10** ⬆️ (+6)
+
 ✅ docker-compose pour DB
 ✅ Scripts admin présents
 ✅ Dockerfiles app (API + UI multi-stage) ← NOUVEAU
@@ -698,6 +759,7 @@ Analyse du respect de la constitution `specs/constitution.md`:
 ❌ Pas de stratégie backup (Sprint 3)
 
 ### Sécurité: **6/10 → 7/10** ⬆️ (+1)
+
 ✅ CORS configuré
 ✅ Pydantic validation
 ✅ Pas de SQL injection (ORM)
@@ -707,6 +769,7 @@ Analyse du respect de la constitution `specs/constitution.md`:
 ❌ Pas de scan vulnérabilités (Sprint 3)
 
 ### Performance: **6/10** (=)
+
 ✅ Async partout (FastAPI + SQLAlchemy)
 ✅ Index DB appropriés
 ❌ Pas de cache Redis
@@ -718,14 +781,15 @@ Analyse du respect de la constitution `specs/constitution.md`:
 ## 💰 ESTIMATION EFFORT PRODUCTION-READY
 
 ### Estimation Initiale (Nov 15)
+
 **Effort total estimé**: **4-6 semaines** (1 développeur full-stack senior)
 
-| Phase | Durée | Items |
-|-------|-------|-------|
+| Phase    | Durée      | Items                                              |
+| -------- | ---------- | -------------------------------------------------- |
 | Sprint 1 | 2 semaines | Dockerfiles, CI/CD, Linting, Refactor AdminConsole |
-| Sprint 2 | 2 semaines | Monitoring, Tests frontend, Secrets, Retry logic |
-| Sprint 3 | 1 semaine | Migrations, Backup, State management |
-| Sprint 4 | 1 semaine | Documentation, Tests e2e, Polish |
+| Sprint 2 | 2 semaines | Monitoring, Tests frontend, Secrets, Retry logic   |
+| Sprint 3 | 1 semaine  | Migrations, Backup, State management               |
+| Sprint 4 | 1 semaine  | Documentation, Tests e2e, Polish                   |
 
 **Coût estimé** (à 800€/jour): ~16 000€ - 24 000€
 
@@ -736,10 +800,10 @@ Analyse du respect de la constitution `specs/constitution.md`:
 
 **Effort restant estimé**: **2-3 semaines** (Sprint 3-4)
 
-| Phase | Durée | Items |
-|-------|-------|-------|
+| Phase    | Durée        | Items                                              |
+| -------- | ------------ | -------------------------------------------------- |
 | Sprint 3 | 1.5 semaines | AdminConsole refactor, Migrations, Backup, Secrets |
-| Sprint 4 | 1 semaine | Documentation, Tests e2e, Scanning sécurité |
+| Sprint 4 | 1 semaine    | Documentation, Tests e2e, Scanning sécurité        |
 
 **Coût restant estimé** (à 800€/jour): ~8 000€ - 12 000€
 
@@ -756,6 +820,7 @@ Analyse du respect de la constitution `specs/constitution.md`:
 Après Sprint 1 & 2, **le projet EST maintenant production-ready** pour un déploiement beta/interne. Les absences critiques (Dockerfiles, monitoring, tests frontend) ont été comblées.
 
 ### Points Excellents
+
 - Architecture moderne et scalable
 - Documentation "Spec-Kit" unique
 - Types stricts bout-en-bout
@@ -767,12 +832,14 @@ Après Sprint 1 & 2, **le projet EST maintenant production-ready** pour un dépl
 - **Robustesse ingestion (retry + rate limiting)** ← NOUVEAU
 
 ### Risques Résolus ✅
+
 - ~~Impossible à déployer facilement~~ → ✅ **Docker + docker-compose**
 - ~~Aucune visibilité production~~ → ✅ **Logs JSON + Sentry + Prometheus**
 - ~~Qualité frontend inconnue~~ → ✅ **Tests 99% coverage + CI**
 - ~~Pas de linting~~ → ✅ **Black + flake8 + ESLint automatiques**
 
 ### Risques Restants ⚠️
+
 - Secrets non protégés (déféré Sprint 3)
 - AdminConsole trop dense (Sprint 3, maintenant safe grâce aux tests)
 - Pas de backups automatiques (Sprint 3)
@@ -787,7 +854,7 @@ Le projet a **tenu ses promesses** et est devenu une référence dans le domaine
 ---
 
 **Note globale finale: 8.5/10** ⬆️ (+2.0)
-*(Projet production-ready, excellent travail Sprint 1 & 2!)*
+_(Projet production-ready, excellent travail Sprint 1 & 2!)_
 
 ---
 
@@ -796,6 +863,7 @@ Le projet a **tenu ses promesses** et est devenu une référence dans le domaine
 ### Fichiers Clés Analysés
 
 **Backend**:
+
 - `api/app/main.py` - Point d'entrée FastAPI
 - `api/app/core/config.py` - Configuration Pydantic
 - `api/app/services/tariff_service.py` - Logique métier
@@ -803,22 +871,26 @@ Le projet a **tenu ses promesses** et est devenu une référence dans le domaine
 - `db/ddl.sql` - Schéma PostgreSQL
 
 **Frontend**:
+
 - `ui/app/page.tsx` - Page d'accueil
 - `ui/app/admin/page.tsx` - Console admin (462 lignes)
 - `ui/components/TariffList.tsx` - Comparateur
 - `ui/lib/openapi-types.ts` - Types générés
 
 **Parsers**:
+
 - `parsers/core/pdf_parser.py` - Parser PDF
 - `parsers/config/edf.yaml` - Config EDF
 - `ingest/pipeline.py` - Orchestration
 
 **Documentation**:
+
 - `specs/constitution.md` - Principes fondateurs
 - `specs/api.md` - Spec OpenAPI
 - `README.md` - Guide principal
 
 **CI/CD**:
+
 - `.github/workflows/nightly.yml` - Workflow automatisé
 
 ### Méthodologie Audit
@@ -837,6 +909,7 @@ L'audit a été réalisé selon les axes suivants:
 ### Outils Recommandés
 
 **Qualité Code**:
+
 - black (formatting Python)
 - flake8 (linting Python)
 - mypy (type checking)
@@ -844,21 +917,25 @@ L'audit a été réalisé selon les axes suivants:
 - eslint (linting TS/JS)
 
 **Tests**:
+
 - pytest + pytest-cov (backend)
 - Vitest + React Testing Library (frontend)
 - Playwright (e2e)
 
 **Monitoring**:
+
 - Sentry (error tracking)
 - Prometheus + Grafana (métriques)
 - structlog (logging structuré)
 
 **CI/CD**:
+
 - GitHub Actions (déjà en place)
 - Dependabot (scan vulnérabilités)
 - pre-commit (hooks git)
 
 **Déploiement**:
+
 - Docker + docker-compose
 - Kubernetes (long terme)
 - nginx (reverse proxy)

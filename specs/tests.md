@@ -8,6 +8,7 @@ last_updated: 2025-11-11
 # ✅ Scénarios d'acceptance (Gherkin)
 
 ## Parser EDF v1
+
 ```
 Feature: Extraction EDF
   Scenario: Snapshot HTML février 2025
@@ -19,6 +20,7 @@ Feature: Extraction EDF
 ```
 
 ## API /v1/tariffs
+
 ```
 Feature: Derniers tarifs
   Scenario: Liste fresh par défaut

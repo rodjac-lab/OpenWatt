@@ -16,11 +16,7 @@
       "type": "string"
     },
     "option": {
-      "enum": [
-        "BASE",
-        "HPHC",
-        "TEMPO"
-      ]
+      "enum": ["BASE", "HPHC", "TEMPO"]
     },
     "puissance_kva": {
       "type": "integer",
@@ -28,22 +24,13 @@
       "maximum": 36
     },
     "price_kwh_ttc": {
-      "type": [
-        "number",
-        "null"
-      ]
+      "type": ["number", "null"]
     },
     "price_kwh_hp_ttc": {
-      "type": [
-        "number",
-        "null"
-      ]
+      "type": ["number", "null"]
     },
     "price_kwh_hc_ttc": {
-      "type": [
-        "number",
-        "null"
-      ]
+      "type": ["number", "null"]
     },
     "abo_month_ttc": {
       "type": "number"
@@ -66,12 +53,7 @@
     },
     "data_status": {
       "type": "string",
-      "enum": [
-        "fresh",
-        "verifying",
-        "stale",
-        "broken"
-      ]
+      "enum": ["fresh", "verifying", "stale", "broken"]
     }
   }
 }

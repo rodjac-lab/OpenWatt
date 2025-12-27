@@ -11,6 +11,7 @@
 **Sprint 2 est maintenant COMPLET à 100%** (8/8 tâches terminées)
 
 Avec l'ajout des tests frontend, le Sprint 2 est maintenant entièrement terminé :
+
 - ✅ 6 tâches backend (logging, Sentry, Prometheus, retry, rate limiting, request-ID)
 - ✅ 2 tâches frontend restantes (tests + documentation)
 
@@ -21,6 +22,7 @@ Avec l'ajout des tests frontend, le Sprint 2 est maintenant entièrement termin�
 ### 1. Installation Vitest + React Testing Library
 
 **Packages installés** ([ui/package.json](../ui/package.json)):
+
 ```json
 {
   "devDependencies": {
@@ -36,6 +38,7 @@ Avec l'ajout des tests frontend, le Sprint 2 est maintenant entièrement termin�
 ```
 
 **Environnement**:
+
 - **Vitest**: Test runner moderne (plus rapide que Jest)
 - **Happy-DOM**: Alternative légère à jsdom
 - **React Testing Library**: Tests orientés comportement utilisateur
@@ -60,8 +63,8 @@ export default defineConfig({
       exclude: [
         "node_modules/",
         "**/__tests__/**",
-        "app/**/*",  // Next.js pages
-        "lib/**/*",  // Generated types
+        "app/**/*", // Next.js pages
+        "lib/**/*", // Generated types
       ],
       thresholds: {
         lines: 70,
@@ -80,6 +83,7 @@ export default defineConfig({
 ```
 
 **Features**:
+
 - ✅ Happy-DOM pour rapidité
 - ✅ Globals activés (pas besoin d'importer `describe`, `it`, `expect`)
 - ✅ Coverage 70% minimum (build fail si < 70%)
@@ -90,9 +94,10 @@ export default defineConfig({
 
 ### 3. Tests FreshnessBadge
 
-**Fichier**: [ui/components/__tests__/FreshnessBadge.test.tsx](../ui/components/__tests__/FreshnessBadge.test.tsx)
+**Fichier**: [ui/components/**tests**/FreshnessBadge.test.tsx](../ui/components/__tests__/FreshnessBadge.test.tsx)
 
 **6 test cases** couvrant tous les statuts:
+
 1. ✅ Status "fresh" → badge vert "Frais"
 2. ✅ Status "verifying" → badge amber "Vérification en cours"
 3. ✅ Status "stale" → badge gris "Obsolète"
@@ -106,7 +111,7 @@ export default defineConfig({
 
 ### 4. Tests TariffList
 
-**Fichier**: [ui/components/__tests__/TariffList.test.tsx](../ui/components/__tests__/TariffList.test.tsx)
+**Fichier**: [ui/components/**tests**/TariffList.test.tsx](../ui/components/__tests__/TariffList.test.tsx)
 
 **9 test cases** couvrant toutes les fonctionnalités:
 
@@ -121,6 +126,7 @@ export default defineConfig({
 9. ✅ **FreshnessBadge rendering** - Badge affiché pour chaque tarif
 
 **Techniques utilisées**:
+
 - Mock `global.fetch` avec `vi.fn()`
 - Simulation user events (select, type, clear)
 - `waitFor()` pour assertions async
@@ -146,6 +152,7 @@ export default defineConfig({
 ```
 
 **Usage**:
+
 ```bash
 npm test              # Run tests once
 npm run test:watch    # Watch mode (re-run on changes)
@@ -193,6 +200,7 @@ test-frontend:
 ```
 
 **Comportement CI**:
+
 - ✅ Run automatiquement sur chaque push/PR
 - ✅ Fail si coverage < 70%
 - ✅ Upload coverage vers Codecov
@@ -205,6 +213,7 @@ test-frontend:
 **Fichier**: [docs/frontend-testing.md](frontend-testing.md)
 
 **Sections**:
+
 1. Quick Start
 2. Configuration détaillée
 3. Writing Tests (exemples)
@@ -215,6 +224,7 @@ test-frontend:
 8. Resources
 
 **Exemples de code complets** pour:
+
 - Tests simples (FreshnessBadge)
 - Tests complexes avec fetch + user events (TariffList)
 - Mocking fetch API
@@ -225,15 +235,18 @@ test-frontend:
 ## 📊 Résultats Tests
 
 ### Test Files: 2 passed (2)
+
 - ✅ FreshnessBadge.test.tsx (6 tests)
 - ✅ TariffList.test.tsx (9 tests)
 
 ### Tests: 15 passed (15)
+
 - ✅ 0 failed
 - ✅ 0 skipped
 - ✅ 100% success rate
 
 ### Coverage
+
 ```
 File               | % Stmts | % Branch | % Funcs | % Lines
 -------------------|---------|----------|---------|--------
@@ -245,6 +258,7 @@ All files          |   99.43 |    71.69 |   85.71 |   99.43
 **Thresholds**: ✅ PASS (all > 70%)
 
 ### Duration
+
 - Transform: 137ms
 - Setup: 522ms
 - Collect: 229ms
@@ -257,19 +271,23 @@ All files          |   99.43 |    71.69 |   85.71 |   99.43
 ## 🎯 Impact Projet
 
 ### Avant
+
 - ❌ Aucun test frontend
 - ❌ Impossible de valider refacto
 - ❌ Risque de régression
 - ❌ Pas de coverage metrics
 
 ### Après
+
 - ✅ 15 tests automatisés
 - ✅ Coverage 99% components
 - ✅ CI bloque merge si tests fail
 - ✅ Refacto safe (tests comme filet)
 
 ### Déblocage AdminConsole Refactoring
+
 Avec les tests en place, on peut maintenant **refactorer AdminConsole en confiance**:
+
 - Tests TariffList comme modèle
 - Coverage enforced
 - CI validation automatique
@@ -300,6 +318,7 @@ OpenWatt/
 ### Sprint 2 COMPLET ✅
 
 Toutes les tâches Sprint 2 sont terminées :
+
 - [x] Logging structuré
 - [x] Sentry error tracking
 - [x] Prometheus metrics
@@ -310,6 +329,7 @@ Toutes les tâches Sprint 2 sont terminées :
 - [x] Documentation ← **NOUVEAU**
 
 **Reste à faire (hors Sprint 2)**:
+
 - ❌ Secrets management (déféré)
 
 ---
@@ -344,18 +364,21 @@ Voir [docs/audit.md](audit.md) section "Sprint 3":
 ## 🎓 Ce qui a été appris
 
 ### Vitest > Jest
+
 - ✅ 10x plus rapide
 - ✅ Config simplifiée
 - ✅ ESM native support
 - ✅ UI mode intégrée
 
 ### React Testing Library
+
 - ✅ Tests orientés utilisateur (pas implementation)
 - ✅ `getByRole` > `getByTestId`
 - ✅ `waitFor()` pour async
 - ✅ `userEvent` > `fireEvent`
 
 ### Coverage Thresholds
+
 - ✅ Enforce qualité code
 - ✅ Prévient régressions
 - ✅ Visibilité gaps
@@ -366,7 +389,9 @@ Voir [docs/audit.md](audit.md) section "Sprint 3":
 ## 📚 Documentation Complète
 
 ### Guide Tests Frontend
+
 [docs/frontend-testing.md](frontend-testing.md) - Guide complet avec :
+
 - Quick start
 - Configuration
 - Patterns de tests
@@ -374,6 +399,7 @@ Voir [docs/audit.md](audit.md) section "Sprint 3":
 - Resources
 
 ### Tests Existants
+
 - [FreshnessBadge.test.tsx](../ui/components/__tests__/FreshnessBadge.test.tsx)
 - [TariffList.test.tsx](../ui/components/__tests__/TariffList.test.tsx)
 
@@ -382,6 +408,7 @@ Voir [docs/audit.md](audit.md) section "Sprint 3":
 ## ✅ Validation Sprint 2 FINAL
 
 **Checklist Backend** (Sprint 2 initial):
+
 - [x] Logging structuré JSON
 - [x] Request-ID middleware
 - [x] Sentry error tracking
@@ -391,6 +418,7 @@ Voir [docs/audit.md](audit.md) section "Sprint 3":
 - [x] Documentation logging
 
 **Checklist Frontend** (Sprint 2 complété):
+
 - [x] Vitest setup
 - [x] Tests composants (FreshnessBadge, TariffList)
 - [x] Coverage 70%+
@@ -408,16 +436,19 @@ Voir [docs/audit.md](audit.md) section "Sprint 3":
 Le **Sprint 2 est COMPLET à 100%** ! OpenWatt dispose maintenant de :
 
 ### Observabilité Production
+
 - ✅ Logs JSON structurés (ELK/CloudWatch ready)
 - ✅ Error tracking (Sentry)
 - ✅ Metrics (Prometheus)
 - ✅ Request tracing (request_id)
 
 ### Robustesse Ingestion
+
 - ✅ Retry automatique (tenacity)
 - ✅ Rate limiting (token bucket)
 
 ### Qualité Frontend
+
 - ✅ Tests automatisés (Vitest)
 - ✅ Coverage enforced (70%+)
 - ✅ CI validation

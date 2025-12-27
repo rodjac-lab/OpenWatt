@@ -1,50 +1,22 @@
 {
   "$id": "schema/trve_reference.json",
   "type": "object",
-  "required": [
-    "option",
-    "puissance_kva",
-    "abo_month_ttc",
-    "valid_from"
-  ],
+  "required": ["option", "puissance_kva", "abo_month_ttc", "valid_from"],
   "properties": {
     "option": {
-      "enum": [
-        "BASE",
-        "HPHC",
-        "TEMPO"
-      ]
+      "enum": ["BASE", "HPHC", "TEMPO"]
     },
     "puissance_kva": {
-      "enum": [
-        3,
-        6,
-        9,
-        12,
-        15,
-        18,
-        24,
-        30,
-        36
-      ]
+      "enum": [3, 6, 9, 12, 15, 18, 24, 30, 36]
     },
     "price_kwh_ttc": {
-      "type": [
-        "number",
-        "null"
-      ]
+      "type": ["number", "null"]
     },
     "price_kwh_hp_ttc": {
-      "type": [
-        "number",
-        "null"
-      ]
+      "type": ["number", "null"]
     },
     "price_kwh_hc_ttc": {
-      "type": [
-        "number",
-        "null"
-      ]
+      "type": ["number", "null"]
     },
     "abo_month_ttc": {
       "type": "number"
@@ -54,10 +26,7 @@
       "format": "date"
     },
     "valid_to": {
-      "type": [
-        "string",
-        "null"
-      ],
+      "type": ["string", "null"],
       "format": "date"
     }
   }

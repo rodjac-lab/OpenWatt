@@ -12,6 +12,7 @@ pdf:
       slices:
         - option: BASE
           puissance_column: 0
+          price_unit: cts
           columns:
             abo_month_ttc: 1
             price_kwh_ttc: 2
@@ -21,6 +22,7 @@ pdf:
       slices:
         - option: HPHC
           puissance_column: 0
+          price_unit: cts
           columns:
             abo_month_ttc: 1
             price_kwh_hp_ttc: 2

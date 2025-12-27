@@ -9,6 +9,7 @@
 ## 🎯 Contexte
 
 Le code de monitoring est **déjà implémenté** dans le projet (Sprint 2):
+
 - ✅ Logs structurés JSON (structlog)
 - ✅ Request-ID tracking
 - ✅ Sentry SDK intégré
@@ -21,13 +22,13 @@ Le code de monitoring est **déjà implémenté** dans le projet (Sprint 2):
 
 ## 📊 État Actuel
 
-| Composant | Code | Infrastructure | Action Requise |
-|-----------|------|----------------|----------------|
-| Logs structurés | ✅ | ⚠️ Pas de viewer | Setup ELK/Datadog |
-| Request-ID | ✅ | ✅ | Aucune |
-| Sentry | ✅ | ❌ | Créer compte gratuit |
-| Prometheus | ✅ | ❌ | Setup Grafana |
-| Retry/Rate limit | ✅ | ✅ | Aucune |
+| Composant        | Code | Infrastructure   | Action Requise       |
+| ---------------- | ---- | ---------------- | -------------------- |
+| Logs structurés  | ✅   | ⚠️ Pas de viewer | Setup ELK/Datadog    |
+| Request-ID       | ✅   | ✅               | Aucune               |
+| Sentry           | ✅   | ❌               | Créer compte gratuit |
+| Prometheus       | ✅   | ❌               | Setup Grafana        |
+| Retry/Rate limit | ✅   | ✅               | Aucune               |
 
 ---
 
@@ -109,6 +110,7 @@ curl http://localhost:8000/v1/tariffs
 #### Configuration Avancée
 
 **Alertes Sentry**:
+
 ```
 Settings → Alerts → New Alert Rule
 
@@ -122,6 +124,7 @@ Conditions:
 ```
 
 **Filtres**:
+
 ```python
 # Déjà configuré dans api/app/core/sentry.py
 # Ignore automatiquement:
@@ -154,10 +157,10 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
 
   grafana:
     image: grafana/grafana:latest
@@ -187,9 +190,9 @@ global:
   evaluation_interval: 15s
 
 scrape_configs:
-  - job_name: 'openwatt-api'
+  - job_name: "openwatt-api"
     static_configs:
-      - targets: ['host.docker.internal:8000']  # Windows/Mac
+      - targets: ["host.docker.internal:8000"] # Windows/Mac
         # Pour Linux: ['172.17.0.1:8000']
     scrape_interval: 15s
 ```
@@ -257,6 +260,7 @@ docker-compose -f docker-compose.monitoring.yaml up -d
 ```
 
 **Import dans Grafana**:
+
 ```
 Grafana → Dashboards → Import → Upload JSON file
 ```
@@ -349,6 +353,7 @@ logging.getLogger().addHandler(logstash_handler)
 ```
 
 **Lancer**:
+
 ```bash
 docker-compose -f docker-compose.elk.yaml up -d
 # Kibana: http://localhost:5601
@@ -359,6 +364,7 @@ docker-compose -f docker-compose.elk.yaml up -d
 **Prérequis**: API déployée sur AWS EC2/ECS
 
 **Configuration**:
+
 ```bash
 # 1. Installer CloudWatch Agent sur EC2
 wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
@@ -393,6 +399,7 @@ sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
 ```
 
 **Queries CloudWatch Insights**:
+
 ```sql
 # Trouver toutes les erreurs
 fields @timestamp, event, level, exc_info
@@ -427,6 +434,7 @@ sudo vim /etc/datadog-agent/conf.d/python.d/conf.yaml
 ```
 
 **conf.yaml**:
+
 ```yaml
 logs:
   - type: file
@@ -437,6 +445,7 @@ logs:
 ```
 
 **Redémarrer agent**:
+
 ```bash
 sudo systemctl restart datadog-agent
 ```

@@ -3,6 +3,7 @@
 ## Overview
 
 OpenWatt uses **structlog** for structured JSON logging, enabling:
+
 - ✅ Machine-readable logs (ELK, CloudWatch, Datadog, etc.)
 - ✅ Request correlation via `request_id`
 - ✅ Rich context (user_id, tariff_id, supplier, etc.)
@@ -104,13 +105,13 @@ async def my_endpoint(request: Request):
 
 Use appropriate log levels:
 
-| Level | Usage | Example |
-|-------|-------|---------|
-| `DEBUG` | Development details | `logger.debug("query_executed", sql="SELECT ...")` |
-| `INFO` | Normal operations | `logger.info("tariff_fetched", tariff_id=123)` |
-| `WARNING` | Recoverable issues | `logger.warning("rate_limit_approached", current=90, max=100)` |
-| `ERROR` | Application errors | `logger.error("db_connection_failed", exc_info=exc)` |
-| `CRITICAL` | System failures | `logger.critical("database_unreachable")` |
+| Level      | Usage               | Example                                                        |
+| ---------- | ------------------- | -------------------------------------------------------------- |
+| `DEBUG`    | Development details | `logger.debug("query_executed", sql="SELECT ...")`             |
+| `INFO`     | Normal operations   | `logger.info("tariff_fetched", tariff_id=123)`                 |
+| `WARNING`  | Recoverable issues  | `logger.warning("rate_limit_approached", current=90, max=100)` |
+| `ERROR`    | Application errors  | `logger.error("db_connection_failed", exc_info=exc)`           |
+| `CRITICAL` | System failures     | `logger.critical("database_unreachable")`                      |
 
 ---
 
@@ -189,6 +190,7 @@ uvicorn api.app.main:app | logstash -f logstash.conf
 ```
 
 **Logstash config**:
+
 ```ruby
 input {
   stdin { codec => json }
@@ -250,6 +252,7 @@ processors.append(structlog.dev.ConsoleRenderer())  # Instead of JSONRenderer
 ```
 
 Output:
+
 ```
 2025-11-15 20:30:45 [info     ] tariff_created      tariff_id=456 supplier=EDF
 ```
@@ -326,6 +329,7 @@ def run_ingestion(supplier: str):
 ### No logs appearing
 
 Check log level:
+
 ```python
 import logging
 logging.getLogger().setLevel(logging.DEBUG)
@@ -334,6 +338,7 @@ logging.getLogger().setLevel(logging.DEBUG)
 ### Logs not JSON formatted
 
 Ensure `JSONRenderer` is last processor:
+
 ```python
 processors.append(structlog.processors.JSONRenderer())
 ```
@@ -341,6 +346,7 @@ processors.append(structlog.processors.JSONRenderer())
 ### Request ID not in logs
 
 Verify middleware is added:
+
 ```python
 # In api/app/main.py
 app.add_middleware(RequestIDMiddleware)
@@ -372,6 +378,7 @@ logger.info("user_logged_in", user_id=user_id, ip=ip)
 ## Performance
 
 Structlog is highly optimized:
+
 - **Lazy binding**: Context only serialized when logged
 - **Caching**: Loggers cached on first use
 - **Minimal overhead**: ~2-5µs per log entry

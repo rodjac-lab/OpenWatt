@@ -28,6 +28,7 @@ python -m ingest.pipeline engie --fetch --persist
 #### Option 2 : Serveur dédié (moyen terme)
 
 Mettre en place un serveur dédié avec IP résidentielle pour exécuter l'ingestion :
+
 - VPS avec IP résidentielle
 - Serveur physique dans un datacenter avec IP non bloquée
 - Raspberry Pi à domicile avec IP résidentielle
@@ -35,6 +36,7 @@ Mettre en place un serveur dédié avec IP résidentielle pour exécuter l'inges
 #### Option 3 : Proxy résidentiel (coûteux)
 
 Utiliser un service de proxy résidentiel payant :
+
 - Bright Data (ex-Luminati)
 - Oxylabs
 - SmartProxy
@@ -79,7 +81,7 @@ Pour réactiver l'ingestion automatique d'un fournisseur, modifier le fichier `.
 
 ```yaml
 matrix:
-  supplier: [edf, engie, mint_indexe_trv, ...]  # Ajouter edf/engie ici
+  supplier: [edf, engie, mint_indexe_trv, ...] # Ajouter edf/engie ici
 ```
 
 **Note :** Ne réactiver que si vous avez mis en place une des solutions de contournement (serveur dédié, proxy, etc.).

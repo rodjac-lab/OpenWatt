@@ -24,6 +24,7 @@ class PdfSliceConfig(BaseModel):
     notes: Optional[str] = None
     use_clean_rows: Optional[bool] = None
     puissance_values: Optional[list[int]] = None
+    price_unit: Optional[Literal["EUR", "cts"]] = "EUR"  # "cts" for centimes, "EUR" for euros
 
 
 class PdfTableConfig(BaseModel):

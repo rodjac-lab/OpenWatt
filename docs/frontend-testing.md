@@ -69,8 +69,8 @@ import path from "path";
 export default defineConfig({
   plugins: [react()],
   test: {
-    environment: "happy-dom",      // Fast DOM implementation
-    globals: true,                 // No need to import describe/it/expect
+    environment: "happy-dom", // Fast DOM implementation
+    globals: true, // No need to import describe/it/expect
     setupFiles: ["./vitest.setup.ts"],
     coverage: {
       provider: "v8",
@@ -102,6 +102,7 @@ export default defineConfig({
 ```
 
 **Key Features**:
+
 - ✅ **happy-dom**: Faster than jsdom, sufficient for most React tests
 - ✅ **globals: true**: Automatic `describe`, `it`, `expect` imports
 - ✅ **Coverage thresholds**: 70% minimum enforced (build fails if < 70%)
@@ -170,6 +171,7 @@ describe("FreshnessBadge", () => {
 ```
 
 **Key Testing Patterns**:
+
 - ✅ `render()`: Mount React component in test DOM
 - ✅ `screen.getByText()`: Find element by text content
 - ✅ `toBeInTheDocument()`: Assert element exists
@@ -272,6 +274,7 @@ describe("TariffList", () => {
 ```
 
 **Key Patterns for Complex Components**:
+
 - ✅ **Mock fetch**: Use `vi.fn()` to mock global fetch
 - ✅ **beforeEach**: Clear mocks before each test
 - ✅ **mockResolvedValueOnce**: Mock successful API response
@@ -325,6 +328,7 @@ npm run test:coverage
 ```
 
 **Output**:
+
 - Terminal: Summary table with percentages
 - `ui/coverage/index.html`: Interactive HTML report
 - `ui/coverage/lcov.info`: LCOV format (for CI tools)
@@ -334,7 +338,7 @@ npm run test:coverage
 Coverage MUST meet these thresholds (enforced in CI):
 
 | Metric     | Threshold |
-|------------|-----------|
+| ---------- | --------- |
 | Lines      | 70%       |
 | Functions  | 70%       |
 | Branches   | 70%       |
@@ -351,6 +355,7 @@ cd coverage
 ```
 
 **Coverage report shows**:
+
 - ✅ Covered lines (green)
 - ❌ Uncovered lines (red)
 - ⚠️ Partially covered branches (yellow)
@@ -368,7 +373,7 @@ exclude: [
   "**/__tests__/**",
   "**/*.test.*",
   ".next/",
-]
+];
 ```
 
 ---
@@ -429,6 +434,7 @@ cd ui && npm test
 ```
 
 Make executable:
+
 ```bash
 chmod +x .git/hooks/pre-commit
 ```
@@ -440,6 +446,7 @@ chmod +x .git/hooks/pre-commit
 ### 1. Test Behavior, Not Implementation
 
 ❌ **Bad** (testing implementation):
+
 ```typescript
 it("sets state to loading", () => {
   const { result } = renderHook(() => useState(false));
@@ -448,6 +455,7 @@ it("sets state to loading", () => {
 ```
 
 ✅ **Good** (testing behavior):
+
 ```typescript
 it("shows loading spinner while fetching", () => {
   render(<TariffList />);
@@ -469,12 +477,14 @@ it("shows loading spinner while fetching", () => {
 ### 3. Wait for Async Updates
 
 ❌ **Bad** (race condition):
+
 ```typescript
 render(<TariffList />);
 expect(screen.getByText("EDF")).toBeInTheDocument(); // Fails!
 ```
 
 ✅ **Good**:
+
 ```typescript
 render(<TariffList />);
 await waitFor(() => {
@@ -488,19 +498,21 @@ await waitFor(() => {
 import { afterEach, vi } from "vitest";
 
 afterEach(() => {
-  vi.restoreAllMocks();  // Restore mocked functions
-  cleanup();             // Unmount components
+  vi.restoreAllMocks(); // Restore mocked functions
+  cleanup(); // Unmount components
 });
 ```
 
 ### 5. Use userEvent for Interactions
 
 ❌ **Bad** (fireEvent):
+
 ```typescript
 fireEvent.click(button); // Too low-level
 ```
 
 ✅ **Good** (userEvent):
+
 ```typescript
 const user = userEvent.setup();
 await user.click(button); // Simulates real user behavior
@@ -525,11 +537,13 @@ vi.mock("next/navigation", () => ({
 ### 7. Descriptive Test Names
 
 ❌ **Bad**:
+
 ```typescript
 it("works", () => { ... });
 ```
 
 ✅ **Good**:
+
 ```typescript
 it("calculates annual cost correctly for BASE option", () => { ... });
 ```
@@ -557,16 +571,19 @@ it("filters tariffs by puissance", async () => {
 ## 📚 Resources
 
 ### Official Docs
+
 - [Vitest](https://vitest.dev/)
 - [React Testing Library](https://testing-library.com/react)
 - [Testing Library Queries](https://testing-library.com/docs/queries/about)
 - [User Event](https://testing-library.com/docs/user-event/intro)
 
 ### OpenWatt Tests
+
 - [FreshnessBadge.test.tsx](../ui/components/__tests__/FreshnessBadge.test.tsx) - Simple component
 - [TariffList.test.tsx](../ui/components/__tests__/TariffList.test.tsx) - Complex component with fetch + user interaction
 
 ### Cheat Sheets
+
 - [Common Testing Library Queries](https://testing-library.com/docs/queries/about#priority)
 - [User Event API](https://testing-library.com/docs/user-event/utility)
 - [Vitest API](https://vitest.dev/api/)
@@ -578,10 +595,12 @@ it("filters tariffs by puissance", async () => {
 ### Current Coverage (2025-11-16)
 
 **Components tested**:
+
 - ✅ FreshnessBadge (6 test cases)
 - ✅ TariffList (10 test cases)
 
 **To test next**:
+
 1. **AdminConsole** (high priority)
    - Supplier management
    - Manual PDF upload

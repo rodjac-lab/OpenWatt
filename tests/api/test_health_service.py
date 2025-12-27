@@ -350,7 +350,9 @@ class TestHealthService:
         service = HealthService(session_factory=session_factory)
         result = await service.get_ingest_health()
 
-        supplier_health = find_supplier(result["suppliers"], "edf")  # Adjust supplier name as needed
+        supplier_health = find_supplier(
+            result["suppliers"], "edf"
+        )  # Adjust supplier name as needed
         assert supplier_health is not None
         assert supplier_health["last_run_status"] == "failed"
         assert supplier_health["last_success_at"] is not None
@@ -383,7 +385,9 @@ class TestHealthService:
         service = HealthService(session_factory=session_factory)
         result = await service.get_ingest_health()
 
-        supplier_health = find_supplier(result["suppliers"], "edf")  # Adjust supplier name as needed
+        supplier_health = find_supplier(
+            result["suppliers"], "edf"
+        )  # Adjust supplier name as needed
         assert supplier_health is not None
         assert supplier_health["consecutive_failures"] == 0
         # Running status is not considered broken, but it's also not fresh/stale

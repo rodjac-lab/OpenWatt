@@ -3,38 +3,45 @@
 ## Backend / Ingestion Issues
 
 ### EDF Parser: Price values 100x too high
+
 **Priority**: High
 **Status**: To Do
 **Discovered**: 2025-11-24
 
 **Problem**:
+
 - EDF tariff prices are stored as 100x their actual value
 - Database shows: `19.52 €/kWh` (should be `0.1952 €/kWh`)
 - The PDF displays prices in centimes (c€/kWh): "19,52 c€"
 - Parser reads the numeric value without converting from centimes to euros
 
 **Impact**:
+
 - Annual costs for EDF are massively inflated (234,381 € instead of ~976 €)
 - EDF tariffs appear extremely expensive in comparisons
 
 **Root Cause**:
+
 - Located in: `parsers/config/edf.yaml`
 - Parser version: `edf_pdf_v1`
 - Source: https://particulier.edf.fr/content/dam/2-Actifs/Documents/Offres/Grille_prix_Tarif_Bleu.pdf
 
 **Affected Data**:
+
 - All EDF BASE tariffs: `price_kwh_ttc` = 19.52 (should be 0.1952)
 - All EDF HPHC tariffs:
   - `price_kwh_hp_ttc` = 20.81 (should be 0.2081)
   - `price_kwh_hc_ttc` = 16.35 (should be 0.1635)
 
 **Solution**:
+
 1. Update parser to detect and convert centimes to euros (divide by 100)
 2. Re-run ingestion job for EDF data
 3. Verify corrected values in database
 4. Add test case to prevent regression
 
 **Related Files**:
+
 - `parsers/config/edf.yaml`
 - `artifacts/parsed/edf_20250215T000000Z.json`
 - `tests/snapshots/edf/edf_2025_02_expected.json`
@@ -44,14 +51,17 @@
 ## Frontend Improvements
 
 ### CORS Configuration
+
 **Priority**: Medium
 **Status**: To Do
 
 **Problem**:
+
 - CORS currently set to wildcard `["*"]` for development
 - Security risk if deployed to production
 
 **Solution**:
+
 - Implement environment-based CORS configuration
 - Create `.env.development` and `.env.production` files
 - Update `api/app/main.py` to use environment variables
@@ -62,23 +72,27 @@
 ---
 
 ### Add TRVE (Regulated Tariff) as Reference Baseline
+
 **Priority**: High
 **Status**: To Do
 **Discovered**: 2025-11-24
 
 **Context**:
+
 - TRVE (Tarif Réglementé de Vente d'Électricité) is the market reference in France
 - All suppliers advertise by comparing to TRVE ("X% moins cher que le tarif réglementé")
 - Users want to compare market offers both against each other AND against TRVE
 - TRVE is not an "option" (like BASE/HPHC/TEMPO) but a tariff category/reference
 
 **Business Value**:
+
 - Enable accurate comparison: "Is this offer really cheaper than TRVE?"
 - Highlight best deals vs. regulated reference
 - Match how suppliers market their offers
 - Help users understand savings vs. staying with EDF
 
 **Problem**:
+
 - Currently EDF Tarif Bleu (TRVE) is mixed with market offers in the same list
 - No visual distinction or special treatment for TRVE
 - Cannot easily answer "How much cheaper is this vs. TRVE?"
@@ -87,12 +101,14 @@
 **Two Possible Approaches**:
 
 **Option A: Flag EDF Tarif Bleu as TRVE**
+
 - Add `is_regulated: boolean` field to schema
 - Mark EDF tariffs as regulated in parser config
 - Visual badge in UI: "📋 Tarif Réglementé"
 - Show savings vs. TRVE in podium/table
 
 **Option B: Separate TRVE supplier (from CRE data)**
+
 - Create dedicated "TRVE" supplier entry
 - Source data directly from CRE (official regulator)
 - Keep EDF separate as market supplier
@@ -100,12 +116,14 @@
 - URL: https://www.cre.fr/pages/tarifs-reglementes-de-vente
 
 **Recommended: Option B**
+
 - More accurate (official CRE data)
 - Clear separation: TRVE vs. all market offers (including EDF)
 - Future-proof if EDF loses TRVE monopoly
 - Easier to highlight as special reference
 
 **Implementation Steps**:
+
 1. Create parser for CRE TRVE data (BASE, HPHC, TEMPO)
 2. Add `is_regulated: boolean` field to database schema
 3. Add database migration
@@ -120,6 +138,7 @@
 7. Optional filter: "Montrer uniquement offres < TRVE"
 
 **Related Files**:
+
 - `api/app/models/tariff.py` (database model)
 - `api/app/schemas/tariff.py` (API schema)
 - `parsers/config/trve.yaml` (new CRE parser)
@@ -127,6 +146,7 @@
 - `ui/components/FreshnessBadge.tsx` (add TRVE badge)
 
 **Use Cases**:
+
 - "Show me all offers cheaper than TRVE"
 - "How much would I save vs. staying with regulated tariff?"
 - "Is Engie really 15% cheaper than TRVE?"
@@ -135,11 +155,13 @@
 ---
 
 ### Frontend: TRVE Comparison Features
+
 **Priority**: High
 **Status**: To Do
 **Depends on**: "Add TRVE (Regulated Tariff) as Reference Baseline"
 
 **Context**:
+
 - Once TRVE data is available in the database, the frontend needs to exploit it
 - Users expect to see how market offers compare to the regulated reference
 - Visual treatment should make TRVE stand out as the baseline
@@ -179,6 +201,7 @@
    - Show "N/A" if no matching TRVE exists
 
 **UI Mockup Ideas**:
+
 ```
 ┌─────────────────────────────────────────────┐
 │ 🥇 1er - Engie Elec Référence              │
@@ -189,6 +212,7 @@
 ```
 
 **Table Column Example**:
+
 ```
 Fournisseur | Option | Puissance | Coût annuel | vs. TRVE        | Fraîcheur
 ─────────────────────────────────────────────────────────────────────────────
@@ -199,11 +223,13 @@ EDF Vert    | BASE   | 6 kVA     | 1 120 €     | +24 € (+2%)     | ✓ Fresh
 ```
 
 **Related Files**:
+
 - `ui/components/TariffList.tsx` (main comparison logic)
 - `ui/components/FreshnessBadge.tsx` (add TRVE badge)
 - `ui/app/globals.css` (TRVE styling)
 
 **Success Criteria**:
+
 - Users can immediately identify TRVE tariffs
 - Savings vs. TRVE are clearly visible
 - Can filter to see only offers cheaper than TRVE
@@ -214,11 +240,13 @@ EDF Vert    | BASE   | 6 kVA     | 1 120 €     | +24 € (+2%)     | ✓ Fresh
 ## Completed
 
 ### ✅ React Re-rendering Bug in Tariff Calculations
+
 **Completed**: 2025-11-24
 
 Fixed issue where annual costs stopped updating after changing consumption profiles multiple times.
 
 ### ✅ Table Layout Improvements
+
 **Completed**: 2025-11-24
 
 - Increased max-width to 1000px

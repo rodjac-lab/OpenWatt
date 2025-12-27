@@ -9,6 +9,7 @@
 ## 🎯 Objectif Initial
 
 Refactoriser `ui/app/admin/page.tsx` (462 lignes monolithiques) en composants modulaires pour:
+
 - Améliorer la maintenabilité
 - Faciliter les tests
 - Respecter le principe SRP (Single Responsibility Principle)
@@ -20,15 +21,15 @@ Refactoriser `ui/app/admin/page.tsx` (462 lignes monolithiques) en composants mo
 
 ### Métriques Avant/Après
 
-| Métrique | Avant | Après | Évolution |
-|----------|-------|-------|-----------|
-| Lignes fichier principal | 462 | 269 | ⬇️ -42% |
-| Composants modulaires | 0 | 6 | ✅ +6 |
-| Fichier types centralisé | Non | Oui (53 lignes) | ✅ |
-| Lignes par composant | - | 30-94 | ✅ Optimal |
-| Complexité cyclomatique | Élevée | Faible | ⬇️ ~60% |
-| Maintenabilité | 3/10 | 9/10 | ⬆️ +600% |
-| Testabilité | 2/10 | 9/10 | ⬆️ +450% |
+| Métrique                 | Avant  | Après           | Évolution  |
+| ------------------------ | ------ | --------------- | ---------- |
+| Lignes fichier principal | 462    | 269             | ⬇️ -42%    |
+| Composants modulaires    | 0      | 6               | ✅ +6      |
+| Fichier types centralisé | Non    | Oui (53 lignes) | ✅         |
+| Lignes par composant     | -      | 30-94           | ✅ Optimal |
+| Complexité cyclomatique  | Élevée | Faible          | ⬇️ ~60%    |
+| Maintenabilité           | 3/10   | 9/10            | ⬆️ +600%   |
+| Testabilité              | 2/10   | 9/10            | ⬆️ +450%   |
 
 **Score Refactoring**: **9/10** (-1 pour tests manquants)
 
@@ -60,6 +61,7 @@ ui/
 ## 🔍 Détail des Composants
 
 ### 1. AdminNav.tsx (31 lignes)
+
 **Responsabilité**: Navigation entre sections
 
 ```typescript
@@ -71,6 +73,7 @@ interface AdminNavProps {
 ```
 
 **Features**:
+
 - Liste des sections (Health, Suppliers, Jobs, Tools, History)
 - Highlight section active
 - Callbacks pour navigation
@@ -78,6 +81,7 @@ interface AdminNavProps {
 ---
 
 ### 2. MetricsPanel.tsx (65 lignes)
+
 **Responsabilité**: Dashboard métriques qualité données
 
 ```typescript
@@ -92,17 +96,20 @@ interface MetricsPanelProps {
 ```
 
 **Features**:
+
 - **Qualité data**: % observations fresh, progress bar
 - **Monitoring API**: Latence moyenne, TRVE deltas
 - **Actions rapides**: Refresh dashboard, Voir docs API
 
 **Calculs**:
+
 - `freshRatio = stats.fresh / total`
 - `freshPercent = Math.round(freshRatio * 100)`
 
 ---
 
 ### 3. SuppliersPanel.tsx (58 lignes)
+
 **Responsabilité**: Liste fournisseurs et parsers
 
 ```typescript
@@ -120,6 +127,7 @@ interface SupplierRow {
 ```
 
 **Features**:
+
 - Tableau fournisseurs avec parsers
 - Source URL avec lien externe
 - Nombre d'observations
@@ -129,6 +137,7 @@ interface SupplierRow {
 ---
 
 ### 4. JobsPanel.tsx (40 lignes)
+
 **Responsabilité**: Affichage jobs ingestion
 
 ```typescript
@@ -146,6 +155,7 @@ interface AdminRunPayload {
 ```
 
 **Features**:
+
 - Tableau jobs nightly
 - Status OK/NOK avec icônes
 - Messages détaillés
@@ -154,6 +164,7 @@ interface AdminRunPayload {
 ---
 
 ### 5. ToolsPanel.tsx (94 lignes)
+
 **Responsabilité**: Outils admin (inspection PDF + overrides)
 
 ```typescript
@@ -173,6 +184,7 @@ interface ToolsPanelProps {
 ```
 
 **Features**:
+
 - **Inspection PDF**:
   - Upload fichier
   - Sélection fournisseur
@@ -186,6 +198,7 @@ interface ToolsPanelProps {
 ---
 
 ### 6. OverrideHistoryPanel.tsx (30 lignes)
+
 **Responsabilité**: Historique des overrides manuels
 
 ```typescript
@@ -204,6 +217,7 @@ interface OverrideEntryPayload {
 ```
 
 **Features**:
+
 - Tableau historique chronologique
 - Supplier, URL, dates
 - Gestion erreurs
@@ -339,32 +353,38 @@ export default function AdminConsole() {
 ## ✅ Points Forts du Refactoring
 
 ### 1. Séparation des Responsabilités ✅
+
 - Chaque composant a **une fonction claire**
 - Pas de logique métier dans les composants de présentation
 - Props bien typées avec TypeScript
 
 ### 2. Taille des Composants ✅
+
 - Tous < 100 lignes (recommandation: < 150)
 - Le plus gros: **ToolsPanel (94 lignes)** reste raisonnable
 - Moyenne: **53 lignes par composant**
 
 ### 3. Architecture Propre ✅
+
 - Types centralisés dans `types.ts`
 - Composants isolés dans `components/admin/`
 - Page principale orchestre tout
 - Callbacks pour communication parent → enfant
 
 ### 4. Maintenabilité ✅
+
 - Facile d'ajouter un nouveau panel
 - Facile de modifier un panel isolément
 - Pas de duplication de code
 
 ### 5. TypeScript Strict ✅
+
 - Toutes les props typées avec interfaces
 - Interfaces exportées et réutilisables
 - Pas de `any` visible (sauf `inspectionResult`, acceptable)
 
 ### 6. Testabilité ✅
+
 - Composants isolés faciles à tester
 - Props mockables
 - Pas d'effets de bord
@@ -375,6 +395,7 @@ export default function AdminConsole() {
 ## 📊 Validation
 
 ### Build ✅
+
 ```bash
 cd ui && npm run build
 # ✓ Compiled successfully
@@ -383,6 +404,7 @@ cd ui && npm run build
 ```
 
 ### Tests ✅
+
 ```bash
 cd ui && npm test
 # Test Files  2 passed (2)
@@ -391,11 +413,13 @@ cd ui && npm test
 ```
 
 ### Type Checking ✅
+
 - Aucune erreur TypeScript
 - Strict mode activé
 - Toutes les props bien typées
 
 ### Linting ✅
+
 - ESLint config simplifiée
 - Prettier compatible
 - Aucun warning bloquant
@@ -405,9 +429,11 @@ cd ui && npm test
 ## ⚠️ Améliorations Futures (Recommandations)
 
 ### 1. Tests Unitaires (Priorité HAUTE)
+
 **État**: ❌ Aucun test pour composants admin
 
 **Recommandation**:
+
 ```bash
 ui/components/admin/__tests__/
 ├── AdminNav.test.tsx
@@ -425,6 +451,7 @@ ui/components/admin/__tests__/
 ---
 
 ### 2. State Management (Priorité MOYENNE)
+
 **État**: 14 useState dans page.tsx
 
 **Recommandation**: TanStack Query
@@ -444,6 +471,7 @@ const { data: tariffs, error: tariffError } = useQuery({
 ```
 
 **Bénéfices**:
+
 - Cache intelligent
 - Auto-refresh
 - Loading states automatiques
@@ -455,6 +483,7 @@ const { data: tariffs, error: tariffError } = useQuery({
 ---
 
 ### 3. Custom Hooks (Priorité BASSE)
+
 **Recommandation**: Extraire logique fetch
 
 ```typescript
@@ -475,6 +504,7 @@ const { health, tariffs, refresh } = useAdminData();
 ```
 
 **Bénéfices**:
+
 - Réutilisabilité
 - Tests plus faciles
 - Logique métier séparée
@@ -484,6 +514,7 @@ const { health, tariffs, refresh } = useAdminData();
 ---
 
 ### 4. Error Boundaries (Priorité BASSE)
+
 **Recommandation**: Ajouter Error Boundaries React
 
 ```typescript
@@ -501,6 +532,7 @@ export class AdminErrorBoundary extends React.Component {
 ```
 
 **Bénéfices**:
+
 - UI ne crash pas si un panel fail
 - Meilleure UX
 - Logs d'erreurs centralisés
@@ -512,23 +544,27 @@ export class AdminErrorBoundary extends React.Component {
 ## 📈 Impact Projet
 
 ### Maintenabilité: 3/10 → 9/10 (+600%)
+
 - Code bien organisé
 - Facile d'ajouter features
 - Facile de debugger
 - Documentation claire
 
 ### Testabilité: 2/10 → 9/10 (+450%)
+
 - Composants isolés
 - Props mockables
 - Structure idéale pour tests
 - Ready for TDD
 
 ### Performance: = (pas de régression)
+
 - Même nombre de renders
 - Pas de props drilling excessif
 - useMemo pour calculs coûteux
 
 ### DX (Developer Experience): ⬆️ +80%
+
 - Navigation rapide entre fichiers
 - Intellisense TypeScript
 - Hotkeys IDE efficaces
@@ -538,17 +574,17 @@ export class AdminErrorBoundary extends React.Component {
 
 ## 🎯 Conformité Best Practices
 
-| Pratique | Avant | Après | Status |
-|----------|-------|-------|--------|
-| SRP (Single Responsibility) | ❌ | ✅ | ✅ |
-| DRY (Don't Repeat Yourself) | ⚠️ | ✅ | ✅ |
-| KISS (Keep It Simple) | ❌ | ✅ | ✅ |
-| YAGNI (You Ain't Gonna Need It) | ✅ | ✅ | ✅ |
-| Composition > Inheritance | ✅ | ✅ | ✅ |
-| TypeScript Strict | ✅ | ✅ | ✅ |
-| Props Typing | ⚠️ | ✅ | ✅ |
-| Component Size < 150 lines | ❌ | ✅ | ✅ |
-| Testable Components | ❌ | ✅ | ⚠️ (tests manquants) |
+| Pratique                        | Avant | Après | Status               |
+| ------------------------------- | ----- | ----- | -------------------- |
+| SRP (Single Responsibility)     | ❌    | ✅    | ✅                   |
+| DRY (Don't Repeat Yourself)     | ⚠️    | ✅    | ✅                   |
+| KISS (Keep It Simple)           | ❌    | ✅    | ✅                   |
+| YAGNI (You Ain't Gonna Need It) | ✅    | ✅    | ✅                   |
+| Composition > Inheritance       | ✅    | ✅    | ✅                   |
+| TypeScript Strict               | ✅    | ✅    | ✅                   |
+| Props Typing                    | ⚠️    | ✅    | ✅                   |
+| Component Size < 150 lines      | ❌    | ✅    | ✅                   |
+| Testable Components             | ❌    | ✅    | ⚠️ (tests manquants) |
 
 ---
 
@@ -557,6 +593,7 @@ export class AdminErrorBoundary extends React.Component {
 **Le refactoring AdminConsole est un succès total!** 🎉
 
 ### Objectifs Atteints ✅
+
 - ✅ Réduction 42% lignes fichier principal
 - ✅ 6 composants modulaires créés
 - ✅ Types centralisés
@@ -565,13 +602,16 @@ export class AdminErrorBoundary extends React.Component {
 - ✅ Architecture propre et scalable
 
 ### Objectifs Partiels ⚠️
+
 - ⚠️ Tests manquants (facile à ajouter maintenant)
 - ⚠️ State management basique (TanStack Query recommandé)
 
 ### Score Final: **9/10**
+
 - **-1 point**: Tests unitaires manquants
 
 ### Next Steps
+
 1. **Ajouter tests** (2-3h) → Score 10/10
 2. **TanStack Query** (3-4h) → Simplification state
 3. **Custom hooks** (2h) → Réutilisabilité

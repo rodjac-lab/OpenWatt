@@ -8,7 +8,7 @@ on:
       supplier:
         description: 'Supplier to ingest (or "all")'
         required: false
-        default: 'all'
+        default: "all"
 
 permissions:
   contents: read
@@ -22,7 +22,14 @@ jobs:
       matrix:
         # Note: edf and engie are excluded because GitHub Actions IPs are blocked by their websites (403 Forbidden)
         # These suppliers must be ingested manually or from a dedicated server with residential IP
-        supplier: [mint_indexe_trv, mint_classic_green, mint_smart_green, total_heures_eco, total_standard_fixe]
+        supplier:
+          [
+            mint_indexe_trv,
+            mint_classic_green,
+            mint_smart_green,
+            total_heures_eco,
+            total_standard_fixe,
+          ]
 
     services:
       postgres:
@@ -111,7 +118,7 @@ jobs:
             const sourceCheckFailed = process.env.CHECK_OUTCOME === 'failure';
             const errorType = sourceCheckFailed ? 'Source URL unavailable (404 or timeout)' : 'Parsing error';
             const runUrl = context.serverUrl + '/' + context.repo.owner + '/' + context.repo.repo + '/actions/runs/' + context.runId;
-            
+
             let body = '## Ingest pipeline failed for ' + supplier + '\n\n';
             body += '**Error type:** ' + errorType + '\n\n';
             body += '**Run:** ' + runUrl + '\n\n';

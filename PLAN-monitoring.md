@@ -5,6 +5,7 @@
 **Contexte** : OpenWatt est un comparateur de tarifs d'électricité en France. Le pipeline d'ingestion scrape des PDFs de fournisseurs (EDF, Engie, TotalEnergies...) et persiste les tarifs en base. Actuellement, si une URL de PDF change ou si un parser casse, il n'y a pas de détection automatique ni d'alerte.
 
 **Contraintes SpecKit** (voir `specs/constitution.md`) :
+
 - Pas de Selenium/Playwright — on reste sur `requests + BeautifulSoup + pdfplumber`
 - Stack : Python 3.11+, PostgreSQL, FastAPI, GitHub Actions
 - Alertes : GitHub Issues (pas Slack)
@@ -14,12 +15,15 @@
 ## Phase 1 — Monitoring des URLs
 
 ### Objectif
+
 Vérifier que les URLs des sources (PDFs) répondent avant de tenter le parsing.
 
 ### Livrable
+
 Créer `scripts/check_sources.py`
 
 ### Spécifications
+
 - Lire tous les fichiers `parsers/config/*.yaml`
 - Pour chaque fichier, extraire `source.url`
 - Faire un `HEAD` request (avec timeout 10s, retry 2x)
@@ -28,12 +32,14 @@ Créer `scripts/check_sources.py`
 - Pouvoir être appelé standalone ou importé
 
 ### Exemple de sortie
+
 ```
 2025-05-29T03:15:00Z | EDF | https://particulier.edf.fr/.../Grille_prix.pdf | 200 | 342ms
 2025-05-29T03:15:01Z | Engie | https://particuliers.engie.fr/.../fiche.pdf | 404 | 127ms | ERROR
 ```
 
 ### Tests
+
 - Test avec mock requests (succès, 404, timeout)
 - Snapshot du format de sortie
 
@@ -42,13 +48,16 @@ Créer `scripts/check_sources.py`
 ## Phase 2 — Table `ingest_runs`
 
 ### Objectif
+
 Historiser chaque exécution du pipeline pour pouvoir diagnostiquer les problèmes et calculer le `data_status` automatiquement.
 
 ### Livrable
+
 1. `db/migrations/003_ingest_runs.sql` (ou ajouter à `db/ddl.sql` selon le pattern actuel)
 2. Modifier `ingest/pipeline.py` pour écrire dans cette table
 
 ### Schéma de la table
+
 ```sql
 CREATE TABLE IF NOT EXISTS ingest_runs (
     id SERIAL PRIMARY KEY,
@@ -67,12 +76,15 @@ CREATE INDEX idx_ingest_runs_supplier_started ON ingest_runs(supplier, started_a
 ```
 
 ### Modification du pipeline
+
 Dans `ingest/pipeline.py`, encapsuler le run :
+
 1. INSERT au début avec `status='running'`
 2. UPDATE à la fin avec `status='success'` ou `status='failed'` + `error_message`
 3. Si HEAD échoue avant le fetch → `status='source_unavailable'`
 
 ### Tests
+
 - Test d'intégration : run pipeline sur snapshot, vérifier que `ingest_runs` a une ligne
 
 ---
@@ -80,13 +92,16 @@ Dans `ingest/pipeline.py`, encapsuler le run :
 ## Phase 3 — Endpoint `/v1/health/ingest`
 
 ### Objectif
+
 Exposer l'état de santé de chaque fournisseur via l'API.
 
 ### Livrable
+
 1. `api/app/routes/health.py` (ou ajouter à un fichier existant)
 2. `api/app/services/health_service.py`
 
 ### Spécifications
+
 - Route : `GET /v1/health/ingest`
 - Pas d'authentification requise
 - Réponse JSON :
@@ -118,13 +133,16 @@ Exposer l'état de santé de chaque fournisseur via l'API.
 ```
 
 ### Logique `data_status`
+
 Dériver de `ingest_runs` :
+
 - `fresh` : dernier run `success` il y a < 7 jours
 - `verifying` : dernier run < 48h mais données pas encore validées
 - `stale` : dernier `success` > 14 jours
 - `broken` : dernier run `failed` ou `source_unavailable`
 
 ### Tests
+
 - Test API avec DB mockée
 - Snapshot de la réponse JSON
 
@@ -133,12 +151,15 @@ Dériver de `ingest_runs` :
 ## Phase 4 — Alertes GitHub Issues
 
 ### Objectif
+
 Créer automatiquement une issue GitHub quand un fournisseur est en échec.
 
 ### Livrable
+
 Modifier `.github/workflows/nightly.yml`
 
 ### Spécifications
+
 - Si le job d'ingestion échoue → créer une issue
 - Titre : `[INGEST BROKEN] {supplier} - {date}`
 - Labels : `bug`, `ingest`
@@ -146,6 +167,7 @@ Modifier `.github/workflows/nightly.yml`
 - Éviter les doublons : chercher si une issue ouverte existe déjà pour ce supplier
 
 ### Exemple d'ajout au workflow
+
 ```yaml
 - name: Create issue on failure
   if: failure()
@@ -153,7 +175,7 @@ Modifier `.github/workflows/nightly.yml`
   with:
     script: |
       const title = `[INGEST BROKEN] ${process.env.SUPPLIER} - ${new Date().toISOString().split('T')[0]}`;
-      
+
       // Check for existing open issue
       const issues = await github.rest.issues.listForRepo({
         owner: context.repo.owner,
@@ -161,13 +183,13 @@ Modifier `.github/workflows/nightly.yml`
         state: 'open',
         labels: 'ingest'
       });
-      
+
       const existing = issues.data.find(i => i.title.includes(process.env.SUPPLIER));
       if (existing) {
         console.log(`Issue already exists: #${existing.number}`);
         return;
       }
-      
+
       await github.rest.issues.create({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -178,6 +200,7 @@ Modifier `.github/workflows/nightly.yml`
 ```
 
 ### Tests
+
 - Test manuel avec `workflow_dispatch` en forçant un échec
 
 ---
@@ -185,57 +208,60 @@ Modifier `.github/workflows/nightly.yml`
 ## Phase 5 — Workflow live fetch
 
 ### Objectif
+
 Remplacer le test sur snapshot statique par un vrai fetch des sources pour détecter les changements.
 
 ### Livrable
+
 Créer `.github/workflows/ingest-live.yml`
 
 ### Spécifications
+
 ```yaml
 name: ingest-live
 
 on:
   schedule:
-    - cron: "30 3 * * *"  # 30 min après le nightly classique
+    - cron: "30 3 * * *" # 30 min après le nightly classique
   workflow_dispatch:
     inputs:
       supplier:
         description: 'Supplier to ingest (or "all")'
         required: false
-        default: 'all'
+        default: "all"
 
 jobs:
   ingest:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false  # Continue autres suppliers si un échoue
+      fail-fast: false # Continue autres suppliers si un échoue
       matrix:
         supplier: [edf, engie, totalenergies]
-    
+
     services:
       postgres:
         # ... (même config que nightly.yml)
-    
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      
+
       - name: Install deps
         run: pip install -r requirements.txt
-      
+
       - name: Check source availability
         id: check
         run: python scripts/check_sources.py --supplier ${{ matrix.supplier }}
-      
+
       - name: Run live ingest
         id: ingest
         env:
           SUPPLIER: ${{ matrix.supplier }}
         run: |
           python -m ingest.pipeline ${{ matrix.supplier }} --fetch --persist
-      
+
       - name: Create issue on failure
         if: failure()
         uses: actions/github-script@v7
@@ -247,6 +273,7 @@ jobs:
 ```
 
 ### Points d'attention
+
 - `fail-fast: false` : un supplier en échec ne bloque pas les autres
 - Le check des sources avant l'ingest permet de distinguer "URL cassée" vs "parsing cassé"
 - Garder le workflow `nightly.yml` existant pour les tests de non-régression sur snapshots
@@ -256,28 +283,35 @@ jobs:
 ## Phase 6 — Mise à jour de la constitution
 
 ### Objectif
+
 Corriger la spec pour refléter GitHub Issues au lieu de Slack.
 
 ### Livrable
+
 Modifier `specs/constitution.md`
 
 ### Changements
+
 Remplacer :
+
 ```markdown
 - Alertes : Slack Webhook.
 ```
 
 Par :
+
 ```markdown
 - Alertes : GitHub Issues auto-créées par les workflows CI.
 ```
 
 Et dans la section "Alerting & traçabilité" :
+
 ```markdown
 - Slack alert si `parse_error`, `prix_anomal`, ou `structure_changed`.
 ```
 
 Par :
+
 ```markdown
 - GitHub Issue auto-créée si `parse_error`, `prix_anomal`, ou `structure_changed`.
 - Notifications via l'app GitHub mobile.

@@ -21,7 +21,7 @@ def parse_float(value: Any) -> float | None:
     text = normalize_text(value)
     if not text:
         return None
-    text = text.replace("\u20ac", "").replace("cts", "").replace("%", "")
+    text = text.replace("\u20ac", "").replace("cts", "").replace("Cts", "").replace("%", "")
     text = text.replace(",", ".")
     text = re.sub(r"[^0-9.+-]", "", text)
     if not text or text in {"-", "--"}:
@@ -118,6 +118,9 @@ def build_record_from_row(
         if column_index >= len(row):
             return None
         value = parse_float(row[column_index])
+        # Convert centimes to euros if needed for price fields
+        if value is not None and slice_spec.price_unit == "cts" and "price" in field:
+            value = value / 100.0
         payload[field] = value
 
     for field in slice_spec.columns.keys():

@@ -6,6 +6,7 @@ last_updated: 2025-11-11
 ---
 
 # 📡 API (extrait OpenAPI)
+
 ```yaml
 openapi: 3.0.3
 info: { title: Elec Tariffs FR API, version: 0.1.0 }
@@ -19,7 +20,7 @@ paths:
           schema: { enum: [BASE, HPHC, TEMPO] }
         - name: puissance
           in: query
-          schema: { type: integer, enum: [3,6,9,12,15,18,24,30,36] }
+          schema: { type: integer, enum: [3, 6, 9, 12, 15, 18, 24, 30, 36] }
         - name: include_stale
           in: query
           schema: { type: boolean, default: false }
@@ -74,12 +75,17 @@ paths:
             schema:
               type: object
               properties:
-                supplier: { type: string, description: "Code du parser (ex: engie)" }
-                file_path: { type: string, description: "Chemin local du PDF à analyser" }
-                table_hint: { type: integer, description: "Index de table optionnel" }
+                supplier:
+                  { type: string, description: "Code du parser (ex: engie)" }
+                file_path:
+                  {
+                    type: string,
+                    description: "Chemin local du PDF à analyser",
+                  }
+                table_hint:
+                  { type: integer, description: "Index de table optionnel" }
               required: [supplier, file_path]
       responses:
         "200":
           description: JSON des cellules extraites (preview non persisté)
 ```
-

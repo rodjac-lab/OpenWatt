@@ -15,6 +15,7 @@ Open Data electricity tariffs comparator for France — transparent, reproducibl
 ## 🎉 What's New (Sprint 1 & 2 - Nov 2025)
 
 ### Sprint 1 - Production Readiness ✅
+
 - **Docker**: Multi-stage Dockerfiles (API + UI) + docker-compose.prod.yaml
 - **CI/CD**: Complete GitHub Actions workflow (linting, tests, builds)
 - **Linting**: black, flake8, mypy (Python) + ESLint, Prettier (TypeScript)
@@ -22,6 +23,7 @@ Open Data electricity tariffs comparator for France — transparent, reproducibl
 - **Coverage**: 70% enforced (backend), 99% (frontend)
 
 ### Sprint 2 - Monitoring & Robustness ✅
+
 - **Logging**: Structured JSON logs (structlog) for production
 - **Monitoring**: Sentry error tracking + Prometheus metrics (code ready)
 - **Tracing**: Request-ID middleware for distributed tracing
@@ -30,6 +32,7 @@ Open Data electricity tariffs comparator for France — transparent, reproducibl
 - **Documentation**: Complete guides for testing, monitoring, logging
 
 ### Sprint 3 - Code Quality (In Progress) ⏳
+
 - **AdminConsole Refactoring**: 462 → 269 lines (-42%), 6 modular components ✅
 - **Type Safety**: Centralized TypeScript interfaces (types.ts) ✅
 - **Maintainability**: Component size < 100 lines, clean architecture ✅
@@ -66,6 +69,7 @@ docker compose -f docker-compose.prod.yaml exec api python scripts/apply_ddl.py
 ---
 
 ## Contents
+
 - specs/: project specifications (Spec-Kit)
 - db/: PostgreSQL DDL (insert-only)
 - .github/: workflows and automation
@@ -75,16 +79,18 @@ docker compose -f docker-compose.prod.yaml exec api python scripts/apply_ddl.py
 - docs/: comprehensive documentation (Sprint 1 & 2 guides)
 
 ## Backend development
+
 1. Ensure Python 3.11+ is installed (per Spec-Kit charter).
 2. Create a virtual environment and install dependencies:
-    python -m venv .venv
-    .\\.venv\\Scripts\\activate
-    pip install --upgrade pip
-    pip install -r requirements.txt
+   python -m venv .venv
+   .\\.venv\\Scripts\\activate
+   pip install --upgrade pip
+   pip install -r requirements.txt
 3. Run the FastAPI app, which currently serves `/health` and `/v1/*` routes:
-    uvicorn api.app.main:app --reload
+   uvicorn api.app.main:app --reload
 
 ### Database setup
+
 1. Copy `.env.example` to `.env` and adjust credentials if needed.
 2. Start PostgreSQL locally: `docker compose up -d db` (or point to an existing instance).
 3. Apply the canonical schema:
@@ -93,29 +99,32 @@ docker compose -f docker-compose.prod.yaml exec api python scripts/apply_ddl.py
 4. Import the TRVE reference grid (official CRE annex B PDF parsed under `tests/snapshots/trve/`):
    `OPENWATT_DATABASE_URL=<db-url> python scripts/import_trve.py tests/snapshots/trve/trve_cre_2025_07_expected.json --valid-from 2025-08-01 --truncate`
 5. Export `OPENWATT_DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/openwatt` (or the SQLite URL above) and set `OPENWATT_ENABLE_DB=1` before launching uvicorn.
-5. Alembic is ready for future migrations (`alembic init migrations`).
+6. Alembic is ready for future migrations (`alembic init migrations`).
 
 ## Ingestion & parsers
+
 - Supplier scrapers are declared in `parsers/config/<supplier>.yaml` (selectors ou tables PDF, parser version).
 - Run the parser against an existing artifact (HTML ou PDF) :
-    python -m ingest.pipeline edf --html tests/snapshots/edf/edf_tarif_bleu.pdf --observed-at 2025-02-12T08:00:00Z
+  python -m ingest.pipeline edf --html tests/snapshots/edf/edf_tarif_bleu.pdf --observed-at 2025-02-12T08:00:00Z
 - Or download the latest source defined in YAML et persister en base :
-    python -m ingest.pipeline total_heures_eco --fetch --persist
+  python -m ingest.pipeline total_heures_eco --fetch --persist
   The raw file lands in `artifacts/raw/` and the parsed JSON in `artifacts/parsed/`.
 - Automate all suppliers sequentially (ideal for cron) :
-    python scripts/run_ingest_all.py --observed-at 2025-02-15T00:00:00+00:00
+  python scripts/run_ingest_all.py --observed-at 2025-02-15T00:00:00+00:00
 - Snapshot outputs live in `tests/snapshots/<supplier>/` et sont valides par `pytest`.
 - Current coverage: EDF (`edf_pdf_v1`), Engie (`engie_pdf_v1`), TotalEnergies (`total_heures_eco_v1`, `total_standard_fixe_v1`) et Mint Energie (`mint_indexe_trv_v1`, `mint_classic_green_v1`, `mint_smart_green_v1`). Ajoutez un fournisseur en clonant ce pattern YAML + snapshot.
 
 ## UI hand-off
+
 - Generate an OpenAPI payload for frontend tooling:
-    python scripts/export_openapi.py --out specs/openapi.generated.json
+  python scripts/export_openapi.py --out specs/openapi.generated.json
 - Reuse the status badge guidance + starter types in `docs/ui/`.
 - Spin up the Next.js skeleton in `ui/`:
-    cd ui && npm install && npm run dev
+  cd ui && npm install && npm run dev
 - Set `NEXT_PUBLIC_API_BASE` to point at your FastAPI instance before fetching data.
 
 ## API endpoints (alpha)
+
 - GET /health - liveness probe for CI/CD monitors.
 - GET /v1/tariffs - latest observations filtered by option, puissance, include_stale (`data_status = fresh|verifying|stale|broken`).
 - GET /v1/tariffs/history - insert-only log with supplier/option/puissance/since/until filters.
@@ -127,31 +136,34 @@ docker compose -f docker-compose.prod.yaml exec api python scripts/apply_ddl.py
 ## Tests
 
 ### Backend Tests (pytest)
+
 1. Snapshot fixtures live in `tests/snapshots/` (EDF, Engie, TotalEnergies).
 2. Run the suite locally:
-    ```bash
-    pytest                           # Run all tests
-    pytest --cov                     # With coverage report
-    pytest --cov --cov-report=html   # Generate HTML coverage report
-    ```
+   ```bash
+   pytest                           # Run all tests
+   pytest --cov                     # With coverage report
+   pytest --cov --cov-report=html   # Generate HTML coverage report
+   ```
 3. **Coverage enforced**: 70% minimum (CI fails if < 70%)
 
 ### Frontend Tests (Vitest) - **NEW!**
+
 1. Test files: `ui/components/__tests__/*.test.tsx`
 2. Run the suite:
-    ```bash
-    cd ui
-    npm test                 # Run tests once
-    npm run test:watch       # Watch mode
-    npm run test:ui          # Browser UI
-    npm run test:coverage    # With coverage report
-    ```
+   ```bash
+   cd ui
+   npm test                 # Run tests once
+   npm run test:watch       # Watch mode
+   npm run test:ui          # Browser UI
+   npm run test:coverage    # With coverage report
+   ```
 3. **Coverage**: 99.43% (FreshnessBadge: 100%, TariffList: 99.36%)
 4. **CI validation**: Automatic on every PR/push
 
 **See**: [Frontend Testing Guide](docs/frontend-testing.md)
 
 ### CI/CD
+
 - GitHub Actions runs **all tests** (backend + frontend) on every PR/push
 - Linting (black, flake8, mypy, ESLint, Prettier)
 - Docker builds validation
@@ -163,27 +175,32 @@ docker compose -f docker-compose.prod.yaml exec api python scripts/apply_ddl.py
 ## 📚 Documentation
 
 ### Getting Started
+
 - [README](README.md) - This file (Quick start, development setup)
 - [Audit Report](docs/audit.md) - Complete project audit (updated post-Sprint 1 & 2)
 
 ### Sprint Documentation
+
 - [Sprint 1 Summary](docs/sprint-1-summary.md) - Production readiness (Docker, CI/CD, linting)
 - [Sprint 2 Summary](docs/sprint-2-summary.md) - Monitoring & robustness (logs, Sentry, tests)
 - [Sprint 2 Frontend Tests](docs/sprint-2-frontend-tests-complete.md) - Detailed frontend testing report
 - [AdminConsole Refactoring Complete](docs/adminConsole-refactoring-complete.md) - Sprint 3 refactoring report ✨ NEW
 
 ### Development Guides
+
 - [Frontend Testing Guide](docs/frontend-testing.md) - Vitest + React Testing Library (complete guide)
 - [Logging Guide](docs/logging.md) - Structured logging with structlog
 - [Monitoring Setup Guide](docs/monitoring-setup-guide.md) - Sentry + Prometheus + Grafana deployment
 - [AdminConsole Refactor Guide (OLD)](docs/refactoring-admin-console.md) - Original guide (superseded by complete report)
 
 ### Specifications
+
 - [specs/constitution.md](specs/constitution.md) - Spec-Kit principles and charter
 - [specs/api.md](specs/api.md) - OpenAPI specification
 - [specs/openapi.generated.json](specs/openapi.generated.json) - Generated OpenAPI schema
 
 ### Architecture
+
 - **Stack**: FastAPI (Python 3.11+) + Next.js 14 + PostgreSQL 16
 - **Pattern**: Insert-only history (immutable database)
 - **Testing**: pytest (backend 70%+) + Vitest (frontend 99%+)
@@ -198,10 +215,12 @@ docker compose -f docker-compose.prod.yaml exec api python scripts/apply_ddl.py
 **Note**: 8.5/10 (see [audit report](docs/audit.md))
 
 ### Completed ✅
+
 - Sprint 1: Production readiness (100%)
 - Sprint 2: Monitoring & robustness (87.5%)
 
 ### Roadmap (Sprint 3-4)
+
 1. AdminConsole refactoring
 2. Alembic migrations active
 3. PostgreSQL backup automation

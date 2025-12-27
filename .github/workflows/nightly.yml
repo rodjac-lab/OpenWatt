@@ -91,7 +91,7 @@ jobs:
             }
 
             const runUrl = context.serverUrl + '/' + context.repo.owner + '/' + context.repo.repo + '/actions/runs/' + context.runId;
-            
+
             let body = '## Ingest pipeline failed for ' + supplier + '\n\n';
             body += '**Error:** See workflow logs for details\n\n';
             body += '**Run:** ' + runUrl + '\n\n';

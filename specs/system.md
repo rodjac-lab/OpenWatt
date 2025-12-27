@@ -17,6 +17,7 @@ C --> F["TRVE Guard Diff (QA)"]
 ```
 
 # 🔌 Flux de données
+
 1. **Scrapers** récupèrent HTML/PDF → checksum SHA-256
 2. **Normalizer** mappe vers contrat `tariff.schema.json`
 3. **Storage** `INSERT` uniquement (clé idempotente)
@@ -24,6 +25,7 @@ C --> F["TRVE Guard Diff (QA)"]
 5. **QA** compare vs **TRVE** pour badges et alertes
 
 # Badges / Etats
+
 - **fresh** : observation ≤ 7 jours, aucune alerte active.
 - **verifying** : vérification en cours (changement détecté ou diff TRVE à confirmer en < 48 h).
 - **stale** : observation > 14 jours.

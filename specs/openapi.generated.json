@@ -7,9 +7,7 @@
   "paths": {
     "/health": {
       "get": {
-        "tags": [
-          "health"
-        ],
+        "tags": ["health"],
         "summary": "Health probe",
         "description": "Basic uptime signal for monitoring.",
         "operationId": "health_probe_health_get",
@@ -33,9 +31,7 @@
     },
     "/v1/tariffs": {
       "get": {
-        "tags": [
-          "tariffs"
-        ],
+        "tags": ["tariffs"],
         "summary": "Derniers tarifs frais",
         "description": "Expose `/v1/tariffs` tel que decrit dans `specs/api.md`.",
         "operationId": "get_latest_tariffs_v1_tariffs_get",
@@ -117,9 +113,7 @@
     },
     "/v1/tariffs/history": {
       "get": {
-        "tags": [
-          "tariffs"
-        ],
+        "tags": ["tariffs"],
         "summary": "Historique insert-only",
         "operationId": "get_tariff_history_v1_tariffs_history_get",
         "parameters": [
@@ -240,9 +234,7 @@
     },
     "/v1/guards/trve-diff": {
       "get": {
-        "tags": [
-          "guards"
-        ],
+        "tags": ["guards"],
         "summary": "Ecart vs TRVE",
         "description": "Return last validation snapshot between observed tariffs and TRVE reference.",
         "operationId": "get_trve_diff_v1_guards_trve_diff_get",
@@ -265,12 +257,7 @@
     "schemas": {
       "FreshnessStatus": {
         "type": "string",
-        "enum": [
-          "fresh",
-          "verifying",
-          "stale",
-          "broken"
-        ],
+        "enum": ["fresh", "verifying", "stale", "broken"],
         "title": "FreshnessStatus"
       },
       "HTTPValidationError": {
@@ -302,9 +289,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "title": "TariffCollection"
       },
       "TariffHistoryFilters": {
@@ -334,17 +319,7 @@
             "anyOf": [
               {
                 "type": "integer",
-                "enum": [
-                  3,
-                  6,
-                  9,
-                  12,
-                  15,
-                  18,
-                  24,
-                  30,
-                  36
-                ]
+                "enum": [3, 6, 9, 12, 15, 18, 24, 30, 36]
               },
               {
                 "type": "null"
@@ -394,10 +369,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "filters",
-          "items"
-        ],
+        "required": ["filters", "items"],
         "title": "TariffHistoryResponse"
       },
       "TariffObservation": {
@@ -412,17 +384,7 @@
           },
           "puissance_kva": {
             "type": "integer",
-            "enum": [
-              3,
-              6,
-              9,
-              12,
-              15,
-              18,
-              24,
-              30,
-              36
-            ],
+            "enum": [3, 6, 9, 12, 15, 18, 24, 30, 36],
             "title": "Puissance Kva"
           },
           "price_kwh_ttc": {
@@ -514,11 +476,7 @@
       },
       "TariffOption": {
         "type": "string",
-        "enum": [
-          "BASE",
-          "HPHC",
-          "TEMPO"
-        ],
+        "enum": ["BASE", "HPHC", "TEMPO"],
         "title": "TariffOption"
       },
       "TrveDiffEntry": {
@@ -532,17 +490,7 @@
           },
           "puissance_kva": {
             "type": "integer",
-            "enum": [
-              3,
-              6,
-              9,
-              12,
-              15,
-              18,
-              24,
-              30,
-              36
-            ],
+            "enum": [3, 6, 9, 12, 15, 18, 24, 30, 36],
             "title": "Puissance Kva"
           },
           "delta_eur_per_mwh": {
@@ -587,10 +535,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "generated_at",
-          "items"
-        ],
+        "required": ["generated_at", "items"],
         "title": "TrveDiffResponse"
       },
       "ValidationError": {
@@ -619,11 +564,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "loc",
-          "msg",
-          "type"
-        ],
+        "required": ["loc", "msg", "type"],
         "title": "ValidationError"
       }
     }

@@ -73,6 +73,7 @@ Voir `PLAN-monitoring.md` à la racine du repo pour les détails.
 4. "Submit new issue"
 
 Ou depuis la CLI GitHub :
+
 ```bash
 gh issue create --title "[FEATURE] Fiabilité du pipeline d'ingestion — Monitoring & Alertes" --body-file GITHUB-ISSUE-monitoring.md --label "enhancement"
 ```

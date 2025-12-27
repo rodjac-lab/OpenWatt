@@ -3,6 +3,7 @@
 ## Problème Actuel
 
 Le fichier `ui/app/admin/page.tsx` contient **462 lignes** de code, ce qui le rend:
+
 - Difficile à maintenir
 - Difficile à tester
 - Violation du principe de responsabilité unique (SRP)
@@ -47,7 +48,7 @@ export class APIError extends Error {
   constructor(
     public status: number,
     public message: string,
-    public details?: unknown
+    public details?: unknown,
   ) {
     super(message);
     this.name = "APIError";
@@ -65,7 +66,9 @@ export const apiClient = {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: "Unknown error" }));
+      const error = await response
+        .json()
+        .catch(() => ({ detail: "Unknown error" }));
       throw new APIError(response.status, error.detail || error.message, error);
     }
 
@@ -359,12 +362,14 @@ describe("DashboardMetrics", () => {
 ## Bénéfices du Refactoring
 
 ### Avant
+
 - ✅ 1 fichier de 462 lignes
 - ❌ Difficile à tester
 - ❌ Logique fetch dupliquée
 - ❌ Violation SRP
 
 ### Après
+
 - ✅ 7 fichiers modulaires (50-100 lignes chacun)
 - ✅ Composants testables isolément
 - ✅ Client API réutilisable

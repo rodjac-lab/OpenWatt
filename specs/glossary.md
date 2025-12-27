@@ -6,6 +6,7 @@ last_updated: 2025-11-11
 ---
 
 # 📘 Glossaire
+
 - **TRVE**: Tarif réglementé de vente d'électricité (référence QA)
 - **BASE**: Option à un seul prix du kWh
 - **HP/HC**: Heures Pleines / Heures Creuses (deux prix du kWh)

@@ -9,19 +9,23 @@
 ## 📊 Tâches Réalisées
 
 ### 1. ✅ Logging Structuré (structlog + JSON)
+
 **Fichiers créés**:
+
 - `api/app/core/logging.py` - Configuration structlog
 - `api/app/middleware/request_id.py` - Middleware request_id
 - `api/app/middleware/__init__.py` - Exports middleware
 - `docs/logging.md` - Guide complet logging
 
 **Fonctionnalités**:
+
 - ✅ Logs JSON structurés (ELK/CloudWatch ready)
 - ✅ Request-ID automatique (UUID4)
 - ✅ Context binding (user_id, tariff_id, etc.)
 - ✅ Correlation distribuée
 
 **Exemple de log**:
+
 ```json
 {
   "event": "tariff_created",
@@ -35,6 +39,7 @@
 ```
 
 **Usage**:
+
 ```python
 from api.app.core.logging import get_logger
 
@@ -45,10 +50,13 @@ logger.info("user_action", user_id=123, action="login")
 ---
 
 ### 2. ✅ Sentry Error Tracking
+
 **Fichiers créés**:
+
 - `api/app/core/sentry.py` - Configuration Sentry SDK
 
 **Fonctionnalités**:
+
 - ✅ Capture automatique erreurs
 - ✅ Performance monitoring (transactions)
 - ✅ Intégrations FastAPI + SQLAlchemy
@@ -56,6 +64,7 @@ logger.info("user_action", user_id=123, action="login")
 - ✅ GDPR compliant (no PII)
 
 **Configuration**:
+
 ```bash
 # .env
 OPENWATT_SENTRY_DSN=https://xxx@sentry.io/123456
@@ -63,6 +72,7 @@ OPENWATT_ENVIRONMENT=production
 ```
 
 **Usage manuel**:
+
 ```python
 from api.app.core.sentry import capture_exception, capture_message
 
@@ -73,22 +83,26 @@ except Exception as exc:
 ```
 
 **Traces sample rate**:
+
 - Development: 100%
 - Production: 10%
 
 ---
 
 ### 3. ✅ Métriques Prometheus
+
 **Dépendance**: `prometheus-fastapi-instrumentator>=6.1,<7.0`
 
 **Endpoint**: `GET /metrics` (format Prometheus)
 
 **Métriques automatiques**:
+
 - `http_requests_total` - Total requests par endpoint/méthode/status
 - `http_request_duration_seconds` - Latence par endpoint
 - `http_requests_inprogress` - Requests en cours
 
 **Métriques custom** (possibles):
+
 ```python
 from prometheus_client import Counter, Histogram
 
@@ -100,6 +114,7 @@ parse_duration.labels(supplier="EDF").observe(1.23)
 ```
 
 **Grafana dashboard** (exemple de requêtes):
+
 ```promql
 # Requêtes par seconde
 rate(http_requests_total[5m])
@@ -114,15 +129,18 @@ sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total
 ---
 
 ### 4. ✅ Request-ID Traçabilité
+
 **Fichier**: `api/app/middleware/request_id.py`
 
 **Fonctionnement**:
+
 1. Génère UUID4 pour chaque requête
 2. Bind à structlog context
 3. Ajouté dans response header `X-Request-ID`
 4. Accessible via `request.state.request_id`
 
 **Exemple**:
+
 ```bash
 # Request
 curl -H "X-Request-ID: custom-123" http://localhost:8000/v1/tariffs
@@ -136,6 +154,7 @@ X-Request-ID: custom-123
 ---
 
 ### 5. ✅ Retry Logic Ingestion
+
 **Fichier**: `ingest/retry.py`
 
 **Dépendance**: `tenacity>=8.2,<9.0`
@@ -143,7 +162,9 @@ X-Request-ID: custom-123
 **Décorateurs**:
 
 #### `@retry_on_network_error`
+
 Retry sur erreurs réseau (max 3 tentatives, backoff exponentiel 1-10s)
+
 ```python
 @retry_on_network_error(max_attempts=5)
 def fetch_tariff_pdf(url: str) -> bytes:
@@ -151,7 +172,9 @@ def fetch_tariff_pdf(url: str) -> bytes:
 ```
 
 #### `@retry_on_parse_error`
+
 Retry sur erreurs parsing (max 2 tentatives, backoff 1-3s)
+
 ```python
 @retry_on_parse_error(max_attempts=2)
 def parse_pdf_table(pdf_path: str) -> list[dict]:
@@ -159,6 +182,7 @@ def parse_pdf_table(pdf_path: str) -> list[dict]:
 ```
 
 **Comportement**:
+
 - Backoff exponentiel (1s → 2s → 4s → 8s)
 - Log WARNING avant retry
 - Log DEBUG après retry réussi
@@ -167,11 +191,13 @@ def parse_pdf_table(pdf_path: str) -> list[dict]:
 ---
 
 ### 6. ✅ Rate Limiting Parsers
+
 **Fichier**: `ingest/rate_limiter.py`
 
 **Algorithme**: Token bucket per-domain
 
 **Configuration**:
+
 ```python
 rate_limiter = RateLimiter(
     requests_per_second=0.2,  # 1 requête / 5 secondes
@@ -180,6 +206,7 @@ rate_limiter = RateLimiter(
 ```
 
 **Usage**:
+
 ```python
 from ingest.rate_limiter import default_rate_limiter
 
@@ -189,12 +216,14 @@ response = requests.get(url)
 ```
 
 **Features**:
+
 - Thread-safe (Lock)
 - Per-domain rate limiting
 - Token bucket avec refill automatique
 - Stats disponibles via `get_stats()`
 
 **Exemple**:
+
 ```python
 # 1ère requête EDF: passe immédiatement
 rate_limiter.wait_if_needed("https://edf.fr/tarif1.pdf")
@@ -209,8 +238,10 @@ rate_limiter.wait_if_needed("https://engie.fr/tarif.pdf")
 ---
 
 ### 7. ✅ Tests Frontend (Vitest)
+
 **Date**: 2025-11-16
 **Fichiers créés**:
+
 - `ui/vitest.config.ts` - Configuration Vitest
 - `ui/vitest.setup.ts` - Setup file
 - `ui/components/__tests__/FreshnessBadge.test.tsx` - 6 test cases
@@ -219,6 +250,7 @@ rate_limiter.wait_if_needed("https://engie.fr/tarif.pdf")
 - `docs/sprint-2-frontend-tests-complete.md` - Rapport complet
 
 **Fonctionnalités**:
+
 - ✅ Vitest + React Testing Library + Happy-DOM
 - ✅ 15 tests automatisés (100% pass rate)
 - ✅ Coverage 99.43% (FreshnessBadge: 100%, TariffList: 99.36%)
@@ -227,6 +259,7 @@ rate_limiter.wait_if_needed("https://engie.fr/tarif.pdf")
 - ✅ Upload coverage vers Codecov
 
 **Test cases**:
+
 - FreshnessBadge: fresh, verifying, stale, broken, unknown, empty
 - TariffList: loading, fetch, error, filter option, filter puissance, calculate cost, update consumption, sort, badges
 
@@ -239,9 +272,11 @@ rate_limiter.wait_if_needed("https://engie.fr/tarif.pdf")
 ## ❌ Tâche Non Complétée
 
 ### 8. ❌ Secrets Management
+
 **Raison**: Nécessite décision d'architecture (AWS Secrets / Vault / dotenv-vault)
 
 **À faire**:
+
 - Choisir solution (recommandation: dotenv-vault pour simplicité)
 - Migrer secrets vers vault
 - Rotation automatique
@@ -253,16 +288,16 @@ rate_limiter.wait_if_needed("https://engie.fr/tarif.pdf")
 
 ## 📊 Métriques Sprint 2
 
-| Métrique | Avant | Après | Amélioration |
-|----------|-------|-------|--------------|
-| Logging structuré | ❌ | ✅ (JSON) | +∞% |
-| Error tracking | ❌ | ✅ (Sentry) | +∞% |
-| Métriques Prometheus | ❌ | ✅ (/metrics) | +∞% |
-| Request tracing | ❌ | ✅ (request_id) | +∞% |
-| Retry logic | ❌ | ✅ (tenacity) | +∞% |
-| Rate limiting | ❌ | ✅ (token bucket) | +∞% |
-| Tests frontend | ❌ | ✅ (Vitest, 99% coverage) | +∞% |
-| Secrets vault | ❌ | ❌ | 0% |
+| Métrique             | Avant | Après                     | Amélioration |
+| -------------------- | ----- | ------------------------- | ------------ |
+| Logging structuré    | ❌    | ✅ (JSON)                 | +∞%          |
+| Error tracking       | ❌    | ✅ (Sentry)               | +∞%          |
+| Métriques Prometheus | ❌    | ✅ (/metrics)             | +∞%          |
+| Request tracing      | ❌    | ✅ (request_id)           | +∞%          |
+| Retry logic          | ❌    | ✅ (tenacity)             | +∞%          |
+| Rate limiting        | ❌    | ✅ (token bucket)         | +∞%          |
+| Tests frontend       | ❌    | ✅ (Vitest, 99% coverage) | +∞%          |
+| Secrets vault        | ❌    | ❌                        | 0%           |
 
 **Score Sprint 2**: 7/8 (87.5%)
 
@@ -271,14 +306,17 @@ rate_limiter.wait_if_needed("https://engie.fr/tarif.pdf")
 ## 🎯 Impact Projet
 
 ### Observabilité
+
 - ✅ **Avant**: Logs texte illisibles, pas de tracing
 - ✅ **Après**: Logs JSON structurés + request-ID + Sentry + Prometheus
 
 ### Robustesse Ingestion
+
 - ✅ **Avant**: Échec réseau = job failed
 - ✅ **Après**: Retry automatique 3x + rate limiting anti-ban
 
 ### Monitoring Production
+
 - ✅ **Avant**: Impossible de débugger production
 - ✅ **Après**: Sentry errors + Prometheus metrics + structured logs
 
@@ -327,6 +365,7 @@ OpenWatt/
 ### Puis Sprint 3
 
 Voir [docs/audit.md](audit.md) section "Sprint 3 - Moyen terme":
+
 1. Migrations Alembic actives
 2. Backup PostgreSQL automatique
 3. Tests e2e (Playwright)
@@ -338,6 +377,7 @@ Voir [docs/audit.md](audit.md) section "Sprint 3 - Moyen terme":
 ## 📚 Documentation Créée
 
 ### Guide Logging ([docs/logging.md](logging.md))
+
 - Quick start structlog
 - Request correlation
 - Log levels best practices
@@ -350,6 +390,7 @@ Voir [docs/audit.md](audit.md) section "Sprint 3 - Moyen terme":
 ## ✅ Validation Sprint 2
 
 **Checklist backend**:
+
 - [x] Logging structuré JSON
 - [x] Request-ID middleware
 - [x] Sentry error tracking
@@ -359,6 +400,7 @@ Voir [docs/audit.md](audit.md) section "Sprint 3 - Moyen terme":
 - [x] Documentation logging
 
 **Checklist frontend** (complété 2025-11-16):
+
 - [x] Vitest setup
 - [x] Tests composants (FreshnessBadge, TariffList)
 - [x] Coverage 99%+ (> 70% threshold)
@@ -374,6 +416,7 @@ Voir [docs/audit.md](audit.md) section "Sprint 3 - Moyen terme":
 ## 🏆 Conclusion
 
 Le **Sprint 2 est un succès complet (87.5%)** ! OpenWatt a maintenant:
+
 - ✅ **Observabilité production** (Logs + Sentry + Prometheus)
 - ✅ **Robustesse ingestion** (Retry + Rate limiting)
 - ✅ **Traçabilité distribuée** (Request-ID)
@@ -381,9 +424,11 @@ Le **Sprint 2 est un succès complet (87.5%)** ! OpenWatt a maintenant:
 - ✅ **CI validation** (GitHub Actions)
 
 **Reste à faire**:
+
 - ❌ Secrets management (important pour sécurité, mais non bloquant)
 
 **OpenWatt est maintenant prêt pour**:
+
 1. Déploiement production (monitoring complet)
 2. Refactoring AdminConsole (tests frontend comme filet de sécurité)
 3. Sprint 3 (migrations, backups, e2e tests)
@@ -393,16 +438,19 @@ Le **Sprint 2 est un succès complet (87.5%)** ! OpenWatt a maintenant:
 ## 🎓 Ce qui a été appris
 
 ### Logs structurés > Logs texte
+
 - Machine-readable
 - Queryable (ELK, CloudWatch Insights)
 - Context-aware (request_id)
 
 ### Monitoring = Visibilité production
+
 - Sentry: erreurs en temps réel
 - Prometheus: métriques système
 - Structured logs: debugging détaillé
 
 ### Robustesse = Retry + Rate limiting
+
 - Réseau = faillible (retry)
 - Scraping = ban-prone (rate limit)
 - Idempotence = clé
