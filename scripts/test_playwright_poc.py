@@ -30,9 +30,11 @@ def test_beautifulsoup_static(url: str) -> dict[str, Any]:
     start = time.time()
 
     try:
-        response = requests.get(url, timeout=10, headers={
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-        })
+        response = requests.get(
+            url,
+            timeout=10,
+            headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"},
+        )
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, "html.parser")
@@ -84,7 +86,8 @@ async def test_playwright_page(url: str, wait_for_selector: str | None = None) -
             content = await page.content()
 
             # Extract prices
-            prices = await page.evaluate("""
+            prices = await page.evaluate(
+                """
                 () => {
                     const elements = document.querySelectorAll('span, div, td, p');
                     const prices = [];
@@ -96,7 +99,8 @@ async def test_playwright_page(url: str, wait_for_selector: str | None = None) -
                     }
                     return prices.slice(0, 5);
                 }
-            """)
+            """
+            )
 
             await browser.close()
 
@@ -141,15 +145,19 @@ async def main():
 
     print(f"\n{'Method':<20} {'Status':<10} {'Duration':<12} {'HTML Size':<12} {'Prices Found'}")
     print("-" * 80)
-    print(f"{result_bs['method']:<20} {result_bs.get('status', 'N/A'):<10} "
-          f"{result_bs.get('duration_ms', 'N/A'):<12} "
-          f"{result_bs.get('html_length', 'N/A'):<12} "
-          f"{result_bs.get('prices_found', 'N/A')}")
+    print(
+        f"{result_bs['method']:<20} {result_bs.get('status', 'N/A'):<10} "
+        f"{result_bs.get('duration_ms', 'N/A'):<12} "
+        f"{result_bs.get('html_length', 'N/A'):<12} "
+        f"{result_bs.get('prices_found', 'N/A')}"
+    )
 
-    print(f"{result_pw['method']:<20} {result_pw.get('status', 'N/A'):<10} "
-          f"{result_pw.get('duration_ms', 'N/A'):<12} "
-          f"{result_pw.get('html_length', 'N/A'):<12} "
-          f"{result_pw.get('prices_found', 'N/A')}")
+    print(
+        f"{result_pw['method']:<20} {result_pw.get('status', 'N/A'):<10} "
+        f"{result_pw.get('duration_ms', 'N/A'):<12} "
+        f"{result_pw.get('html_length', 'N/A'):<12} "
+        f"{result_pw.get('prices_found', 'N/A')}"
+    )
 
     print("\n" + "=" * 80)
     print("SAMPLE PRICES EXTRACTED")
@@ -177,7 +185,9 @@ async def main():
         print("\n[SUCCESS] Both methods work for static HTML pages")
         print(f"   BeautifulSoup: {result_bs['duration_ms']}ms")
         print(f"   Playwright: {result_pw['duration_ms']}ms")
-        print(f"\n   Speed ratio: Playwright is {result_pw['duration_ms'] / result_bs['duration_ms']:.1f}x slower")
+        print(
+            f"\n   Speed ratio: Playwright is {result_pw['duration_ms'] / result_bs['duration_ms']:.1f}x slower"
+        )
         print("\n[RECOMMENDATION]")
         print("   - Use BeautifulSoup for static pages (faster, lighter)")
         print("   - Reserve Playwright for dynamic JavaScript pages")
