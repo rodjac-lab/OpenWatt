@@ -185,9 +185,8 @@ async def main():
         print("\n[SUCCESS] Both methods work for static HTML pages")
         print(f"   BeautifulSoup: {result_bs['duration_ms']}ms")
         print(f"   Playwright: {result_pw['duration_ms']}ms")
-        print(
-            f"\n   Speed ratio: Playwright is {result_pw['duration_ms'] / result_bs['duration_ms']:.1f}x slower"
-        )
+        ratio = result_pw["duration_ms"] / result_bs["duration_ms"]
+        print(f"\n   Speed ratio: Playwright is {ratio:.1f}x slower")
         print("\n[RECOMMENDATION]")
         print("   - Use BeautifulSoup for static pages (faster, lighter)")
         print("   - Reserve Playwright for dynamic JavaScript pages")
