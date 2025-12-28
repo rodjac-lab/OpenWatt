@@ -24,7 +24,7 @@ from bs4 import BeautifulSoup
 from playwright.async_api import async_playwright
 
 
-def test_beautifulsoup_static(url: str) -> dict[str, Any]:
+def scrape_with_beautifulsoup(url: str) -> dict[str, Any]:
     """Test scraping with requests + BeautifulSoup (current stack)"""
     print(f"\n[BeautifulSoup] Fetching {url}...")
     start = time.time()
@@ -66,7 +66,9 @@ def test_beautifulsoup_static(url: str) -> dict[str, Any]:
         }
 
 
-async def test_playwright_page(url: str, wait_for_selector: str | None = None) -> dict[str, Any]:
+async def scrape_with_playwright(
+    url: str, wait_for_selector: str | None = None
+) -> dict[str, Any]:
     """Test scraping with Playwright (new stack option)"""
     print(f"\n[Playwright] Fetching {url}...")
     start = time.time()
@@ -136,8 +138,8 @@ async def main():
     print("\n[TEST 1] Static HTML page (aggregator)")
     print(f"URL: {test_url}")
 
-    result_bs = test_beautifulsoup_static(test_url)
-    result_pw = await test_playwright_page(test_url)
+    result_bs = scrape_with_beautifulsoup(test_url)
+    result_pw = await scrape_with_playwright(test_url)
 
     print("\n" + "=" * 80)
     print("RESULTS COMPARISON")
