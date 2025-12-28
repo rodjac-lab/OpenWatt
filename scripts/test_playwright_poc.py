@@ -66,9 +66,7 @@ def scrape_with_beautifulsoup(url: str) -> dict[str, Any]:
         }
 
 
-async def scrape_with_playwright(
-    url: str, wait_for_selector: str | None = None
-) -> dict[str, Any]:
+async def scrape_with_playwright(url: str, wait_for_selector: str | None = None) -> dict[str, Any]:
     """Test scraping with Playwright (new stack option)"""
     print(f"\n[Playwright] Fetching {url}...")
     start = time.time()
