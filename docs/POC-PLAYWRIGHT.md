@@ -1,31 +1,78 @@
 # Proof of Concept : Playwright pour OpenWatt
 
-**Date :** 28 décembre 2025
+**Date :** 29 décembre 2025 (mis à jour)
 **Auteur :** OpenWatt Core Team
-**Statut :** ✅ Validé
-**Objectif :** Prouver la faisabilité technique de Playwright pour la constitution v2.0
+**Statut :** ✅ Validé avec clarifications importantes
+**Objectif :** Comprendre quand utiliser Playwright vs requests pour la constitution v2.0
 
 ---
 
 ## 🎯 Résumé exécutif
 
-**Résultat :** ✅ **Playwright fonctionne parfaitement** et est prêt à être utilisé en production.
+**Résultat POC technique :** ✅ Playwright fonctionne et peut scraper des pages web dynamiques.
 
-**Performance :**
-- **BeautifulSoup :** 355-504 ms
-- **Playwright :** 3721-7698 ms (environ **10x plus lent**)
+**MAIS ATTENTION - Clarification critique :**
 
-**Conclusion :** L'approche de la constitution v2.0 est validée :
-- ✅ Utiliser **BeautifulSoup** pour les pages statiques (PDF, HTML simple)
-- ✅ Réserver **Playwright** pour les sites dynamiques nécessitant JavaScript
+Playwright n'est **PAS** la solution au problème de blocage IP d'EDF/Engie !
+
+### Les deux problèmes distincts
+
+| Problème | Cause | Solution | Outil nécessaire |
+|----------|-------|----------|------------------|
+| **Blocage IP** (EDF, Engie) | IPs datacenter bloquées | Raspberry Pi / Proxy résidentiel | `requests` suffit ! |
+| **Site dynamique** (React/Vue) | Contenu chargé en JavaScript | Playwright | `playwright` requis |
+
+**Pour EDF/Engie :** Le problème est uniquement le blocage IP, pas le JavaScript. Les PDFs sont statiques et accessibles avec `requests` depuis une IP résidentielle.
 
 ---
 
-## 📊 Résultats du test POC
+## 🔍 Investigation détaillée : EDF/Engie
+
+### Test de blocage IP (29 décembre 2025)
+
+**Depuis IP résidentielle (machine locale) :**
+
+```bash
+$ curl -I https://particulier.edf.fr/content/dam/2-Actifs/Documents/Offres/Grille_prix_Tarif_Bleu.pdf
+HTTP/1.1 200 OK
+Content-Type: application/pdf
+Content-Length: 169949
+
+$ curl -I https://particuliers.engie.fr/content/dam/pdf/fiches-descriptives/fiche-descriptive-elec-reference-3-ans.pdf
+HTTP/1.1 200 OK
+Content-Type: application/pdf
+Content-Length: 306500
+```
+
+✅ **Les PDFs sont accessibles avec un simple `curl` !**
+
+**Depuis GitHub Actions (IP datacenter) :**
+
+```yaml
+# .github/workflows/ingest-live.yml (lignes 23-32)
+# Note: edf and engie are excluded because GitHub Actions IPs are blocked
+# by their websites (403 Forbidden)
+```
+
+❌ **GitHub Actions est bloqué (HTTP 403)**
+
+### Conclusion pour EDF/Engie
+
+- **Type de contenu :** PDFs statiques (pas de JavaScript)
+- **Outil de scraping :** `requests` + `pdfplumber` (déjà en place)
+- **Problème :** Blocage IP uniquement
+- **Solution :** Raspberry Pi / Proxy résidentiel / Serveur dédié
+- **Playwright nécessaire ?** ❌ **NON** (les PDFs sont statiques)
+
+---
+
+## 📊 Résultats du test POC Playwright
 
 ### Test réalisé
 
 **URL testée :** https://www.fournisseurs-electricite.com/fournisseurs/edf/tarifs/bleu-reglemente
+
+Ce site est un **agrégateur tiers** (pas EDF officiel).
 
 | Méthode        | Statut  | Durée (ms) | Taille HTML | Prix trouvés |
 |----------------|---------|------------|-------------|--------------|
@@ -34,90 +81,73 @@
 
 **Ratio de performance :** Playwright est environ **10x plus lent** que BeautifulSoup sur une page statique.
 
-### Extrait des résultats
+### Conclusion du test
 
-```
-================================================================================
-RESULTS COMPARISON
-================================================================================
-
-Method               Status     Duration     HTML Size    Prices Found
---------------------------------------------------------------------------------
-BeautifulSoup        success    355          186303       5
-Playwright           success    3721         215401       5
-
-================================================================================
-CONCLUSION
-================================================================================
-
-[SUCCESS] Both methods work for static HTML pages
-   BeautifulSoup: 355ms
-   Playwright: 3721ms
-
-   Speed ratio: Playwright is 10.5x slower
-
-[RECOMMENDATION]
-   - Use BeautifulSoup for static pages (faster, lighter)
-   - Reserve Playwright for dynamic JavaScript pages
-
-[VALIDATION] Constitution v2.0 approach VALIDATED
-```
+✅ **Playwright fonctionne techniquement**
+⚠️ **Mais 10x plus lent et inutile pour du contenu statique**
 
 ---
 
-## 🔍 Analyse du paysage de scraping français
+## 🎯 Quand utiliser Playwright ?
 
-### Fournisseurs avec PDFs officiels (✅ Existant)
+### ✅ Cas d'usage VALIDES pour Playwright
 
-Les fournisseurs majeurs publient tous des grilles tarifaires en PDF pour conformité réglementaire :
+1. **Sites web avec contenu dynamique (React/Vue/Next.js)**
+   - Exemple : calculateurs interactifs
+   - Les prix sont chargés en AJAX après le chargement initial
+   - `requests` voit une page vide
 
-| Fournisseur | Format | URL officielle | Méthode recommandée |
-|-------------|--------|----------------|---------------------|
-| **EDF** | PDF | https://particulier.edf.fr/content/dam/2-Actifs/Documents/Offres/Grille_prix_EJP.pdf | `pdfplumber` ✅ Déjà en place |
-| **Engie** | PDF | https://particuliers.engie.fr/content/dam/pdf/fiches-descriptives/fiche-descriptive-elec-reference-3-ans.pdf | `pdfplumber` ✅ Déjà en place |
-| **Vattenfall** | PDF | Page CGV avec liens vers PDFs par offre | `pdfplumber` |
-| **Total** | PDF | Grilles tarifaires PDF | `pdfplumber` ✅ Déjà en place |
-| **Mint** | PDF | Grilles tarifaires PDF | `pdfplumber` ✅ Déjà en place |
+2. **Sites nécessitant interaction**
+   - Cliquer sur des boutons
+   - Remplir des formulaires
+   - Naviguer entre pages
 
-### Sites d'agrégateurs (📝 Cas d'usage futur pour Playwright)
+3. **Agrégateurs temps réel**
+   - Sites comparateurs qui chargent dynamiquement les tarifs
 
-Les comparateurs tiers affichent les tarifs en HTML dynamique :
+### ❌ Cas d'usage INVALIDES pour Playwright
 
-| Site | Type | Méthode recommandée |
-|------|------|---------------------|
-| fournisseurs-electricite.com | HTML statique + JS charts | `requests + BeautifulSoup` ou `Playwright` |
-| hellowatt.fr | Application React/Next.js | `Playwright` |
-| kelwatt.fr | HTML dynamique | `Playwright` |
+1. **Contourner le blocage IP**
+   - Playwright sur GitHub Actions = même IP bloquée
+   - Solution = changer d'infrastructure, pas d'outil
 
-**Observation importante :** Les fournisseurs officiels privilégient tous le PDF pour des raisons légales et de traçabilité. Les sites web dynamiques sont principalement les comparateurs tiers.
+2. **PDFs statiques** (EDF, Engie, Total, Mint)
+   - `requests` + `pdfplumber` suffit amplement
+   - Playwright n'apporte rien
+
+3. **HTML statique simple**
+   - `requests` + BeautifulSoup est 10x plus rapide
 
 ---
 
-## 💡 Recommandations
+## 💡 Stratégie recommandée par type de source
 
-### Stratégie court terme (Q1 2026)
+### 1. PDFs officiels (EDF, Engie, Total, Mint, Vattenfall)
 
-1. **Continuer avec les PDFs** pour les fournisseurs majeurs
-   - EDF, Engie, Total, Mint, Vattenfall → `pdfplumber`
-   - Avantages : rapide (355ms), fiable, déjà fonctionnel
-   - 0 installation supplémentaire nécessaire
+**Outil :** `requests` + `pdfplumber`
 
-2. **Tester Playwright sur un agrégateur** (optionnel)
-   - Exemple : hellowatt.fr ou kelwatt.fr
-   - Objectif : prouver la capacité à scraper des sites dynamiques
-   - Pas critique pour atteindre 100% des fournisseurs français
+**Infrastructure :**
+- ✅ Raspberry Pi à domicile (IP résidentielle)
+- ✅ VPS avec IP résidentielle
+- ✅ Proxy résidentiel payant
 
-### Stratégie moyen terme (Q2-Q3 2026)
+**Playwright nécessaire ?** ❌ NON
 
-3. **Utiliser Playwright uniquement si nécessaire**
-   - Fournisseurs sans PDF officiel
-   - Sites web avec calculateurs dynamiques
-   - Obligation de scraper du contenu chargé en AJAX
+### 2. Sites web dynamiques (futurs fournisseurs)
 
-4. **Infrastructure dédiée si blocage IP**
-   - Les tests POC fonctionnent localement ✅
-   - Si GitHub Actions bloque : passer à self-hosted runner
-   - Options : Raspberry Pi (~100€) ou VPS résidentiel (~50€/mois)
+**Outil :** `playwright` + `pdfplumber` (si extraction de tableaux)
+
+**Infrastructure :** Même que ci-dessus (IP résidentielle requise)
+
+**Playwright nécessaire ?** ✅ OUI
+
+### 3. Agrégateurs tiers (optionnel)
+
+**Outil :** `playwright` (si dynamique) ou `requests` + BeautifulSoup (si statique)
+
+**Infrastructure :** GitHub Actions fonctionne (pas de blocage IP)
+
+**Playwright nécessaire ?** Dépend du site
 
 ---
 
@@ -132,7 +162,7 @@ scripts/test_playwright_poc.py
 **Usage :**
 
 ```bash
-# Installer Playwright (déjà fait)
+# Installer Playwright
 pip install playwright
 playwright install chromium
 
@@ -140,28 +170,46 @@ playwright install chromium
 python scripts/test_playwright_poc.py
 ```
 
-**Fonctionnalités :**
-- Compare BeautifulSoup vs Playwright sur la même URL
-- Mesure les performances (durée, taille HTML)
-- Extrait des prix pour validation
-- Génère un rapport de conclusion
+**Ce que le script teste :**
+- ✅ Que Playwright fonctionne techniquement
+- ✅ Comparaison de performance vs BeautifulSoup
+- ❌ Ne teste PAS le contournement de blocage IP (ce n'est pas son rôle)
 
 ---
 
-## ✅ Conclusion finale
+## ✅ Conclusions finales CORRIGÉES
 
-**Faisabilité :** ✅ **VALIDÉE**
+### Faisabilité technique
 
-Playwright fonctionne parfaitement en local et est prêt pour la production. L'approche de la constitution v2.0 (outil adapté à la source) est techniquement solide.
+✅ **Playwright fonctionne** pour scraper des sites web dynamiques
+✅ **L'approche constitution v2.0** (outil adapté à la source) est valide
 
-**Prochaines étapes recommandées :**
+### Clarifications importantes
 
-1. ✅ **Continuer avec PDFs** pour les 5-10 prochains fournisseurs
-2. 🔄 **Tester Playwright sur GitHub Actions** (peut être bloqué par certains sites)
-3. 🏗️ **Préparer infrastructure self-hosted** si nécessaire (Raspberry Pi)
-4. 🎯 **Objectif 100% couverture** reste atteignable avec constitution v2.0
+❌ **Playwright ne contourne PAS le blocage IP**
+✅ **Pour EDF/Engie : Raspberry Pi + requests suffit**
+✅ **Playwright réservé aux vrais sites dynamiques (React/Vue)**
+
+### Prochaines étapes
+
+1. ✅ **Court terme :** Setup Raspberry Pi / VPS résidentiel
+2. ✅ **Configuration :** GitHub self-hosted runner sur ce serveur
+3. ✅ **Stack EDF/Engie :** `requests` + `pdfplumber` (pas de Playwright)
+4. 🔄 **Future :** Playwright uniquement pour fournisseurs avec sites dynamiques
 
 ---
 
-**Rapport validé le 28 décembre 2025.**
-Pour questions : ouvrir une issue GitHub avec le tag `[poc-playwright]`.
+## 📚 Documentation associée
+
+- **[SELF-HOSTED-SETUP.md](SELF-HOSTED-SETUP.md)** : Guide complet pour Raspberry Pi, VPS, proxy
+- **[ingestion-limitations.md](ingestion-limitations.md)** : Stratégies par type de blocage
+- **[constitution.md](../specs/constitution.md)** : Constitution v2.0.0
+
+---
+
+**Rapport mis à jour le 29 décembre 2025.**
+
+**Leçons apprises :**
+- ⚠️ Ne pas confondre "blocage IP" et "site dynamique"
+- ⚠️ Playwright n'est pas une solution magique anti-blocage
+- ✅ Toujours tester avec `curl` d'abord pour identifier le vrai problème
